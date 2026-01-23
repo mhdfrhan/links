@@ -1,26 +1,151 @@
 @import "tailwindcss";
 
+/* Theme Color Variables */
 :root {
-  --background: #ffffff;
+  /* Light mode colors */
+  --background: #fafafa;
   --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  /* Emerald green accent - matching almamater */
+  --accent: #10b981;
+  --accent-dark: #059669;
+  --accent-light: #34d399;
+  --accent-foreground: #ffffff;
+  --border: #e4e4e7;
+  --ring: #10b981;
+  /* Dot colors */
+  --dot-color: rgba(16, 185, 129, 0.15);
+  --dot-glow: rgba(16, 185, 129, 0.3);
+}
+
+.dark {
+  /* Dark mode colors */
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #18181b;
+  --card-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  /* Emerald green accent */
+  --accent: #10b981;
+  --accent-dark: #059669;
+  --accent-light: #34d399;
+  --accent-foreground: #ffffff;
+  --border: #27272a;
+  --ring: #10b981;
+  /* Dot colors - more visible in dark mode */
+  --dot-color: rgba(16, 185, 129, 0.2);
+  --dot-glow: rgba(16, 185, 129, 0.4);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-light: var(--accent-light);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Smooth theme transition */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+}
+
+button,
+a,
+input {
+  transition: all 0.2s ease;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Focus states for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Animated dots keyframes */
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 3s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 6s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 8s ease-in-out infinite;
+  background-size: 200% 100%;
 }

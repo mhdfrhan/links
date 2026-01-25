@@ -101,6 +101,7 @@ const education = [
     institution: "SMKN 2 Pekanbaru",
     period: "2020 – 2023",
     degree: "Rekayasa Perangkat Lunak",
+    note: "Siswa Berprestasi dan Menjadi Siswa Teknologi 2023"
   }
 ];
 

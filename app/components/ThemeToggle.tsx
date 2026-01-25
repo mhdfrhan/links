@@ -14,7 +14,7 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
 
-  const handleThemeChange = useCallback(async () => {
+  const handleThemeChange = useCallback(() => {
     if (isAnimating || !buttonRef.current) return;
 
     const button = buttonRef.current;
@@ -25,87 +25,64 @@ export function ThemeToggle() {
     // Calculate the maximum radius needed to cover the entire viewport
     const maxX = Math.max(x, window.innerWidth - x);
     const maxY = Math.max(y, window.innerHeight - y);
-    const maxRadius = Math.sqrt(maxX * maxX + maxY * maxY) * 1.1; // 10% extra for safety
+    const maxRadius = Math.sqrt(maxX * maxX + maxY * maxY) + 100;
 
     const newTheme = resolvedTheme === "dark" ? "light" : "dark";
-    const newBgColor = newTheme === "dark" ? "#0a0a0a" : "#fafafa";
+    
+    // OLD theme color - circle shows this while shrinking
+    const oldThemeBg = resolvedTheme === "dark" ? "#0a0a0a" : "#fafafa";
 
-    // Check for View Transitions API support (Chrome 111+)
-    if (document.startViewTransition) {
-      setIsAnimating(true);
-      
-      document.documentElement.style.setProperty("--reveal-x", `${x}px`);
-      document.documentElement.style.setProperty("--reveal-y", `${y}px`);
-      document.documentElement.style.setProperty("--reveal-radius", `${maxRadius}px`);
+    setIsAnimating(true);
 
-      const transition = document.startViewTransition(() => {
-        setTheme(newTheme);
-      });
+    // Create the circle overlay showing OLD theme color
+    const circleOverlay = document.createElement("div");
+    circleOverlay.id = "theme-circle-overlay";
+    circleOverlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      pointer-events: none;
+      background-color: ${oldThemeBg};
+      clip-path: circle(${maxRadius}px at ${x}px ${y}px);
+      will-change: clip-path;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translateZ(0);
+    `;
+    
+    document.body.appendChild(circleOverlay);
 
-      transition.ready.then(() => {
-        document.documentElement.animate(
-          {
-            clipPath: [
-              `circle(0px at ${x}px ${y}px)`,
-              `circle(${maxRadius}px at ${x}px ${y}px)`,
-            ],
-          },
-          {
-            duration: 700,
-            easing: "cubic-bezier(0.16, 1, 0.3, 1)", // Smooth expo ease-out
-            pseudoElement: "::view-transition-new(root)",
-          }
-        );
-      });
+    // Force GPU layer and reflow
+    void circleOverlay.offsetWidth;
 
-      transition.finished.then(() => {
+    // Change theme IMMEDIATELY
+    setTheme(newTheme);
+
+    // Animate circle shrinking with smooth exponential ease
+    requestAnimationFrame(() => {
+      const animation = circleOverlay.animate(
+        [
+          { clipPath: `circle(${maxRadius}px at ${x}px ${y}px)` },
+          { clipPath: `circle(0px at ${x}px ${y}px)` }
+        ],
+        {
+          duration: 600, // Slightly longer for smoother feel
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)", // Smooth exponential ease-out
+          fill: "forwards"
+        }
+      );
+
+      animation.onfinish = () => {
+        circleOverlay.remove();
         setIsAnimating(false);
-      });
-    } else {
-      // Fallback for browsers without View Transitions API
-      setIsAnimating(true);
+      };
 
-      // Create the overlay element for radial reveal
-      const overlay = document.createElement("div");
-      overlay.style.cssText = `
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        pointer-events: none;
-        background: ${newBgColor};
-        clip-path: circle(0px at ${x}px ${y}px);
-        will-change: clip-path;
-      `;
-      document.body.appendChild(overlay);
+      animation.oncancel = () => {
+        circleOverlay.remove();
+        setIsAnimating(false);
+      };
+    });
 
-      // Use requestAnimationFrame for smoother animation start
-      requestAnimationFrame(() => {
-        const animation = overlay.animate(
-          [
-            { clipPath: `circle(0px at ${x}px ${y}px)` },
-            { clipPath: `circle(${maxRadius}px at ${x}px ${y}px)` },
-          ],
-          {
-            duration: 700,
-            easing: "cubic-bezier(0.16, 1, 0.3, 1)", // Smooth expo ease-out
-            fill: "forwards",
-          }
-        );
-
-        // Change theme at 35% of animation for smoother perception
-        setTimeout(() => {
-          setTheme(newTheme);
-        }, 250);
-
-        animation.onfinish = () => {
-          // Small delay before removing overlay for smoother finish
-          setTimeout(() => {
-            overlay.remove();
-            setIsAnimating(false);
-          }, 100);
-        };
-      });
-    }
   }, [resolvedTheme, setTheme, isAnimating]);
 
   if (!mounted) {
@@ -135,8 +112,8 @@ export function ThemeToggle() {
             animate={{ rotate: 0, scale: 1, opacity: 1 }}
             exit={{ rotate: 45, scale: 0, opacity: 0 }}
             transition={{ 
-              duration: 0.35, 
-              ease: [0.22, 1, 0.36, 1] // Same smooth ease
+              duration: 0.5, 
+              ease: [0.22, 1, 0.36, 1] // Matching smooth ease
             }}
           >
             <svg
@@ -161,7 +138,7 @@ export function ThemeToggle() {
             animate={{ rotate: 0, scale: 1, opacity: 1 }}
             exit={{ rotate: -45, scale: 0, opacity: 0 }}
             transition={{ 
-              duration: 0.35, 
+              duration: 0.5, 
               ease: [0.22, 1, 0.36, 1]
             }}
           >

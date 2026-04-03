@@ -107,7 +107,7 @@ const education = [
 
 const awards = [
   { title: "Mahasiswa Berprestasi Universitas Muhammadiyah Riau", year: "2025", highlight: true },
-  { title: "Lolos Pendanaan P2MW 2025 di Universitas Tidar Magelang", year: "2025", highlight: true },
+  { title: "Lolos Pendanaan dan KMI EXPO P2MW 2025 di Universitas Tidar Magelang", year: "2025", highlight: true },
   { title: "Juara 3 Lomba Nasional Web Design - Universitas Muhammadiyah Semarang", year: "2025" },
   { title: "Finalis Web Development Informatics Festival - Universitas Atma Jaya Yogyakarta", year: "2025" },
   { title: "Mahasiswa Berprestasi Universitas Muhammadiyah Riau", year: "2024", highlight: true },
@@ -218,11 +218,13 @@ export default function Home() {
           className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl"
           animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          style={{ willChange: "transform, opacity" }}
         />
         <motion.div 
           className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-emerald-400/10 dark:bg-emerald-400/15 rounded-full blur-3xl"
           animate={{ scale: [1.1, 1, 1.1], opacity: [0.15, 0.25, 0.15] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          style={{ willChange: "transform, opacity" }}
         />
         <div 
           className="absolute inset-0 opacity-[0.3] dark:opacity-[0.2]"

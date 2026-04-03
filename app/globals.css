@@ -58,15 +58,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Smooth theme transition */
-* {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+/* Smooth theme transition - Optimized */
+body {
+  transition: background-color 0.3s ease, color 0.15s ease;
 }
 
 button,
 a,
 input {
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 html {
@@ -139,6 +139,7 @@ body {
 
 .animate-float-slow {
   animation: float-slow 8s ease-in-out infinite;
+  will-change: transform;
 }
 
 .animate-pulse-glow {

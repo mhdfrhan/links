@@ -58,6 +58,15 @@ export function ThemeToggle() {
     // Change theme IMMEDIATELY
     setTheme(newTheme);
 
+    // Inject a STYLE tag to disable ALL transitions during the animation
+    const disableTransitions = document.createElement("style");
+    disableTransitions.textContent = `
+      * {
+        transition: none !important;
+      }
+    `;
+    document.head.appendChild(disableTransitions);
+
     // Animate circle shrinking with smooth exponential ease
     requestAnimationFrame(() => {
       const animation = circleOverlay.animate(
@@ -74,11 +83,13 @@ export function ThemeToggle() {
 
       animation.onfinish = () => {
         circleOverlay.remove();
+        disableTransitions.remove();
         setIsAnimating(false);
       };
 
       animation.oncancel = () => {
         circleOverlay.remove();
+        disableTransitions.remove();
         setIsAnimating(false);
       };
     });

@@ -1,6 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface ExperienceItem {
   title: string;
@@ -15,52 +20,47 @@ interface ExperienceSectionProps {
   items: ExperienceItem[];
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
 export function ExperienceSection({ title, icon, items }: ExperienceSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top 85%",
+        once: true
+      }
+    });
+
+    tl.fromTo(sectionRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.1 }
+    )
+    .fromTo(".section-title-container", 
+      { opacity: 0, y: 15, filter: "blur(4px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" }
+    )
+    .fromTo(".experience-item", 
+      { opacity: 0, y: 20, filter: "blur(4px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.15, ease: "power3.out" }, 
+      "-=0.3"
+    );
+  }, { scope: sectionRef, dependencies: [] });
+
   return (
-    <motion.section
-      className="w-full"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.1 }}
-      variants={containerVariants}
-    >
-      <motion.div 
-        className="flex items-center gap-3 mb-6"
-        variants={itemVariants}
-      >
+    <section ref={sectionRef} className="w-full gpu opacity-0">
+      <div className="section-title-container flex items-center gap-3 mb-6">
         <div className="p-2 rounded-xl bg-accent/10 text-accent">
           {icon}
         </div>
         <h2 className="text-xl font-bold text-foreground">{title}</h2>
-      </motion.div>
+      </div>
 
       <div className="space-y-4">
         {items.map((item, index) => (
-          <motion.div
+          <div
             key={index}
-            className="relative pl-6 border-l-2 border-accent/30 hover:border-accent transition-colors duration-300"
-            variants={itemVariants}
+            className="experience-item relative pl-6 border-l-2 border-accent/30 hover:border-accent transition-colors duration-300"
           >
             <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-accent/20 border-2 border-accent" />
             
@@ -73,17 +73,17 @@ export function ExperienceSection({ title, icon, items }: ExperienceSectionProps
                 {item.points.map((point, pIndex) => (
                   <li 
                     key={pIndex}
-                    className="text-sm text-muted-foreground flex items-start gap-2"
+                    className="text-sm text-muted-foreground flex items-center gap-2"
                   >
-                    <span className="text-accent mt-1.5 flex-shrink-0">•</span>
+                    <span className="text-accent flex-shrink-0">•</span>
                     <span>{point}</span>
                   </li>
                 ))}
               </ul>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
-    </motion.section>
+    </section>
   );
 }

@@ -1,6 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface Certification {
   title: string;
@@ -14,55 +19,49 @@ interface CertificationsSectionProps {
   certifications: Certification[];
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.04,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.15,
-    },
-  },
-};
-
 export function CertificationsSection({ certifications }: CertificationsSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top 85%",
+        once: true
+      }
+    });
+
+    tl.fromTo(sectionRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.1 }
+    )
+    .fromTo(".certifications-title-container", 
+      { opacity: 0, y: 15, filter: "blur(4px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" }
+    )
+    .fromTo(".cert-item", 
+      { opacity: 0, y: 12, filter: "blur(4px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, stagger: 0.08, ease: "power3.out" }, 
+      "-=0.3"
+    );
+  }, { scope: sectionRef, dependencies: [] });
+
   return (
-    <motion.section
-      className="w-full"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.1 }}
-      variants={containerVariants}
-    >
-      <motion.div 
-        className="flex items-center gap-3 mb-6"
-        variants={itemVariants}
-      >
+    <section ref={sectionRef} className="w-full gpu opacity-0">
+      <div className="certifications-title-container flex items-center gap-3 mb-6">
         <div className="p-2 rounded-xl bg-accent/10 text-accent">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
           </svg>
         </div>
         <h2 className="text-xl font-bold text-foreground">Sertifikasi & Pelatihan</h2>
-      </motion.div>
+      </div>
 
       <div className="space-y-3">
         {certifications.map((cert, index) => (
-          <motion.div
+          <div
             key={index}
-            className="p-3 rounded-xl bg-card/50 border border-border hover:border-accent/30 transition-all duration-300 group"
-            variants={itemVariants}
-            whileHover={{ x: 4 }}
+            className="cert-item p-3 rounded-xl bg-card/50 border border-border hover:border-accent/30 transition-all duration-300 group hover:translate-x-1"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
@@ -90,9 +89,9 @@ export function CertificationsSection({ certifications }: CertificationsSectionP
                 </a>
               )}
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
-    </motion.section>
+    </section>
   );
 }

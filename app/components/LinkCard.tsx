@@ -1,7 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { useRef, ReactNode } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 interface LinkCardProps {
   href: string;
@@ -18,25 +19,64 @@ export function LinkCard({
   description,
   delay = 0,
 }: LinkCardProps) {
+  const cardRef = useRef<HTMLAnchorElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    gsap.fromTo(cardRef.current,
+      { opacity: 0, y: 15 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: 0.2 + delay,
+        ease: "power3.out"
+      }
+    );
+  }, { scope: cardRef, dependencies: [] });
+
+  const onMouseEnter = () => {
+    gsap.to(innerRef.current, { scale: 1.02, y: -2, duration: 0.3, ease: "power2.out" });
+    gsap.to(glowRef.current, { opacity: 1, duration: 0.3 });
+    gsap.to(arrowRef.current, { x: 4, duration: 0.3 });
+  };
+
+  const onMouseLeave = () => {
+    gsap.to(innerRef.current, { scale: 1, y: 0, duration: 0.3, ease: "power2.out" });
+    gsap.to(glowRef.current, { opacity: 0, duration: 0.3 });
+    gsap.to(arrowRef.current, { x: 0, duration: 0.3 });
+  };
+
+  const onMouseDown = () => {
+    gsap.to(innerRef.current, { scale: 0.98, duration: 0.1 });
+  };
+
+  const onMouseUp = () => {
+    gsap.to(innerRef.current, { scale: 1.02, duration: 0.2 });
+  };
+
   return (
-    <motion.a
+    <a
+      ref={cardRef}
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative w-full"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.4 + delay }}
+      className="group relative w-full gpu opacity-0"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
     >
-      <motion.div
+      <div
+        ref={innerRef}
         className="relative flex items-center gap-4 p-4 rounded-2xl bg-card border border-border overflow-hidden"
-        whileHover={{ scale: 1.02, y: -2 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
         {/* Hover glow effect */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        <div
+          ref={glowRef}
+          className="absolute inset-0 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent opacity-0 transition-opacity duration-300"
         />
 
         {/* Icon */}
@@ -57,10 +97,9 @@ export function LinkCard({
         </div>
 
         {/* Arrow */}
-        <motion.div
+        <div
+          ref={arrowRef}
           className="relative flex-shrink-0 text-muted-foreground group-hover:text-accent transition-colors duration-300"
-          initial={{ x: 0 }}
-          whileHover={{ x: 4 }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -76,8 +115,8 @@ export function LinkCard({
               d="m8.25 4.5 7.5 7.5-7.5 7.5"
             />
           </svg>
-        </motion.div>
-      </motion.div>
-    </motion.a>
+        </div>
+      </div>
+    </a>
   );
 }

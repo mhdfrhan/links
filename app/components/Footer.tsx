@@ -1,34 +1,48 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 interface FooterProps {
   name?: string;
 }
 
 export function Footer({ name = "Muhammad Farhan" }: FooterProps) {
+  const footerRef = useRef<HTMLElement>(null);
+  const heartRef = useRef<HTMLSpanElement>(null);
   const currentYear = new Date().getFullYear();
 
+  useGSAP(() => {
+    gsap.fromTo(footerRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.8, delay: 1, ease: "power2.out" }
+    );
+
+    gsap.to(heartRef.current, {
+      scale: 1.2,
+      duration: 0.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      repeatDelay: 1
+    });
+  }, { scope: footerRef, dependencies: [] });
+
   return (
-    <motion.footer
-      className="mt-auto pt-8 pb-6 text-center"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.8 }}
-    >
+    <footer ref={footerRef} className="mt-auto pt-8 pb-6 text-center opacity-0">
       <p className="text-sm text-muted-foreground">
         © {currentYear} {name}. All rights reserved.
       </p>
       <p className="text-xs text-muted-foreground/60 mt-1">
         Made with{" "}
-        <motion.span
+        <span
+          ref={heartRef}
           className="inline-block text-accent"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
         >
           ♥
-        </motion.span>
+        </span>
       </p>
-    </motion.footer>
+    </footer>
   );
 }

@@ -1,7 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
 import Image from "next/image";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 interface ProfileHeaderProps {
   name: string;
@@ -14,20 +16,42 @@ export function ProfileHeader({
   tagline,
   avatarUrl = "/profile.jpg",
 }: ProfileHeaderProps) {
+  const container = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      defaults: { ease: "power3.out", duration: 1 }
+    });
+
+    tl.fromTo(container.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.1 }
+    )
+    .fromTo(".avatar-container", 
+      { scale: 0.9, opacity: 0 },
+      { scale: 1, opacity: 1, delay: 0.1 }
+    )
+    .fromTo(".profile-name", 
+      { y: 15, opacity: 0 },
+      { y: 0, opacity: 1 }, 
+      "-=0.7"
+    )
+    .fromTo(".profile-tagline", 
+      { y: 15, opacity: 0 },
+      { y: 0, opacity: 1 }, 
+      "-=0.8"
+    )
+    .fromTo(".online-indicator", 
+      { scale: 0 },
+      { scale: 1, ease: "back.out(1.7)", duration: 0.6 }, 
+      "-=0.5"
+    );
+  }, { scope: container, dependencies: [] });
+
   return (
-    <motion.div
-      className="flex flex-col items-center gap-4"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-    >
+    <div ref={container} className="flex flex-col items-center gap-4 gpu opacity-0">
       {/* Avatar */}
-      <motion.div
-        className="relative"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
+      <div className="avatar-container relative gpu">
         <div className="relative h-28 w-28 rounded-full overflow-hidden ring-4 ring-accent/30 ring-offset-4 ring-offset-background">
           <Image
             src={avatarUrl}
@@ -39,33 +63,18 @@ export function ProfileHeader({
           />
         </div>
         {/* Online indicator */}
-        <motion.div
-          className="absolute bottom-1 right-1 h-4 w-4 rounded-full bg-emerald-500 border-2 border-background"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.6, type: "spring", stiffness: 500 }}
-        />
-      </motion.div>
+        <div className="online-indicator absolute bottom-1 right-1 h-4 w-4 rounded-full bg-emerald-500 border-2 border-background" />
+      </div>
 
       {/* Name */}
-      <motion.h1
-        className="text-2xl md:text-3xl font-bold text-foreground tracking-tight"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
+      <h1 className="profile-name text-2xl md:text-3xl font-bold text-foreground tracking-tight gpu">
         {name}
-      </motion.h1>
+      </h1>
 
       {/* Tagline */}
-      <motion.p
-        className="text-muted-foreground text-center max-w-xs text-sm md:text-base"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-      >
+      <p className="profile-tagline text-muted-foreground text-center max-w-xs text-sm md:text-base gpu">
         {tagline}
-      </motion.p>
-    </motion.div>
+      </p>
+    </div>
   );
 }

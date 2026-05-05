@@ -1,6 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { SocialLinks } from "./components/SocialLinks";
@@ -10,185 +12,10 @@ import { EducationSection } from "./components/EducationSection";
 import { AwardsSection } from "./components/AwardsSection";
 import { SkillsSection } from "./components/SkillsSection";
 import { CertificationsSection } from "./components/CertificationsSection";
+import { PortfolioSection } from "./components/PortfolioSection";
 import { Footer } from "./components/Footer";
-
-// CV Data
-const aboutText = "Saya adalah mahasiswa Teknik Informatika di Universitas Muhammadiyah Riau dengan minat dan keahlian di bidang pengembangan website. Sejak lulus dari SMKN 2 Pekanbaru jurusan Rekayasa Perangkat Lunak, saya telah berpengalaman mengerjakan berbagai proyek pengembangan website, baik sebagai magang maupun freelancer, di tingkat lokal maupun nasional.";
-
-const workExperience = [
-  {
-    title: "Web Developer Intern",
-    company: "PT Netviro",
-    period: "2022 – 2023",
-    points: [
-      "Mendesain dan mengembangkan website yang responsif, interaktif, dan user-friendly untuk berbagai klien",
-      "Berkolaborasi dengan tim untuk memastikan website sesuai dengan kebutuhan bisnis dan standar kualitas",
-      "Menerima umpan balik dari klien dan menerapkannya untuk meningkatkan kualitas website"
-    ]
-  },
-  {
-    title: "Freelance Web Developer",
-    company: "Self-employed",
-    period: "2023 – Sekarang",
-    points: [
-      "Membuat berbagai website untuk klien dari berbagai industri",
-      "Menggunakan berbagai keterampilan dan teknologi untuk memenuhi kebutuhan klien",
-      "Menerima umpan balik dari klien dan menerapkannya untuk meningkatkan kualitas website"
-    ]
-  }
-];
-
-const organizationExperience = [
-  {
-    title: "Divisi Kominfo (Komunikasi dan Informasi)",
-    company: "HIMATIF UMRI",
-    period: "2023 – 2024",
-    points: [
-      "Membuat desain flyer sebagai media informasi untuk kegiatan himpunan",
-      "Mendesain konten Instagram himpunan untuk meningkatkan engagement",
-      "Mengembangkan website himpunan untuk mendukung kegiatan organisasi"
-    ]
-  },
-  {
-    title: "Divisi PSDM Ristek",
-    company: "HIMATIF UMRI",
-    period: "2024 – Sekarang",
-    points: [
-      "Menyelenggarakan workshop dan seminar untuk meningkatkan softskill dan hardskill mahasiswa",
-      "Mengorganisir kegiatan olahraga antar mahasiswa untuk membangun team building",
-      "Mengadakan kompetisi internal di bidang teknologi informasi dan olahraga"
-    ]
-  }
-];
-
-const committeeExperience = [
-  {
-    title: "Penanggung Jawab Lomba UI/UX Design",
-    company: "NIFC 3.0 (Tingkat Nasional)",
-    period: "Feb 2024 – Mei 2024",
-    points: [
-      "Mengelola dan menjadi penanggung jawab lomba UI/UX Design Tingkat Nasional",
-      "Berkoordinasi dengan tim juri profesional untuk evaluasi desain"
-    ]
-  },
-  {
-    title: "Penanggung Jawab Lomba Web Development",
-    company: "NIFC 4.0 (Tingkat Nasional)",
-    period: "Apr 2025 – Jun 2025",
-    points: [
-      "Mengelola dan mengkoordinasikan lomba Web Development tingkat nasional",
-      "Menyusun format kompetisi, timeline, dan kriteria penilaian"
-    ]
-  },
-  {
-    title: "Pemateri Workshop",
-    company: "Workshop Web Development SMK",
-    period: "23 Juni 2025",
-    points: [
-      '"Development by Implementing Bootstrap and Laravel"'
-    ]
-  }
-];
-
-const education = [
-  {
-    institution: "Universitas Muhammadiyah Riau",
-    period: "2023 – Sekarang",
-    degree: "S1 Teknik Informatika",
-    note: "Penerima Beasiswa Pemerintah Provinsi Riau (Semester 3 – 8, 2024–2027)"
-  },
-  {
-    institution: "SMKN 2 Pekanbaru",
-    period: "2020 – 2023",
-    degree: "Rekayasa Perangkat Lunak",
-    note: "Siswa Berprestasi dan Menjadi Siswa Teknologi 2023"
-  }
-];
-
-const awards = [
-  { title: "Mahasiswa Berprestasi Universitas Muhammadiyah Riau", year: "2025", highlight: true },
-  { title: "Lolos Pendanaan dan KMI EXPO P2MW 2025 di Universitas Tidar Magelang", year: "2025", highlight: true },
-  { title: "Juara 3 Lomba Nasional Web Design - Universitas Muhammadiyah Semarang", year: "2025" },
-  { title: "Finalis Web Development Informatics Festival - Universitas Atma Jaya Yogyakarta", year: "2025" },
-  { title: "Mahasiswa Berprestasi Universitas Muhammadiyah Riau", year: "2024", highlight: true },
-  { title: "Juara 1 Web Development PERMIKOMNAS", year: "2024", highlight: true },
-  { title: "Finalis Web Development INSYFEST - UBP Karawang", year: "2024" },
-  { title: "Juara 2 Lomba Nasional Web Design UMRI", year: "2024" },
-  { title: "Juara 1 Lomba Nasional Web Design AI - Universitas Aisyiyah Surakarta", year: "2023", highlight: true },
-  { title: "Juara 3 Lomba Nasional Web Development IEC 2023 - Universitas Negeri Jakarta", year: "2023" },
-  { title: "Sertifikasi Kompetensi BSNP KKNI II RPL", year: "2023" },
-  { title: "Siswa Teknologi SMKN 2 Pekanbaru", year: "2023" },
-  { title: "Juara 2 Web Design Tingkat Nasional (IT Olimpiade)", year: "2022" },
-  { title: "Juara 1 Web Design Tingkat Provinsi (Computer Science Festival)", year: "2022" }
-];
-
-const certifications = [
-  {
-    title: "Belajar Dasar Manajemen Proyek",
-    issuer: "Dicoding",
-    date: "21 Agustus 2024",
-    verifyUrl: "https://www.dicoding.com/certificates/2VX3R3V0QZYQ",
-    validUntil: "21 Agustus 2027"
-  },
-  {
-    title: "Software Engineering",
-    issuer: "RevoU",
-    date: "7 Juni 2024"
-  },
-  {
-    title: "Belajar Dasar Visualisasi Data",
-    issuer: "Dicoding",
-    date: "21 Mei 2024",
-    verifyUrl: "https://www.dicoding.com/certificates/4EXGQK7M9ZRL",
-    validUntil: "21 Mei 2027"
-  },
-  {
-    title: "Junior Web Developer - VSGA",
-    issuer: "Digital Talent Scholarship Kominfo",
-    date: "Juni – Juli 2023"
-  },
-  {
-    title: "Coding Camp Front End Developer",
-    issuer: "Harisenin Coding Camp",
-    date: "08 Desember 2023"
-  }
-];
-
-const skills = [
-  {
-    title: "Tech Stack",
-    skills: [
-      { name: "PHP" },
-      { name: "JavaScript" },
-      { name: "Laravel" },
-      { name: "Livewire" },
-      { name: "React.js" },
-      { name: "Next.js" },
-      { name: "TailwindCSS" },
-      { name: "Bootstrap" },
-      { name: "MySQL" },
-      { name: "jQuery" }
-    ]
-  },
-  {
-    title: "Soft Skills",
-    skills: [
-      { name: "Komunikasi" },
-      { name: "Kerjasama Tim" },
-      { name: "Problem Solving" },
-      { name: "Berpikir Kritis" }
-    ]
-  },
-  {
-    title: "Tools",
-    skills: [
-      { name: "Microsoft Office" },
-      { name: "Canva" },
-      { name: "Figma" },
-      { name: "Git" }
-    ]
-  }
-];
+import { usePortfolioData } from "../lib/hooks/usePortfolioData";
+import { AcademicCapIcon, TrophyIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
 
 // Icons
 const BriefcaseIcon = () => (
@@ -209,24 +36,70 @@ const CalendarIcon = () => (
   </svg>
 );
 
+
 export default function Home() {
+  const { data, loading } = usePortfolioData();
+  const container = useRef<HTMLDivElement>(null);
+  const bubble1 = useRef<HTMLDivElement>(null);
+  const bubble2 = useRef<HTMLDivElement>(null);
+  const themeToggleContainer = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (loading) return;
+
+    gsap.to(bubble1.current, {
+      scale: 1.05,
+      opacity: 0.15,
+      x: 20,
+      y: -20,
+      duration: 15,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
+
+    gsap.to(bubble2.current, {
+      scale: 1.05,
+      opacity: 0.2,
+      x: -30,
+      y: 30,
+      duration: 18,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
+
+    gsap.from(themeToggleContainer.current, {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.6,
+      ease: "back.out(1.7)",
+      delay: 0.5
+    });
+  }, { scope: container, dependencies: [loading] });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center" suppressHydrationWarning>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500" suppressHydrationWarning></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* Background effects */}
+    <div ref={container} className="relative min-h-screen bg-background overflow-hidden" suppressHydrationWarning>
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
+        <div
+          ref={bubble1}
           className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           style={{ willChange: "transform, opacity" }}
         />
-        <motion.div 
+        <div
+          ref={bubble2}
           className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-emerald-400/10 dark:bg-emerald-400/15 rounded-full blur-3xl"
-          animate={{ scale: [1.1, 1, 1.1], opacity: [0.15, 0.25, 0.15] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           style={{ willChange: "transform, opacity" }}
         />
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.3] dark:opacity-[0.2]"
           style={{
             backgroundImage: `radial-gradient(circle, var(--accent) 1px, transparent 1px)`,
@@ -235,72 +108,64 @@ export default function Home() {
         />
       </div>
 
-      {/* Main content */}
       <main className="relative flex flex-col items-center min-h-screen px-4 py-8 md:py-12">
-        {/* Theme toggle */}
-        <motion.div
+        <div
+          ref={themeToggleContainer}
           className="fixed top-4 right-4 md:top-6 md:right-6 z-50"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
         >
           <ThemeToggle />
-        </motion.div>
+        </div>
 
-        {/* Content container */}
         <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-10 pt-8 pb-12">
-          {/* Profile header */}
           <ProfileHeader
-            name="Muhammad Farhan"
-            tagline="🎓 Teknik Informatika Student | 💻 Freelance Fullstack Developer 🌟"
-            avatarUrl="/img/foto.jpg"
+            name={data.profile?.name || "Muhammad Farhan"}
+            tagline={data.profile?.tagline || "🎓 Teknik Informatika Student | 💻 Freelance Fullstack Developer 🌟"}
+            avatarUrl={data.profile?.avatarUrl || "/img/foto.jpg"}
           />
 
-          {/* Social links */}
           <SocialLinks
-            whatsappNumber="6283173633639"
-            instagramUsername="mhdfarhan04"
-            linkedinUrl="https://www.linkedin.com/in/muhammad-farhan-79ba79294/"
+            links={data.profile?.socialLinks || []}
           />
 
-          {/* About section */}
-          <AboutSection text={aboutText} />
+          <AboutSection text={data.about || "Belum ada teks..."} />
 
-          {/* Work Experience */}
+          <PortfolioSection projects={data.projects.slice(0, 2)} showAllButton={true} />
+
           <ExperienceSection
             title="Pengalaman Kerja"
             icon={<BriefcaseIcon />}
-            items={workExperience}
+            items={data.experiences}
           />
 
-          {/* Organization Experience */}
           <ExperienceSection
             title="Pengalaman Organisasi"
             icon={<UsersIcon />}
-            items={organizationExperience}
+            items={data.organizationExperience}
           />
 
-          {/* Committee Experience */}
           <ExperienceSection
             title="Pengalaman Kepanitiaan"
             icon={<CalendarIcon />}
-            items={committeeExperience}
+            items={data.committeeExperience}
           />
 
-          {/* Education */}
-          <EducationSection items={education} />
+          <EducationSection
+            items={data.education}
+          />
 
-          {/* Awards */}
-          <AwardsSection awards={awards} />
+          <AwardsSection
+            awards={data.awards}
+          />
 
-          {/* Certifications */}
-          <CertificationsSection certifications={certifications} />
+          <CertificationsSection
+            certifications={data.certifications}
+          />
 
-          {/* Skills */}
-          <SkillsSection categories={skills} />
+          <SkillsSection 
+            categories={data.skills} 
+          />
         </div>
 
-        {/* Footer */}
         <Footer name="Muhammad Farhan" />
       </main>
     </div>

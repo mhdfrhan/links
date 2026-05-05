@@ -91,12 +91,12 @@ export default function Home() {
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
           ref={bubble1}
-          className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl"
+          className="absolute -top-20 -left-20 md:-top-40 md:-left-40 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-emerald-500/5 md:bg-emerald-500/10 dark:bg-emerald-500/10 md:dark:bg-emerald-500/15 rounded-full blur-2xl md:blur-3xl"
           style={{ willChange: "transform, opacity" }}
         />
         <div
           ref={bubble2}
-          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-emerald-400/10 dark:bg-emerald-400/15 rounded-full blur-3xl"
+          className="absolute -bottom-20 -right-20 md:-bottom-40 md:-right-40 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-emerald-400/5 md:bg-emerald-400/10 dark:bg-emerald-400/10 md:dark:bg-emerald-400/15 rounded-full blur-2xl md:blur-3xl"
           style={{ willChange: "transform, opacity" }}
         />
         <div
@@ -161,8 +161,8 @@ export default function Home() {
             certifications={data.certifications}
           />
 
-          <SkillsSection 
-            categories={data.skills} 
+          <SkillsSection
+            categories={data.skills}
           />
         </div>
 

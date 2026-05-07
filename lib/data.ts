@@ -8,7 +8,8 @@ export const dummyProjects: Project[] = [
     fullDescription: "Proyek ini adalah sebuah dashboard admin komprehensif yang dibangun untuk memudahkan pemilik toko online dalam mengelola penjualan, inventaris, dan pelanggan.\n\nFitur Utama:\n- Analitik penjualan real-time menggunakan chart dinamis.\n- Manajemen stok produk dengan peringatan otomatis jika stok menipis.\n- Integrasi dengan payment gateway untuk pelacakan transaksi otomatis.\n- Sistem autentikasi multi-role (Admin, Manager, Staff).",
     imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1000",
     techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Firebase", "Recharts"],
-    link: "https://github.com/mhdfarhan"
+    link: "https://github.com/mhdfarhan",
+    order: 1
   },
   {
     id: "p2",
@@ -17,7 +18,8 @@ export const dummyProjects: Project[] = [
     fullDescription: "Aplikasi Point of Sale (POS) yang dirancang khusus untuk bisnis F&B, khususnya kedai kopi. Dibuat dengan antarmuka yang sangat responsif agar bisa diakses dari tablet maupun smartphone kasir.\n\nFitur Utama:\n- Manajemen menu dan kategori yang mudah disesuaikan.\n- Dukungan untuk cetak struk menggunakan printer thermal bluetooth.\n- Laporan shift dan rekap harian otomatis.\n- Fitur manajemen meja dan pesanan dine-in/takeaway.",
     imageUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=1000",
     techStack: ["React", "Laravel", "MySQL", "Bootstrap", "PWA"],
-    link: "https://github.com/mhdfarhan"
+    link: "https://github.com/mhdfarhan",
+    order: 2
   },
   {
     id: "p3",
@@ -26,6 +28,7 @@ export const dummyProjects: Project[] = [
     fullDescription: "SIAKAD (Sistem Informasi Akademik) adalah solusi digital untuk digitalisasi proses administrasi sekolah. Membantu guru, siswa, dan orang tua untuk terhubung dalam satu platform.\n\nFitur Utama:\n- Portal Siswa untuk melihat jadwal, nilai, dan absensi.\n- Portal Guru untuk input nilai e-Rapor dan manajemen kelas.\n- Fitur notifikasi WhatsApp otomatis untuk orang tua jika siswa absen.\n- Export laporan ke PDF dan Excel.",
     imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=1000",
     techStack: ["PHP", "CodeIgniter", "jQuery", "MySQL", "REST API"],
+    order: 3
   },
   {
     id: "p4",
@@ -34,7 +37,8 @@ export const dummyProjects: Project[] = [
     fullDescription: "Website profil perusahaan yang dirancang dengan estetika modern, fokus pada performa, dan animasi scroll yang halus untuk memberikan kesan profesional.\n\nFitur Utama:\n- Animasi GSAP ScrollTrigger yang memukau.\n- Halaman blog dinamis yang dikelola via CMS headless.\n- SEO optimized dengan skor Lighthouse 100/100.\n- Form kontak terintegrasi dengan email notifikasi.",
     imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1000",
     techStack: ["Next.js", "Framer Motion", "Tailwind CSS", "Sanity CMS"],
-    link: "https://github.com/mhdfarhan"
+    link: "https://github.com/mhdfarhan",
+    order: 4
   }
 ];
 

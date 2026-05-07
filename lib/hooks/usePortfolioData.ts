@@ -66,7 +66,8 @@ export function usePortfolioData() {
         if (!isMounted) return;
 
         const about = aboutDoc.exists() && aboutDoc.data().text ? aboutDoc.data().text : staticAboutText;
-        const projects = projectsSnap.empty ? dummyProjects : projectsSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const projects = (projectsSnap.empty ? dummyProjects : projectsSnap.docs.map(d => ({ id: d.id, ...d.data() } as any)))
+          .sort((a, b) => (b.order || 0) - (a.order || 0));
         const experiences = expSnap.empty ? staticExperiences : expSnap.docs.map(d => d.data() as any);
         const organizationExperience = orgSnap.empty ? staticOrganizationExperience : orgSnap.docs.map(d => d.data() as any);
         const committeeExperience = comSnap.empty ? staticCommitteeExperience : comSnap.docs.map(d => d.data() as any);

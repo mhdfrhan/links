@@ -17,7 +17,31 @@ export function TagInput({ tags, onChange, placeholder = "Ketik lalu Enter...", 
     const trimmed = input.trim();
     if (trimmed && !tags.includes(trimmed)) {
       onChange([...tags, trimmed]);
+    }
+    setInput("");
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.includes(",")) {
+      const splitValues = value.split(",").map((t) => t.trim()).filter(Boolean);
+      
+      let newTags = [...tags];
+      let added = false;
+      
+      splitValues.forEach((t) => {
+        if (!newTags.includes(t)) {
+          newTags.push(t);
+          added = true;
+        }
+      });
+      
+      if (added) {
+        onChange(newTags);
+      }
       setInput("");
+    } else {
+      setInput(value);
     }
   };
 
@@ -60,7 +84,7 @@ export function TagInput({ tags, onChange, placeholder = "Ketik lalu Enter...", 
           ref={inputRef}
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onBlur={addTag}
           placeholder={tags.length === 0 ? placeholder : ""}

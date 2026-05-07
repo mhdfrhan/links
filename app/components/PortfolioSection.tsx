@@ -14,7 +14,7 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  fullDescription: string;
+  fullDescription?: string;
   imageUrl: string;
   techStack: string[];
   link?: string;
@@ -250,50 +250,84 @@ function ProjectModal({ project, onClose, categories = [] }: { project: Project;
             {project.title}
           </h2>
           
-          <div className="flex flex-wrap gap-2 mb-6 items-center">
+          <div className="flex flex-wrap gap-2 mb-8 items-center">
             {project.categoryId && categories.find(c => c.id === project.categoryId) && (
               <>
-                <span className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-accent/20 text-accent rounded-full border border-accent/30">
+                <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-accent/20 text-accent rounded-full border border-accent/30">
                   {categories.find(c => c.id === project.categoryId)?.name}
                 </span>
                 {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
-                  <span className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary/20 text-primary rounded-full border border-primary/30">
+                  <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-primary/20 text-primary rounded-full border border-primary/30">
                     {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
                   </span>
                 )}
-                <span className="text-border/50 text-xs hidden sm:inline-block">|</span>
               </>
             )}
-            {project.techStack.map((tech, i) => (
-              <span key={i} className="px-3 py-1.5 text-xs font-medium rounded-full bg-accent/10 text-accent border border-accent/20">
-                {tech}
-              </span>
-            ))}
           </div>
 
-          <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground mb-8">
-            <p className="whitespace-pre-wrap leading-relaxed">
-              {project.fullDescription}
-            </p>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-accent">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                  Tentang Projek
+                </h3>
+                <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground bg-muted/30 p-5 rounded-2xl border border-border/50">
+                  <p className="whitespace-pre-wrap leading-relaxed m-0">
+                    {project.fullDescription || project.description}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-          {project.link && (
-            <a 
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-              onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
-              onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
-              onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.95, duration: 0.1 })}
-              onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
-            >
-              Lihat Proyek
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-            </a>
-          )}
+            <div className="space-y-8">
+              {project.techStack && project.techStack.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-accent">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                    Teknologi
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {project.techStack.map((tech, i) => (
+                      <span key={i} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent/10 text-accent border border-accent/20">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {project.link && (
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-accent">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                    </svg>
+                    Tautan
+                  </h3>
+                  <a 
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+                    onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 })}
+                    onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
+                    onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.98, duration: 0.1 })}
+                    onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 })}
+                  >
+                    Kunjungi Projek
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>,

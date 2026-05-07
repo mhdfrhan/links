@@ -20,6 +20,7 @@ interface Project {
   techStack: string[];
   link: string;
   order: number;
+  categoryId?: string;
 }
 
 export default function ProjectsPage() {
@@ -36,13 +37,26 @@ export default function ProjectsPage() {
   const [cloudinaryPublicId, setCloudinaryPublicId] = useState("");
   const [techStack, setTechStack] = useState<string[]>([]);
   const [link, setLink] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+
+  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
 
   // Delete modal
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
 
   useEffect(() => {
     fetchProjects();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const snap = await getDocs(query(collection(db, "categories"), orderBy("order", "asc")));
+      setCategories(snap.docs.map(d => ({ id: d.id, name: d.data().name })));
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
 
   const fetchProjects = async () => {
     try {
@@ -65,6 +79,7 @@ export default function ProjectsPage() {
     setCloudinaryPublicId("");
     setTechStack([]);
     setLink("");
+    setCategoryId("");
   };
 
   const startEdit = (project: Project) => {
@@ -76,6 +91,7 @@ export default function ProjectsPage() {
     setCloudinaryPublicId(project.cloudinaryPublicId || "");
     setTechStack(project.techStack || []);
     setLink(project.link || "");
+    setCategoryId(project.categoryId || "");
   };
 
   const handleSave = async () => {
@@ -94,6 +110,7 @@ export default function ProjectsPage() {
         cloudinaryPublicId,
         techStack,
         link: link.trim(),
+        categoryId,
         order: editId ? (projects.find((p) => p.id === editId)?.order || 0) : projects.length,
       });
       showToast("success", editId ? "Projek berhasil diupdate!" : "Projek berhasil ditambahkan!");
@@ -163,6 +180,21 @@ export default function ProjectsPage() {
               label="Cover Image"
             />
             <TagInput tags={techStack} onChange={setTechStack} label="Tech Stack" placeholder="Ketik teknologi lalu Enter..." />
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">Kategori</label>
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
+              >
+                <option value="">Pilih Kategori (Opsional)</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+
             <AdminFormField label="Link URL" type="url" value={link} onChange={setLink} placeholder="https://example.com" hint="Link ke live demo atau repository (opsional)" />
 
             <div className="flex gap-2 pt-2">
@@ -205,6 +237,11 @@ export default function ProjectsPage() {
                 </div>
               )}
               <h3 className="font-semibold text-foreground leading-snug">{project.title}</h3>
+              {project.categoryId && categories.find(c => c.id === project.categoryId) && (
+                <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary rounded-md border border-primary/20">
+                  {categories.find(c => c.id === project.categoryId)?.name}
+                </span>
+              )}
               <p className="text-[11px] text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{project.description}</p>
 
               {project.techStack?.length > 0 && (

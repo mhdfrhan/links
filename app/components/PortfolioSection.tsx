@@ -18,14 +18,17 @@ export interface Project {
   imageUrl: string;
   techStack: string[];
   link?: string;
+  categoryId?: string;
+  order?: number;
 }
 
 interface PortfolioSectionProps {
   projects: Project[];
   showAllButton?: boolean;
+  categories?: any[];
 }
 
-export function PortfolioSection({ projects, showAllButton = false }: PortfolioSectionProps) {
+export function PortfolioSection({ projects, showAllButton = false, categories = [] }: PortfolioSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -106,6 +109,13 @@ export function PortfolioSection({ projects, showAllButton = false }: PortfolioS
               <h3 className="font-semibold text-foreground text-lg mb-1 group-hover:text-accent transition-colors">
                 {project.title}
               </h3>
+              {project.categoryId && categories.find(c => c.id === project.categoryId) && (
+                <div className="mb-2">
+                  <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent rounded-full border border-accent/20">
+                    {categories.find(c => c.id === project.categoryId)?.name}
+                  </span>
+                </div>
+              )}
               <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                 {project.description}
               </p>
@@ -149,6 +159,7 @@ export function PortfolioSection({ projects, showAllButton = false }: PortfolioS
         <ProjectModal 
           project={selectedProject} 
           onClose={() => setSelectedProject(null)} 
+          categories={categories}
         />
       )}
     </section>
@@ -156,7 +167,7 @@ export function PortfolioSection({ projects, showAllButton = false }: PortfolioS
 }
 
 // Modal Component
-function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
+function ProjectModal({ project, onClose, categories = [] }: { project: Project; onClose: () => void; categories?: any[] }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -233,7 +244,15 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
             {project.title}
           </h2>
           
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6 items-center">
+            {project.categoryId && categories.find(c => c.id === project.categoryId) && (
+              <>
+                <span className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-accent/20 text-accent rounded-full border border-accent/30">
+                  {categories.find(c => c.id === project.categoryId)?.name}
+                </span>
+                <span className="text-border/50 text-xs hidden sm:inline-block">|</span>
+              </>
+            )}
             {project.techStack.map((tech, i) => (
               <span key={i} className="px-3 py-1.5 text-xs font-medium rounded-full bg-accent/10 text-accent border border-accent/20">
                 {tech}

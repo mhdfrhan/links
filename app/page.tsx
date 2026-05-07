@@ -129,7 +129,7 @@ export default function Home() {
 
           <AboutSection text={data.about || "Belum ada teks..."} />
 
-          <PortfolioSection projects={data.projects.slice(0, 2)} showAllButton={true} />
+          <PortfolioSection projects={data.projects.slice(0, 2)} showAllButton={true} categories={data.categories} />
 
           <ExperienceSection
             title="Pengalaman Kerja"

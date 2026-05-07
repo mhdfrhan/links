@@ -26,7 +26,8 @@ export function usePortfolioData() {
     awards: staticAwards,
     certifications: staticCertifications,
     skills: staticSkills,
-    profile: null as any
+    profile: null as any,
+    categories: [] as any[]
   });
   const [loading, setLoading] = useState(true);
 
@@ -46,7 +47,8 @@ export function usePortfolioData() {
           awardsSnap,
           certSnap,
           skillsSnap,
-          profileDoc
+          profileDoc,
+          categoriesSnap
         ] = await Promise.all([
           getDoc(doc(db, "portfolio", "about")),
           getDocs(collection(db, "projects")),
@@ -57,7 +59,8 @@ export function usePortfolioData() {
           getDocs(query(collection(db, "awards"), orderBy("order", "asc"))),
           getDocs(query(collection(db, "certifications"), orderBy("order", "asc"))),
           getDocs(query(collection(db, "skills"), orderBy("order", "asc"))),
-          getDoc(doc(db, "portfolio", "profile"))
+          getDoc(doc(db, "portfolio", "profile")),
+          getDocs(query(collection(db, "categories"), orderBy("order", "asc")))
         ]);
 
         if (!isMounted) return;
@@ -72,6 +75,7 @@ export function usePortfolioData() {
         const certifications = certSnap.empty ? staticCertifications : certSnap.docs.map(d => d.data() as any);
         const skills = skillsSnap.empty ? staticSkills : skillsSnap.docs.map(d => d.data() as any);
         const profile = profileDoc.exists() ? profileDoc.data() : null;
+        const categories = categoriesSnap.empty ? [] : categoriesSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
 
         setData({
           about,
@@ -83,7 +87,8 @@ export function usePortfolioData() {
           awards,
           certifications,
           skills,
-          profile
+          profile,
+          categories
         });
       } catch (error) {
         console.error("Error fetching portfolio data from Firebase:", error);

@@ -51,7 +51,7 @@ export function usePortfolioData() {
           categoriesSnap
         ] = await Promise.all([
           getDoc(doc(db, "portfolio", "about")),
-          getDocs(collection(db, "projects")),
+          getDocs(query(collection(db, "projects"), orderBy("order", "asc"))),
           getDocs(query(collection(db, "experiences"), orderBy("order", "asc"))),
           getDocs(query(collection(db, "organizationExperience"), orderBy("order", "asc"))),
           getDocs(query(collection(db, "committeeExperience"), orderBy("order", "asc"))),
@@ -66,8 +66,7 @@ export function usePortfolioData() {
         if (!isMounted) return;
 
         const about = aboutDoc.exists() && aboutDoc.data().text ? aboutDoc.data().text : staticAboutText;
-        const projects = (projectsSnap.empty ? dummyProjects : projectsSnap.docs.map(d => ({ id: d.id, ...d.data() } as any)))
-          .sort((a, b) => (b.order || 0) - (a.order || 0));
+        const projects = projectsSnap.empty ? dummyProjects : projectsSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
         const experiences = expSnap.empty ? staticExperiences : expSnap.docs.map(d => d.data() as any);
         const organizationExperience = orgSnap.empty ? staticOrganizationExperience : orgSnap.docs.map(d => d.data() as any);
         const committeeExperience = comSnap.empty ? staticCommitteeExperience : comSnap.docs.map(d => d.data() as any);

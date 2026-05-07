@@ -2,14 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase/config";
-import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, writeBatch } from "firebase/firestore";
 import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { AdminModal } from "../components/AdminModal";
 import { ImageUploader } from "../components/ImageUploader";
 import { TagInput } from "../components/TagInput";
 import { showToast } from "../components/AdminToast";
+import { SortableItem } from "../components/SortableItem";
 import { PlusIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 interface Project {
   id: string;
@@ -94,6 +110,39 @@ export default function ProjectsPage() {
     setLink("");
     setCategoryId("");
     setSubCategoryId("");
+  };
+
+  // DnD sensors and handlers
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const saveOrderToFirebase = async (newItems: Project[]) => {
+    try {
+      const batch = writeBatch(db);
+      newItems.forEach((item, index) => {
+        const docRef = doc(db, "projects", item.id);
+        batch.update(docRef, { order: index });
+      });
+      await batch.commit();
+      showToast("success", "Urutan projek berhasil disimpan!");
+    } catch (error) {
+      console.error(error);
+      showToast("error", "Gagal menyimpan urutan.");
+      fetchProjects();
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = projects.findIndex((i) => i.id === active.id);
+      const newIndex = projects.findIndex((i) => i.id === over.id);
+      const newItems = arrayMove(projects, oldIndex, newIndex);
+      setProjects(newItems);
+      saveOrderToFirebase(newItems);
+    }
   };
 
   const startEdit = (project: Project) => {
@@ -390,60 +439,77 @@ export default function ProjectsPage() {
           </div>
         </AdminCard>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {projects.map((project) => (
-            <AdminCard key={project.id} className="group border-border/50">
-              {project.imageUrl && (
-                <div className="relative aspect-video w-full overflow-hidden rounded-xl mb-4 -mt-1 bg-muted/20">
-                  <img
-                    src={project.imageUrl}
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-              )}
-              <h3 className="font-semibold text-foreground leading-snug">{project.title}</h3>
-              {project.categoryId && categories.find(c => c.id === project.categoryId) && (
-                <div className="flex flex-wrap gap-1 mt-1">
-                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary rounded-md border border-primary/20">
-                    {categories.find(c => c.id === project.categoryId)?.name}
-                  </span>
-                  {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
-                    <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-accent/10 text-accent rounded-md border border-accent/20">
-                      {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
-                    </span>
-                  )}
-                </div>
-              )}
-              <p className="text-[11px] text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{project.description}</p>
-
-              {project.techStack?.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {project.techStack.map((tech, i) => (
-                    <span key={i} className="px-2 py-0.5 text-[10px] font-medium bg-accent/5 text-accent rounded-md border border-accent/10">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex gap-2 mt-4 pt-3 border-t border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => startEdit(project)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-accent bg-accent/10 rounded-lg hover:bg-accent/20 transition-colors"
-                >
-                  <PencilIcon className="w-3 h-3" /> Edit
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(project)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-red-500 bg-red-500/10 rounded-lg hover:bg-red-500/20 transition-colors"
-                >
-                  <TrashIcon className="w-3 h-3" /> Hapus
-                </button>
-              </div>
-            </AdminCard>
-          ))}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={projects.map(i => i.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-3">
+              {projects.map((project) => (
+                <SortableItem key={project.id} id={project.id}>
+                  <AdminCard className="group border-border/50">
+                    <div className="flex gap-4 pl-6 md:pl-8">
+                      {project.imageUrl && (
+                        <div className="relative w-28 h-20 md:w-40 md:h-24 flex-shrink-0 overflow-hidden rounded-xl bg-muted/20">
+                          <img
+                            src={project.imageUrl}
+                            alt={project.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between">
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-foreground leading-snug">{project.title}</h3>
+                            {project.categoryId && categories.find(c => c.id === project.categoryId) && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary rounded-md border border-primary/20">
+                                  {categories.find(c => c.id === project.categoryId)?.name}
+                                </span>
+                                {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
+                                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-accent/10 text-accent rounded-md border border-accent/20">
+                                    {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            <p className="text-[11px] text-muted-foreground mt-1 line-clamp-1 leading-relaxed">{project.description}</p>
+                            {project.techStack?.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {project.techStack.slice(0, 4).map((tech, i) => (
+                                  <span key={i} className="px-2 py-0.5 text-[10px] font-medium bg-accent/5 text-accent rounded-md border border-accent/10">
+                                    {tech}
+                                  </span>
+                                ))}
+                                {project.techStack.length > 4 && (
+                                  <span className="px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground rounded-md">
+                                    +{project.techStack.length - 4}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all flex-shrink-0 ml-4 relative z-20">
+                            <button
+                              onClick={() => startEdit(project)}
+                              className="p-1.5 text-accent bg-accent/5 rounded-lg hover:bg-accent/10 border border-accent/10 transition-colors"
+                            >
+                              <PencilIcon className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteTarget(project)}
+                              className="p-1.5 text-red-500 bg-red-500/5 rounded-lg hover:bg-red-500/10 border border-red-500/10 transition-colors"
+                            >
+                              <TrashIcon className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </AdminCard>
+                </SortableItem>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Delete Modal */}

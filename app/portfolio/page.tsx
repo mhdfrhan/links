@@ -25,16 +25,13 @@ export default function PortfolioPage() {
       result = result.filter(p => p.subCategoryId === selectedSubCategory);
     }
 
-    // Sort
+    // Sort based on admin drag-and-drop order
+    // order 0 = top of admin list = "newest"
     result.sort((a, b) => {
-      // Assuming 'order' defines the sorting if timestamp is not available.
-      // Usually, lower order = older or higher order = newer depending on how it's saved.
-      // Since order is just 0, 1, 2, 3... let's sort by order.
-      // If we want "newest" first, we reverse the order.
       if (sortOrder === "newest") {
-        return (b.order || 0) - (a.order || 0);
-      } else {
         return (a.order || 0) - (b.order || 0);
+      } else {
+        return (b.order || 0) - (a.order || 0);
       }
     });
 

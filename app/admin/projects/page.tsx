@@ -9,7 +9,7 @@ import { AdminModal } from "../components/AdminModal";
 import { ImageUploader } from "../components/ImageUploader";
 import { TagInput } from "../components/TagInput";
 import { showToast } from "../components/AdminToast";
-import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface Project {
   id: string;
@@ -40,6 +40,13 @@ export default function ProjectsPage() {
   const [link, setLink] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [subCategoryId, setSubCategoryId] = useState("");
+
+  // Quick Add State
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isAddingSubCategory, setIsAddingSubCategory] = useState(false);
+  const [newSubCategoryName, setNewSubCategoryName] = useState("");
+  const [savingCategory, setSavingCategory] = useState(false);
 
   const [categories, setCategories] = useState<{id: string, name: string, subCategories?: {id: string, name: string}[]}[]>([]);
 
@@ -146,6 +153,55 @@ export default function ProjectsPage() {
     }
   };
 
+  const handleQuickAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    setSavingCategory(true);
+    try {
+      const id = `cat_${Date.now()}`;
+      await setDoc(doc(db, "categories", id), {
+        name: newCategoryName.trim(),
+        order: categories.length,
+        subCategories: []
+      });
+      showToast("success", "Kategori baru ditambahkan!");
+      await fetchCategories();
+      setCategoryId(id);
+      setIsAddingCategory(false);
+      setNewCategoryName("");
+      setSubCategoryId("");
+    } catch (err) {
+      showToast("error", "Gagal menambahkan kategori.");
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
+  const handleQuickAddSubCategory = async () => {
+    if (!newSubCategoryName.trim() || !categoryId) return;
+    setSavingCategory(true);
+    try {
+      const cat = categories.find(c => c.id === categoryId);
+      if (!cat) return;
+      const subId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      const newSub = { id: subId, name: newSubCategoryName.trim() };
+      const updatedSubs = [...(cat.subCategories || []), newSub];
+      
+      await setDoc(doc(db, "categories", categoryId), {
+        subCategories: updatedSubs
+      }, { merge: true });
+      
+      showToast("success", "Sub-Kategori baru ditambahkan!");
+      await fetchCategories();
+      setSubCategoryId(subId);
+      setIsAddingSubCategory(false);
+      setNewSubCategoryName("");
+    } catch (err) {
+      showToast("error", "Gagal menambahkan sub-kategori.");
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -191,35 +247,117 @@ export default function ProjectsPage() {
             <TagInput tags={techStack} onChange={setTechStack} label="Tech Stack" placeholder="Ketik teknologi lalu Enter..." />
             
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">Kategori</label>
-              <select
-                value={categoryId}
-                onChange={(e) => {
-                  setCategoryId(e.target.value);
-                  setSubCategoryId("");
-                }}
-                className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
-              >
-                <option value="">Pilih Kategori (Opsional)</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {categoryId && categories.find(c => c.id === categoryId)?.subCategories?.length ? (
-              <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                <label className="block text-sm font-medium text-foreground">Sub-Kategori</label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-foreground">Kategori</label>
+                {!isAddingCategory && (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingCategory(true)}
+                    className="text-[11px] font-semibold text-accent hover:text-accent/80 transition-colors flex items-center gap-1"
+                  >
+                    <PlusIcon className="w-3 h-3" /> Tambah Baru
+                  </button>
+                )}
+              </div>
+              
+              {isAddingCategory ? (
+                <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Ketik Kategori Baru..."
+                    className="flex-1 p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                    autoFocus
+                    onKeyDown={(e) => e.key === "Enter" && handleQuickAddCategory()}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleQuickAddCategory}
+                    disabled={savingCategory || !newCategoryName.trim()}
+                    className="p-3.5 bg-accent text-accent-foreground rounded-xl hover:bg-accent/90 disabled:opacity-50 transition-all shadow-md"
+                  >
+                    {savingCategory ? <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" /> : <CheckIcon className="w-5 h-5" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsAddingCategory(false); setNewCategoryName(""); }}
+                    className="p-3.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all"
+                  >
+                    <XMarkIcon className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
                 <select
-                  value={subCategoryId}
-                  onChange={(e) => setSubCategoryId(e.target.value)}
+                  value={categoryId}
+                  onChange={(e) => {
+                    setCategoryId(e.target.value);
+                    setSubCategoryId("");
+                  }}
                   className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
                 >
-                  <option value="">Pilih Sub-Kategori (Opsional)</option>
-                  {categories.find(c => c.id === categoryId)?.subCategories?.map((sub: any) => (
-                    <option key={sub.id} value={sub.id}>{sub.name}</option>
+                  <option value="">Pilih Kategori (Opsional)</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
+              )}
+            </div>
+
+            {categoryId ? (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Sub-Kategori</label>
+                  {!isAddingSubCategory && (
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingSubCategory(true)}
+                      className="text-[11px] font-semibold text-accent hover:text-accent/80 transition-colors flex items-center gap-1"
+                    >
+                      <PlusIcon className="w-3 h-3" /> Tambah Baru
+                    </button>
+                  )}
+                </div>
+
+                {isAddingSubCategory ? (
+                  <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
+                    <input
+                      type="text"
+                      value={newSubCategoryName}
+                      onChange={(e) => setNewSubCategoryName(e.target.value)}
+                      placeholder="Ketik Sub-Kategori Baru..."
+                      className="flex-1 p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                      autoFocus
+                      onKeyDown={(e) => e.key === "Enter" && handleQuickAddSubCategory()}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleQuickAddSubCategory}
+                      disabled={savingCategory || !newSubCategoryName.trim()}
+                      className="p-3.5 bg-accent text-accent-foreground rounded-xl hover:bg-accent/90 disabled:opacity-50 transition-all shadow-md"
+                    >
+                      {savingCategory ? <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" /> : <CheckIcon className="w-5 h-5" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setIsAddingSubCategory(false); setNewSubCategoryName(""); }}
+                      className="p-3.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all"
+                    >
+                      <XMarkIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    value={subCategoryId}
+                    onChange={(e) => setSubCategoryId(e.target.value)}
+                    className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
+                  >
+                    <option value="">Pilih Sub-Kategori (Opsional)</option>
+                    {categories.find(c => c.id === categoryId)?.subCategories?.map((sub: any) => (
+                      <option key={sub.id} value={sub.id}>{sub.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             ) : null}
 

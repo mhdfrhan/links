@@ -19,6 +19,7 @@ export interface Project {
   techStack: string[];
   link?: string;
   categoryId?: string;
+  subCategoryId?: string;
   order?: number;
 }
 
@@ -110,10 +111,15 @@ export function PortfolioSection({ projects, showAllButton = false, categories =
                 {project.title}
               </h3>
               {project.categoryId && categories.find(c => c.id === project.categoryId) && (
-                <div className="mb-2">
+                <div className="mb-2 flex flex-wrap gap-1.5">
                   <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent rounded-full border border-accent/20">
                     {categories.find(c => c.id === project.categoryId)?.name}
                   </span>
+                  {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
+                    <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary rounded-full border border-primary/20">
+                      {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
+                    </span>
+                  )}
                 </div>
               )}
               <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
@@ -250,6 +256,11 @@ function ProjectModal({ project, onClose, categories = [] }: { project: Project;
                 <span className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-accent/20 text-accent rounded-full border border-accent/30">
                   {categories.find(c => c.id === project.categoryId)?.name}
                 </span>
+                {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
+                  <span className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary/20 text-primary rounded-full border border-primary/30">
+                    {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
+                  </span>
+                )}
                 <span className="text-border/50 text-xs hidden sm:inline-block">|</span>
               </>
             )}

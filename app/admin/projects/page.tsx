@@ -21,6 +21,7 @@ interface Project {
   link: string;
   order: number;
   categoryId?: string;
+  subCategoryId?: string;
 }
 
 export default function ProjectsPage() {
@@ -38,8 +39,9 @@ export default function ProjectsPage() {
   const [techStack, setTechStack] = useState<string[]>([]);
   const [link, setLink] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [subCategoryId, setSubCategoryId] = useState("");
 
-  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
+  const [categories, setCategories] = useState<{id: string, name: string, subCategories?: {id: string, name: string}[]}[]>([]);
 
   // Delete modal
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
@@ -52,7 +54,11 @@ export default function ProjectsPage() {
   const fetchCategories = async () => {
     try {
       const snap = await getDocs(query(collection(db, "categories"), orderBy("order", "asc")));
-      setCategories(snap.docs.map(d => ({ id: d.id, name: d.data().name })));
+      setCategories(snap.docs.map(d => ({ 
+        id: d.id, 
+        name: d.data().name,
+        subCategories: d.data().subCategories || []
+      })));
     } catch (err) {
       console.error("Error fetching categories:", err);
     }
@@ -80,6 +86,7 @@ export default function ProjectsPage() {
     setTechStack([]);
     setLink("");
     setCategoryId("");
+    setSubCategoryId("");
   };
 
   const startEdit = (project: Project) => {
@@ -92,6 +99,7 @@ export default function ProjectsPage() {
     setTechStack(project.techStack || []);
     setLink(project.link || "");
     setCategoryId(project.categoryId || "");
+    setSubCategoryId(project.subCategoryId || "");
   };
 
   const handleSave = async () => {
@@ -111,6 +119,7 @@ export default function ProjectsPage() {
         techStack,
         link: link.trim(),
         categoryId,
+        subCategoryId,
         order: editId ? (projects.find((p) => p.id === editId)?.order || 0) : projects.length,
       });
       showToast("success", editId ? "Projek berhasil diupdate!" : "Projek berhasil ditambahkan!");
@@ -185,7 +194,10 @@ export default function ProjectsPage() {
               <label className="block text-sm font-medium text-foreground">Kategori</label>
               <select
                 value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
+                onChange={(e) => {
+                  setCategoryId(e.target.value);
+                  setSubCategoryId("");
+                }}
                 className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
               >
                 <option value="">Pilih Kategori (Opsional)</option>
@@ -194,6 +206,22 @@ export default function ProjectsPage() {
                 ))}
               </select>
             </div>
+
+            {categoryId && categories.find(c => c.id === categoryId)?.subCategories?.length ? (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                <label className="block text-sm font-medium text-foreground">Sub-Kategori</label>
+                <select
+                  value={subCategoryId}
+                  onChange={(e) => setSubCategoryId(e.target.value)}
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
+                >
+                  <option value="">Pilih Sub-Kategori (Opsional)</option>
+                  {categories.find(c => c.id === categoryId)?.subCategories?.map((sub: any) => (
+                    <option key={sub.id} value={sub.id}>{sub.name}</option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
 
             <AdminFormField label="Link URL" type="url" value={link} onChange={setLink} placeholder="https://example.com" hint="Link ke live demo atau repository (opsional)" />
 
@@ -238,9 +266,16 @@ export default function ProjectsPage() {
               )}
               <h3 className="font-semibold text-foreground leading-snug">{project.title}</h3>
               {project.categoryId && categories.find(c => c.id === project.categoryId) && (
-                <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary rounded-md border border-primary/20">
-                  {categories.find(c => c.id === project.categoryId)?.name}
-                </span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary rounded-md border border-primary/20">
+                    {categories.find(c => c.id === project.categoryId)?.name}
+                  </span>
+                  {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
+                    <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-accent/10 text-accent rounded-md border border-accent/20">
+                      {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
+                    </span>
+                  )}
+                </div>
               )}
               <p className="text-[11px] text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{project.description}</p>
 

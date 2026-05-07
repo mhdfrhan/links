@@ -9,6 +9,7 @@ import { ThemeToggle } from "../components/ThemeToggle";
 export default function PortfolioPage() {
   const { data, loading } = usePortfolioData();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   const filteredAndSortedProjects = useMemo(() => {
@@ -17,6 +18,11 @@ export default function PortfolioPage() {
     // Filter by category
     if (selectedCategory !== "all") {
       result = result.filter(p => p.categoryId === selectedCategory);
+    }
+
+    // Filter by subcategory
+    if (selectedSubCategory !== "all") {
+      result = result.filter(p => p.subCategoryId === selectedSubCategory);
     }
 
     // Sort
@@ -33,7 +39,7 @@ export default function PortfolioPage() {
     });
 
     return result;
-  }, [data.projects, selectedCategory, sortOrder]);
+  }, [data.projects, selectedCategory, selectedSubCategory, sortOrder]);
 
   if (loading) {
     return (
@@ -70,30 +76,67 @@ export default function PortfolioPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
         
         {/* Category Pills */}
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelectedCategory("all")}
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-              selectedCategory === "all"
-                ? "bg-accent text-accent-foreground shadow-md"
-                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
-          >
-            Semua
-          </button>
-          {data.categories.map((cat: any) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
+              onClick={() => {
+                setSelectedCategory("all");
+                setSelectedSubCategory("all");
+              }}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                selectedCategory === cat.id
+                selectedCategory === "all"
                   ? "bg-accent text-accent-foreground shadow-md"
                   : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
-              {cat.name}
+              Semua
             </button>
-          ))}
+            {data.categories.map((cat: any) => (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  setSelectedCategory(cat.id);
+                  setSelectedSubCategory("all");
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  selectedCategory === cat.id
+                    ? "bg-accent text-accent-foreground shadow-md"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* SubCategory Pills (only if category is selected and has subcategories) */}
+          {selectedCategory !== "all" && data.categories.find((c: any) => c.id === selectedCategory)?.subCategories?.length > 0 && (
+            <div className="flex flex-wrap gap-2 pl-1 animate-in fade-in slide-in-from-top-2">
+              <button
+                onClick={() => setSelectedSubCategory("all")}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${
+                  selectedSubCategory === "all"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-primary/5 text-muted-foreground hover:bg-primary/10 hover:text-foreground"
+                }`}
+              >
+                Semua {data.categories.find((c: any) => c.id === selectedCategory)?.name}
+              </button>
+              {data.categories.find((c: any) => c.id === selectedCategory)?.subCategories.map((sub: any) => (
+                <button
+                  key={sub.id}
+                  onClick={() => setSelectedSubCategory(sub.id)}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${
+                    selectedSubCategory === sub.id
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-primary/5 text-muted-foreground hover:bg-primary/10 hover:text-foreground"
+                  }`}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Sort Dropdown */}

@@ -7,8 +7,9 @@ import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { AdminModal } from "../components/AdminModal";
 import { showToast } from "../components/AdminToast";
+import { AITranslateButton } from "../components/AITranslateButton";
 import { SortableItem } from "../components/SortableItem";
-import { PlusIcon, PencilIcon, TrashIcon, StarIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, PencilIcon, TrashIcon, StarIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import {
   DndContext,
   closestCenter,
@@ -41,6 +42,7 @@ export default function AwardsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
+  const [title_en, setTitleEn] = useState("");
   const [year, setYear] = useState("");
   const [highlight, setHighlight] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Award | null>(null);
@@ -88,10 +90,10 @@ export default function AwardsPage() {
     }
   };
 
-  const resetForm = () => { setIsEditing(false); setEditId(null); setTitle(""); setYear(""); setHighlight(false); };
+  const resetForm = () => { setIsEditing(false); setEditId(null); setTitle(""); setTitleEn(""); setYear(""); setHighlight(false); };
 
   const startEdit = (item: Award) => {
-    setIsEditing(true); setEditId(item.id); setTitle(item.title); setYear(item.year); setHighlight(item.highlight || false);
+    setIsEditing(true); setEditId(item.id); setTitle(item.title || ""); setTitleEn(item.title_en || ""); setYear(item.year || ""); setHighlight(item.highlight || false);
   };
 
   const handleSave = async () => {
@@ -100,7 +102,7 @@ export default function AwardsPage() {
     try {
       const id = editId || `award_${Date.now()}`;
       await setDoc(doc(db, "awards", id), {
-        title: title.trim(), year: year.trim(), highlight,
+        title: title.trim(), title_en: title_en.trim(), year: year.trim(), highlight,
         order: editId ? (items.find((e) => e.id === editId)?.order || 0) : items.length,
       });
       showToast("success", editId ? "Berhasil diupdate!" : "Berhasil ditambahkan!");
@@ -138,7 +140,22 @@ export default function AwardsPage() {
       {isEditing && (
         <AdminCard title={editId ? "Edit Penghargaan" : "Tambah Penghargaan"}>
           <div className="space-y-5">
-            <AdminFormField label="Judul Penghargaan" value={title} onChange={setTitle} placeholder="Juara 1 Hackathon XYZ" required />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Judul Penghargaan (ID)" value={title} onChange={setTitle} placeholder="Juara 1 Hackathon XYZ" required />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Judul Penghargaan (EN)</label>
+                  <AITranslateButton text={title} onTranslated={setTitleEn} />
+                </div>
+                <input
+                  type="text"
+                  value={title_en}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                  placeholder="1st Place Hackathon XYZ"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
             <AdminFormField label="Tahun" value={year} onChange={setYear} placeholder="2024" />
             
             <div className="flex items-center gap-3">

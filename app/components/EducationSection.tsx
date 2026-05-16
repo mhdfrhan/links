@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { dictionaries } from "@/lib/i18n/dictionaries";
+
 interface Education {
   institution: string;
   period: string;
@@ -13,6 +16,9 @@ interface EducationSectionProps {
 }
 
 export function EducationSection({ items }: EducationSectionProps) {
+  const { language } = useLanguage();
+  const dict = dictionaries[language].education;
+
   return (
     <section className="w-full">
       {/* Section label */}
@@ -25,7 +31,7 @@ export function EducationSection({ items }: EducationSectionProps) {
             letterSpacing: "0.04em",
           }}
         >
-          06.
+          {dict.sectionNum.split(" ")[0]}
         </span>
         <h2
           style={{
@@ -36,7 +42,7 @@ export function EducationSection({ items }: EducationSectionProps) {
             fontStyle: "normal",
           }}
         >
-          Pendidikan
+          {dict.title}
         </h2>
         <div
           className="flex-1"

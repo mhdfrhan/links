@@ -9,8 +9,9 @@ import { AdminModal } from "../components/AdminModal";
 import { ImageUploader } from "../components/ImageUploader";
 import { TagInput } from "../components/TagInput";
 import { showToast } from "../components/AdminToast";
+import { AITranslateButton } from "../components/AITranslateButton";
 import { SortableItem } from "../components/SortableItem";
-import { PlusIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import {
   DndContext,
   closestCenter,
@@ -49,7 +50,11 @@ export default function ProjectsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
+  const [title_en, setTitleEn] = useState("");
   const [description, setDescription] = useState("");
+  const [description_en, setDescriptionEn] = useState("");
+  const [fullDescription, setFullDescription] = useState("");
+  const [fullDescription_en, setFullDescriptionEn] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [cloudinaryPublicId, setCloudinaryPublicId] = useState("");
   const [techStack, setTechStack] = useState<string[]>([]);
@@ -103,7 +108,11 @@ export default function ProjectsPage() {
     setIsEditing(false);
     setEditId(null);
     setTitle("");
+    setTitleEn("");
     setDescription("");
+    setDescriptionEn("");
+    setFullDescription("");
+    setFullDescriptionEn("");
     setImageUrl("");
     setCloudinaryPublicId("");
     setTechStack([]);
@@ -148,8 +157,12 @@ export default function ProjectsPage() {
   const startEdit = (project: Project) => {
     setIsEditing(true);
     setEditId(project.id);
-    setTitle(project.title);
-    setDescription(project.description);
+    setTitle(project.title || "");
+    setTitleEn(project.title_en || "");
+    setDescription(project.description || "");
+    setDescriptionEn(project.description_en || "");
+    setFullDescription(project.fullDescription || "");
+    setFullDescriptionEn(project.fullDescription_en || "");
     setImageUrl(project.imageUrl || "");
     setCloudinaryPublicId(project.cloudinaryPublicId || "");
     setTechStack(project.techStack || []);
@@ -169,7 +182,11 @@ export default function ProjectsPage() {
       const id = editId || `project_${Date.now()}`;
       await setDoc(doc(db, "projects", id), {
         title: title.trim(),
+        title_en: title_en.trim(),
         description: description.trim(),
+        description_en: description_en.trim(),
+        fullDescription: fullDescription.trim(),
+        fullDescription_en: fullDescription_en.trim(),
         imageUrl,
         cloudinaryPublicId,
         techStack,
@@ -281,8 +298,58 @@ export default function ProjectsPage() {
       {isEditing && (
         <AdminCard title={editId ? "Edit Projek" : "Tambah Projek Baru"}>
           <div className="space-y-5">
-            <AdminFormField label="Judul" value={title} onChange={setTitle} placeholder="Nama projek" required />
-            <AdminFormField label="Deskripsi" type="textarea" value={description} onChange={setDescription} placeholder="Deskripsi singkat projek..." rows={4} maxLength={500} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Judul (ID)" value={title} onChange={setTitle} placeholder="Nama projek (Bahasa Indonesia)" required />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Judul (EN)</label>
+                  <AITranslateButton text={title} onTranslated={setTitleEn} />
+                </div>
+                <input
+                  type="text"
+                  value={title_en}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                  placeholder="Project Name (English)"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Deskripsi Singkat (ID)" type="textarea" value={description} onChange={setDescription} placeholder="Deskripsi singkat projek..." rows={3} maxLength={500} />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Deskripsi Singkat (EN)</label>
+                  <AITranslateButton text={description} onTranslated={setDescriptionEn} />
+                </div>
+                <textarea
+                  value={description_en}
+                  onChange={(e) => setDescriptionEn(e.target.value)}
+                  rows={3}
+                  placeholder="Short description..."
+                  maxLength={500}
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Deskripsi Lengkap (ID)" type="textarea" value={fullDescription} onChange={setFullDescription} placeholder="Deskripsi lengkap untuk popup modal..." rows={6} maxLength={3000} />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Deskripsi Lengkap (EN)</label>
+                  <AITranslateButton text={fullDescription} onTranslated={setFullDescriptionEn} />
+                </div>
+                <textarea
+                  value={fullDescription_en}
+                  onChange={(e) => setFullDescriptionEn(e.target.value)}
+                  rows={6}
+                  placeholder="Full description for modal popup..."
+                  maxLength={3000}
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
             <ImageUploader
               currentImageUrl={imageUrl}
               onUploadComplete={(url, publicId) => {

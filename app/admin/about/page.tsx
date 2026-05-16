@@ -6,9 +6,11 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { showToast } from "../components/AdminToast";
+import { AITranslateButton } from "../components/AITranslateButton";
 
 export default function AboutPage() {
   const [text, setText] = useState("");
+  const [text_en, setTextEn] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -18,6 +20,7 @@ export default function AboutPage() {
         const aboutDoc = await getDoc(doc(db, "portfolio", "about"));
         if (aboutDoc.exists()) {
           setText(aboutDoc.data().text || "");
+          setTextEn(aboutDoc.data().text_en || "");
         }
       } catch (err) {
         console.error("Error fetching about:", err);
@@ -31,7 +34,7 @@ export default function AboutPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, "portfolio", "about"), { text });
+      await setDoc(doc(db, "portfolio", "about"), { text, text_en });
       showToast("success", "Tentang Saya berhasil disimpan!");
     } catch (err) {
       console.error("Error saving about:", err);
@@ -67,15 +70,31 @@ export default function AboutPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AdminCard title="Editor" description="Tulis deskripsi tentang diri kamu.">
-          <AdminFormField
-            label="Teks Tentang Saya"
-            type="textarea"
-            value={text}
-            onChange={setText}
-            rows={10}
-            placeholder="Tulis bio / deskripsi diri kamu di sini..."
-            maxLength={2000}
-          />
+          <div className="space-y-4">
+            <AdminFormField
+              label="Teks Tentang Saya (ID)"
+              type="textarea"
+              value={text}
+              onChange={setText}
+              rows={8}
+              placeholder="Tulis bio / deskripsi diri kamu di sini (Bahasa Indonesia)..."
+              maxLength={2000}
+            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-foreground">Teks Tentang Saya (EN)</label>
+                <AITranslateButton text={text} onTranslated={setTextEn} />
+              </div>
+              <textarea
+                value={text_en}
+                onChange={(e) => setTextEn(e.target.value)}
+                rows={8}
+                placeholder="Write your bio / description here (English)..."
+                maxLength={2000}
+                className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+              />
+            </div>
+          </div>
         </AdminCard>
 
         <AdminCard title="Preview" description="Tampilan teks di website kamu.">

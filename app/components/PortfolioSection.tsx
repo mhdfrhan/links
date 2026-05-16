@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { dictionaries } from "@/lib/i18n/dictionaries";
 
 export interface Project {
   id: string;
@@ -37,6 +39,8 @@ export function PortfolioSection({
   categories = [],
 }: PortfolioSectionProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { language } = useLanguage();
+  const dict = dictionaries[language].projects;
 
   // Lock body scroll when modal open
   useEffect(() => {
@@ -73,7 +77,7 @@ export function PortfolioSection({
             fontStyle: "normal",
           }}
         >
-          Portofolio
+          {dict.title}
         </h2>
         <div
           className="flex-1"
@@ -120,7 +124,7 @@ export function PortfolioSection({
               el.style.background = "transparent";
             }}
           >
-            lihat semua project
+            {dict.viewAll.toLowerCase()}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -286,6 +290,8 @@ function ProjectModal({
   categories?: any[];
 }) {
   const [mounted, setMounted] = useState(false);
+  const { language } = useLanguage();
+  const dict = dictionaries[language].projects;
 
   useEffect(() => {
     setMounted(true);
@@ -407,7 +413,7 @@ function ProjectModal({
                   marginBottom: "0.75rem",
                 }}
               >
-                Tentang Projek
+                {dict.aboutLabel}
               </h3>
               <p
                 style={{
@@ -436,7 +442,7 @@ function ProjectModal({
                       marginBottom: "0.625rem",
                     }}
                   >
-                    Teknologi
+                    {dict.techLabel}
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
                     {project.techStack.map((tech, i) => (
@@ -471,7 +477,7 @@ function ProjectModal({
                       marginBottom: "0.625rem",
                     }}
                   >
-                    Tautan
+                    {dict.linkLabel}
                   </h3>
                   <a
                     href={project.link}
@@ -494,7 +500,7 @@ function ProjectModal({
                       justifyContent: "center",
                     }}
                   >
-                    Kunjungi Projek
+                    {dict.viewProject}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"

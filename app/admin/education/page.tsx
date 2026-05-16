@@ -7,6 +7,7 @@ import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { AdminModal } from "../components/AdminModal";
 import { showToast } from "../components/AdminToast";
+import { AITranslateButton } from "../components/AITranslateButton";
 import { SortableItem } from "../components/SortableItem";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import {
@@ -42,10 +43,14 @@ export default function EducationPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [institution, setInstitution] = useState("");
+  const [institution_en, setInstitutionEn] = useState("");
   const [degree, setDegree] = useState("");
+  const [degree_en, setDegreeEn] = useState("");
   const [period, setPeriod] = useState("");
+  const [period_en, setPeriodEn] = useState("");
   const [score, setScore] = useState("");
   const [note, setNote] = useState("");
+  const [note_en, setNoteEn] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Education | null>(null);
 
   useEffect(() => { fetchData(); }, []);
@@ -91,10 +96,10 @@ export default function EducationPage() {
     }
   };
 
-  const resetForm = () => { setIsEditing(false); setEditId(null); setInstitution(""); setDegree(""); setPeriod(""); setScore(""); setNote(""); };
+  const resetForm = () => { setIsEditing(false); setEditId(null); setInstitution(""); setInstitutionEn(""); setDegree(""); setDegreeEn(""); setPeriod(""); setPeriodEn(""); setScore(""); setNote(""); setNoteEn(""); };
 
   const startEdit = (item: Education) => {
-    setIsEditing(true); setEditId(item.id); setInstitution(item.institution); setDegree(item.degree); setPeriod(item.period); setScore(item.score || ""); setNote(item.note || "");
+    setIsEditing(true); setEditId(item.id); setInstitution(item.institution || ""); setInstitutionEn(item.institution_en || ""); setDegree(item.degree || ""); setDegreeEn(item.degree_en || ""); setPeriod(item.period || ""); setPeriodEn(item.period_en || ""); setScore(item.score || ""); setNote(item.note || ""); setNoteEn(item.note_en || "");
   };
 
   const handleSave = async () => {
@@ -103,7 +108,7 @@ export default function EducationPage() {
     try {
       const id = editId || `edu_${Date.now()}`;
       await setDoc(doc(db, "education", id), {
-        institution: institution.trim(), degree: degree.trim(), period: period.trim(), score: score.trim(), note: note.trim(),
+        institution: institution.trim(), institution_en: institution_en.trim(), degree: degree.trim(), degree_en: degree_en.trim(), period: period.trim(), period_en: period_en.trim(), score: score.trim(), note: note.trim(), note_en: note_en.trim(),
         order: editId ? (items.find((e) => e.id === editId)?.order || 0) : items.length,
       });
       showToast("success", editId ? "Berhasil diupdate!" : "Berhasil ditambahkan!");
@@ -141,11 +146,71 @@ export default function EducationPage() {
       {isEditing && (
         <AdminCard title={editId ? "Edit Pendidikan" : "Tambah Pendidikan"}>
           <div className="space-y-5">
-            <AdminFormField label="Institusi" value={institution} onChange={setInstitution} placeholder="Universitas Example" required />
-            <AdminFormField label="Gelar / Jurusan" value={degree} onChange={setDegree} placeholder="S1 Teknik Informatika" required />
-            <AdminFormField label="Periode" value={period} onChange={setPeriod} placeholder="2020 - Sekarang" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Institusi (ID)" value={institution} onChange={setInstitution} placeholder="Universitas Example" required />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Institusi (EN)</label>
+                  <AITranslateButton text={institution} onTranslated={setInstitutionEn} />
+                </div>
+                <input
+                  type="text"
+                  value={institution_en}
+                  onChange={(e) => setInstitutionEn(e.target.value)}
+                  placeholder="Example University"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Gelar / Jurusan (ID)" value={degree} onChange={setDegree} placeholder="S1 Teknik Informatika" required />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Gelar / Jurusan (EN)</label>
+                  <AITranslateButton text={degree} onTranslated={setDegreeEn} />
+                </div>
+                <input
+                  type="text"
+                  value={degree_en}
+                  onChange={(e) => setDegreeEn(e.target.value)}
+                  placeholder="Bachelor of Informatics"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Periode (ID)" value={period} onChange={setPeriod} placeholder="2020 - Sekarang" />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Periode (EN)</label>
+                  <AITranslateButton text={period} onTranslated={setPeriodEn} />
+                </div>
+                <input
+                  type="text"
+                  value={period_en}
+                  onChange={(e) => setPeriodEn(e.target.value)}
+                  placeholder="2020 - Present"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
             <AdminFormField label="IPK / Nilai Akhir" value={score} onChange={setScore} placeholder="IPK: 3.8/4.0 atau Nilai Akhir: 90/100" />
-            <AdminFormField label="Catatan" value={note} onChange={setNote} placeholder="Beasiswa, prestasi, dll (opsional)" hint="Akan ditampilkan sebagai badge di homepage" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Catatan (ID)" value={note} onChange={setNote} placeholder="Beasiswa, prestasi, dll (opsional)" hint="Akan ditampilkan sebagai badge di homepage" />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Catatan (EN)</label>
+                  <AITranslateButton text={note} onTranslated={setNoteEn} />
+                </div>
+                <input
+                  type="text"
+                  value={note_en}
+                  onChange={(e) => setNoteEn(e.target.value)}
+                  placeholder="Scholarship, achievements, etc (optional)"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
             
             <div className="flex gap-2 pt-2">
               <button

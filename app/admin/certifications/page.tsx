@@ -7,8 +7,9 @@ import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { AdminModal } from "../components/AdminModal";
 import { showToast } from "../components/AdminToast";
+import { AITranslateButton } from "../components/AITranslateButton";
 import { SortableItem } from "../components/SortableItem";
-import { PlusIcon, PencilIcon, TrashIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, PencilIcon, TrashIcon, ArrowTopRightOnSquareIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import {
   DndContext,
   closestCenter,
@@ -42,6 +43,7 @@ export default function CertificationsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
+  const [title_en, setTitleEn] = useState("");
   const [issuer, setIssuer] = useState("");
   const [date, setDate] = useState("");
   const [validUntil, setValidUntil] = useState("");
@@ -91,10 +93,10 @@ export default function CertificationsPage() {
     }
   };
 
-  const resetForm = () => { setIsEditing(false); setEditId(null); setTitle(""); setIssuer(""); setDate(""); setValidUntil(""); setVerifyUrl(""); };
+  const resetForm = () => { setIsEditing(false); setEditId(null); setTitle(""); setTitleEn(""); setIssuer(""); setDate(""); setValidUntil(""); setVerifyUrl(""); };
 
   const startEdit = (item: Certification) => {
-    setIsEditing(true); setEditId(item.id); setTitle(item.title); setIssuer(item.issuer); setDate(item.date); setValidUntil(item.validUntil || ""); setVerifyUrl(item.verifyUrl || "");
+    setIsEditing(true); setEditId(item.id); setTitle(item.title || ""); setTitleEn(item.title_en || ""); setIssuer(item.issuer || ""); setDate(item.date || ""); setValidUntil(item.validUntil || ""); setVerifyUrl(item.verifyUrl || "");
   };
 
   const handleSave = async () => {
@@ -103,7 +105,7 @@ export default function CertificationsPage() {
     try {
       const id = editId || `cert_${Date.now()}`;
       await setDoc(doc(db, "certifications", id), {
-        title: title.trim(), issuer: issuer.trim(), date: date.trim(), validUntil: validUntil.trim(), verifyUrl: verifyUrl.trim(),
+        title: title.trim(), title_en: title_en.trim(), issuer: issuer.trim(), date: date.trim(), validUntil: validUntil.trim(), verifyUrl: verifyUrl.trim(),
         order: editId ? (items.find((e) => e.id === editId)?.order || 0) : items.length,
       });
       showToast("success", editId ? "Berhasil diupdate!" : "Berhasil ditambahkan!");
@@ -141,7 +143,22 @@ export default function CertificationsPage() {
       {isEditing && (
         <AdminCard title={editId ? "Edit Sertifikasi" : "Tambah Sertifikasi"}>
           <div className="space-y-5">
-            <AdminFormField label="Judul Sertifikasi" value={title} onChange={setTitle} placeholder="AWS Certified Solutions Architect" required />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Judul Sertifikasi (ID)" value={title} onChange={setTitle} placeholder="AWS Certified Solutions Architect" required />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Judul Sertifikasi (EN)</label>
+                  <AITranslateButton text={title} onTranslated={setTitleEn} />
+                </div>
+                <input
+                  type="text"
+                  value={title_en}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                  placeholder="AWS Certified Solutions Architect (English)"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
             <AdminFormField label="Penerbit" value={issuer} onChange={setIssuer} placeholder="Amazon Web Services" required />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <AdminFormField label="Tanggal Terbit" value={date} onChange={setDate} placeholder="Des 2024" />

@@ -7,16 +7,19 @@ import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { AdminModal } from "../components/AdminModal";
 import { showToast } from "../components/AdminToast";
+import { AITranslateButton } from "../components/AITranslateButton";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 export interface ProjectSubCategory {
   id: string;
   name: string;
+  name_en: string;
 }
 
 export interface ProjectCategory {
   id: string;
   name: string;
+  name_en: string;
   order: number;
   subCategories?: ProjectSubCategory[];
 }
@@ -30,6 +33,7 @@ export default function CategoriesPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [categoryName, setCategoryName] = useState("");
+  const [categoryName_en, setCategoryNameEn] = useState("");
   const [subCategories, setSubCategories] = useState<ProjectSubCategory[]>([]);
 
   // Delete
@@ -45,12 +49,13 @@ export default function CategoriesPage() {
     finally { setLoading(false); }
   };
 
-  const resetForm = () => { setIsEditing(false); setEditId(null); setCategoryName(""); setSubCategories([]); };
+  const resetForm = () => { setIsEditing(false); setEditId(null); setCategoryName(""); setCategoryNameEn(""); setSubCategories([]); };
 
   const startEdit = (cat: ProjectCategory) => {
     setIsEditing(true);
     setEditId(cat.id);
-    setCategoryName(cat.name);
+    setCategoryName(cat.name || "");
+    setCategoryNameEn(cat.name_en || "");
     setSubCategories(cat.subCategories || []);
   };
 
@@ -60,11 +65,12 @@ export default function CategoriesPage() {
     try {
       const id = editId || `cat_${Date.now()}`;
       const filteredSubs = subCategories
-        .map(s => ({ id: s.id, name: s.name.trim() }))
+        .map(s => ({ id: s.id, name: s.name.trim(), name_en: (s.name_en || "").trim() }))
         .filter(s => s.name !== "");
 
       await setDoc(doc(db, "categories", id), {
         name: categoryName.trim(),
+        name_en: categoryName_en.trim(),
         subCategories: filteredSubs,
         order: editId ? (categories.find((c) => c.id === editId)?.order || 0) : categories.length,
       });
@@ -86,7 +92,13 @@ export default function CategoriesPage() {
     setSubCategories(newSubs);
   };
 
-  const addSub = () => setSubCategories([...subCategories, { id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, name: "" }]);
+  const updateSubEn = (index: number, value: string) => {
+    const newSubs = [...subCategories];
+    newSubs[index].name_en = value;
+    setSubCategories(newSubs);
+  };
+
+  const addSub = () => setSubCategories([...subCategories, { id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, name: "", name_en: "" }]);
   const removeSub = (index: number) => setSubCategories(subCategories.filter((_, i) => i !== index));
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent" /></div>;
@@ -112,20 +124,47 @@ export default function CategoriesPage() {
       {isEditing && (
         <AdminCard title={editId ? "Edit Kategori" : "Tambah Kategori Baru"}>
           <div className="space-y-5">
-            <AdminFormField label="Nama Kategori Utama" value={categoryName} onChange={setCategoryName} placeholder="Misal: Web, Mobile, UI/UX" required />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Nama Kategori Utama (ID)" value={categoryName} onChange={setCategoryName} placeholder="Misal: Web, Mobile, UI/UX" required />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Nama Kategori Utama (EN)</label>
+                  <AITranslateButton text={categoryName} onTranslated={setCategoryNameEn} />
+                </div>
+                <input
+                  type="text"
+                  value={categoryName_en}
+                  onChange={(e) => setCategoryNameEn(e.target.value)}
+                  placeholder="e.g. Web, Mobile, UI/UX"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
 
             <div className="space-y-3">
               <label className="block text-sm font-semibold text-foreground">Sub-Kategori (Opsional)</label>
               <div className="space-y-2">
                 {subCategories.map((sub, i) => (
                   <div key={sub.id} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={sub.name}
-                      onChange={(e) => updateSub(i, e.target.value)}
-                      placeholder={`Sub-Kategori ${i + 1} (Misal: E-Commerce)`}
-                      className="flex-1 p-2.5 rounded-xl bg-background/50 border border-border/50 focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none text-sm transition-all"
-                    />
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={sub.name}
+                        onChange={(e) => updateSub(i, e.target.value)}
+                        placeholder={`Sub-Kategori ID ${i + 1}`}
+                        className="p-2.5 rounded-xl bg-background/50 border border-border/50 focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none text-sm transition-all"
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={sub.name_en || ""}
+                          onChange={(e) => updateSubEn(i, e.target.value)}
+                          placeholder={`Sub-Kategori EN ${i + 1}`}
+                          className="flex-1 p-2.5 rounded-xl bg-background/50 border border-border/50 focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none text-sm transition-all"
+                        />
+                        <AITranslateButton text={sub.name} onTranslated={(translated) => updateSubEn(i, translated)} label="AI" />
+                      </div>
+                    </div>
                     <button 
                       type="button" 
                       onClick={() => removeSub(i)} 

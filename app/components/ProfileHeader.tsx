@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { dictionaries } from "@/lib/i18n/dictionaries";
 
 interface CvEntry {
   url: string;
@@ -230,6 +232,8 @@ function CvDownloadButton({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { language } = useLanguage();
+  const dict = dictionaries[language];
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -294,7 +298,7 @@ function CvDownloadButton({
             d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
           />
         </svg>
-        download cv
+        {dict.hero.downloadCv.toLowerCase()}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

@@ -7,6 +7,7 @@ import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { ImageCropper } from "../components/ImageCropper";
 import { showToast } from "../components/AdminToast";
+import { AITranslateButton } from "../components/AITranslateButton";
 
 const PLATFORM_OPTIONS = [
   { value: "whatsapp", label: "WhatsApp", icon: "💬", prefix: "https://wa.me/" },
@@ -31,6 +32,7 @@ interface SocialLink {
 export default function ProfilePage() {
   const [name, setName] = useState("");
   const [tagline, setTagline] = useState("");
+  const [tagline_en, setTaglineEn] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarPublicId, setAvatarPublicId] = useState("");
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
@@ -50,6 +52,7 @@ export default function ProfilePage() {
           const data = profileDoc.data();
           setName(data.name || "");
           setTagline(data.tagline || "");
+          setTaglineEn(data.tagline_en || "");
           setAvatarUrl(data.avatarUrl || "");
           setAvatarPublicId(data.avatarPublicId || "");
           setSocialLinks(data.socialLinks || []);
@@ -69,6 +72,7 @@ export default function ProfilePage() {
       await setDoc(doc(db, "portfolio", "profile"), {
         name,
         tagline,
+        tagline_en,
         avatarUrl,
         avatarPublicId,
         socialLinks,
@@ -144,13 +148,31 @@ export default function ProfilePage() {
             placeholder="Muhammad Farhan"
             required
           />
-          <AdminFormField
-            label="Tagline"
-            value={tagline}
-            onChange={setTagline}
-            placeholder="🎓 Teknik Informatika Student | 💻 Freelance Fullstack Developer 🌟"
-            hint="Tampil di bawah nama di homepage"
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <AdminFormField
+              label="Tagline (ID)"
+              type="textarea"
+              value={tagline}
+              onChange={setTagline}
+              rows={3}
+              placeholder="Fullstack Developer & UI/UX Designer..."
+              maxLength={200}
+            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-foreground">Tagline (EN)</label>
+                <AITranslateButton text={tagline} onTranslated={setTaglineEn} />
+              </div>
+              <textarea
+                value={tagline_en}
+                onChange={(e) => setTaglineEn(e.target.value)}
+                rows={3}
+                placeholder="Fullstack Developer & UI/UX Designer (English)..."
+                maxLength={200}
+                className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+              />
+            </div>
+          </div>
           <ImageCropper
             currentImageUrl={avatarUrl}
             onCropComplete={(url, publicId) => {

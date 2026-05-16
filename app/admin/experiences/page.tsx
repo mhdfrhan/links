@@ -7,8 +7,9 @@ import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { AdminModal } from "../components/AdminModal";
 import { showToast } from "../components/AdminToast";
+import { AITranslateButton } from "../components/AITranslateButton";
 import { SortableItem } from "../components/SortableItem";
-import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, PencilIcon, TrashIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import {
   DndContext,
   closestCenter,
@@ -56,9 +57,13 @@ export default function ExperiencesPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
+  const [title_en, setTitleEn] = useState("");
   const [company, setCompany] = useState("");
+  const [company_en, setCompanyEn] = useState("");
   const [period, setPeriod] = useState("");
+  const [period_en, setPeriodEn] = useState("");
   const [points, setPoints] = useState<string[]>([""]);
+  const [points_en, setPointsEn] = useState<string[]>([""]);
 
   // Delete
   const [deleteTarget, setDeleteTarget] = useState<Experience | null>(null);
@@ -129,18 +134,26 @@ export default function ExperiencesPage() {
     setIsEditing(false);
     setEditId(null);
     setTitle("");
+    setTitleEn("");
     setCompany("");
+    setCompanyEn("");
     setPeriod("");
+    setPeriodEn("");
     setPoints([""]);
+    setPointsEn([""]);
   };
 
   const startEdit = (exp: Experience) => {
     setIsEditing(true);
     setEditId(exp.id);
-    setTitle(exp.title);
-    setCompany(exp.company);
-    setPeriod(exp.period);
+    setTitle(exp.title || "");
+    setTitleEn(exp.title_en || "");
+    setCompany(exp.company || "");
+    setCompanyEn(exp.company_en || "");
+    setPeriod(exp.period || "");
+    setPeriodEn(exp.period_en || "");
     setPoints(exp.points?.length > 0 ? exp.points : [""]);
+    setPointsEn(exp.points_en?.length > 0 ? exp.points_en : [""]);
   };
 
   const handleSave = async () => {
@@ -153,11 +166,16 @@ export default function ExperiencesPage() {
     try {
       const id = editId || `exp_${Date.now()}`;
       const filteredPoints = points.filter((p) => p.trim());
+      const filteredPointsEn = points_en.filter((p) => p.trim());
       await setDoc(doc(db, activeTab, id), {
         title: title.trim(),
+        title_en: title_en.trim(),
         company: company.trim(),
+        company_en: company_en.trim(),
         period: period.trim(),
+        period_en: period_en.trim(),
         points: filteredPoints,
+        points_en: filteredPointsEn,
         order: editId ? (items[activeTab].find((e) => e.id === editId)?.order || 0) : items[activeTab].length,
       });
       showToast("success", editId ? "Berhasil diupdate!" : "Berhasil ditambahkan!");
@@ -190,8 +208,21 @@ export default function ExperiencesPage() {
     setPoints(newPoints);
   };
 
-  const addPoint = () => setPoints([...points, ""]);
-  const removePoint = (index: number) => setPoints(points.filter((_, i) => i !== index));
+  const updatePointEn = (index: number, value: string) => {
+    const newPoints = [...points_en];
+    newPoints[index] = value;
+    setPointsEn(newPoints);
+  };
+
+  const addPoint = () => {
+    setPoints([...points, ""]);
+    setPointsEn([...points_en, ""]);
+  };
+
+  const removePoint = (index: number) => {
+    setPoints(points.filter((_, i) => i !== index));
+    setPointsEn(points_en.filter((_, i) => i !== index));
+  };
 
   const currentItems = items[activeTab];
 
@@ -243,27 +274,86 @@ export default function ExperiencesPage() {
       {isEditing && (
         <AdminCard title={editId ? "Edit Pengalaman" : "Tambah Pengalaman Baru"}>
           <div className="space-y-5">
-            <AdminFormField label="Posisi / Jabatan" value={title} onChange={setTitle} placeholder="Fullstack Developer" required />
-            <AdminFormField label="Perusahaan / Organisasi" value={company} onChange={setCompany} placeholder="PT. Example" required />
-            <AdminFormField label="Periode" value={period} onChange={setPeriod} placeholder="Jan 2024 - Sekarang" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Posisi / Jabatan (ID)" value={title} onChange={setTitle} placeholder="Fullstack Developer" required />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Posisi / Jabatan (EN)</label>
+                  <AITranslateButton text={title} onTranslated={setTitleEn} />
+                </div>
+                <input
+                  type="text"
+                  value={title_en}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                  placeholder="Fullstack Developer (English)"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Perusahaan / Organisasi (ID)" value={company} onChange={setCompany} placeholder="PT. Example" required />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Perusahaan / Organisasi (EN)</label>
+                  <AITranslateButton text={company} onTranslated={setCompanyEn} />
+                </div>
+                <input
+                  type="text"
+                  value={company_en}
+                  onChange={(e) => setCompanyEn(e.target.value)}
+                  placeholder="Example Corp"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminFormField label="Periode (ID)" value={period} onChange={setPeriod} placeholder="Jan 2024 - Sekarang" />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-foreground">Periode (EN)</label>
+                  <AITranslateButton text={period} onTranslated={setPeriodEn} />
+                </div>
+                <input
+                  type="text"
+                  value={period_en}
+                  onChange={(e) => setPeriodEn(e.target.value)}
+                  placeholder="Jan 2024 - Present"
+                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                />
+              </div>
+            </div>
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-foreground">Deskripsi / Poin-poin</label>
               {points.map((point, i) => (
                 <div key={i} className="flex gap-2">
                   <span className="text-muted-foreground text-sm mt-3 w-6">{i + 1}.</span>
-                  <input
-                    type="text"
-                    value={point}
-                    onChange={(e) => updatePoint(i, e.target.value)}
-                    placeholder="Tulis deskripsi pekerjaan..."
-                    className="flex-1 p-3 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
-                  />
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <input
+                        type="text"
+                        value={point}
+                        onChange={(e) => updatePoint(i, e.target.value)}
+                        placeholder="Tulis deskripsi pekerjaan (ID)..."
+                        className="flex-1 p-3 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={points_en[i] || ""}
+                        onChange={(e) => updatePointEn(i, e.target.value)}
+                        placeholder="Write job description (EN)..."
+                        className="flex-1 p-3 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                      />
+                      <AITranslateButton text={point} onTranslated={(translated) => updatePointEn(i, translated)} label="AI" />
+                    </div>
+                  </div>
                   {points.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removePoint(i)}
-                      className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                      className="p-2 h-fit mt-3 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                     >
                       <TrashIcon className="w-4 h-4" />
                     </button>

@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { dictionaries } from "@/lib/i18n/dictionaries";
+
 interface FooterProps {
   name?: string;
   email?: string;
@@ -12,6 +15,8 @@ interface FooterProps {
  * "Let's connect", email monospace klikabel, copyright
  */
 export function Footer({ name = "Muhammad Farhan", email, github, linkedin }: FooterProps) {
+  const { language } = useLanguage();
+  const dict = dictionaries[language].footer;
   const currentYear = new Date().getFullYear();
 
   return (
@@ -31,7 +36,7 @@ export function Footer({ name = "Muhammad Farhan", email, github, linkedin }: Fo
             marginBottom: "0.5rem",
           }}
         >
-          06. get in touch
+          {dict.sectionNum}
         </p>
         <h2
           style={{
@@ -42,7 +47,7 @@ export function Footer({ name = "Muhammad Farhan", email, github, linkedin }: Fo
             fontStyle: "normal",
           }}
         >
-          Let&apos;s connect
+          {dict.title}
         </h2>
         <p
           style={{
@@ -54,7 +59,7 @@ export function Footer({ name = "Muhammad Farhan", email, github, linkedin }: Fo
             fontStyle: "normal",
           }}
         >
-          Terbuka untuk peluang kerja, kolaborasi project, atau sekedar ngobrol soal web development.
+          {dict.subtitle}
         </p>
 
         {/* Email */}

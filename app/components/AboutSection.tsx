@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { dictionaries } from "@/lib/i18n/dictionaries";
+
 interface AboutSectionProps {
   text: string;
 }
@@ -10,6 +13,9 @@ interface AboutSectionProps {
  * Tidak ada animasi GSAP blur — sudah cukup clean
  */
 export function AboutSection({ text }: AboutSectionProps) {
+  const { language } = useLanguage();
+  const dict = dictionaries[language].about;
+
   return (
     <section className="w-full">
       {/* Section label */}
@@ -33,7 +39,7 @@ export function AboutSection({ text }: AboutSectionProps) {
             fontStyle: "normal",
           }}
         >
-          Tentang Saya
+          {dict.title}
         </h2>
         <div
           className="flex-1"

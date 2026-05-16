@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { dictionaries } from "@/lib/i18n/dictionaries";
+
 interface Skill {
   name: string;
   icon?: string;
@@ -20,6 +23,9 @@ interface SkillsSectionProps {
  * Tidak ada progress bar, tidak ada persentase
  */
 export function SkillsSection({ categories }: SkillsSectionProps) {
+  const { language } = useLanguage();
+  const dict = dictionaries[language].skills;
+
   return (
     <section className="w-full">
       {/* Section label */}
@@ -43,7 +49,7 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
             fontStyle: "normal",
           }}
         >
-          Kemampuan
+          {dict.title}
         </h2>
         <div
           className="flex-1"

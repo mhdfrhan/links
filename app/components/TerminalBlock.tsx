@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { dictionaries } from "@/lib/i18n/dictionaries";
 
 interface TerminalBlockProps {
   name?: string;
@@ -23,6 +25,8 @@ export function TerminalBlock({
   status = "Open to opportunities",
 }: TerminalBlockProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const { language } = useLanguage();
+  const dict = dictionaries[language].terminal;
 
   useEffect(() => {
     // Small delay agar fade-in terasa natural
@@ -138,7 +142,7 @@ export function TerminalBlock({
           </span>
           {", "}
           <span style={{ color: "var(--accent)" }}>
-            &quot;location&quot;
+            &quot;{dict.locationLabel.toLowerCase()}&quot;
           </span>
           {": "}
           <span style={{ color: "var(--green)" }}>

@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { dictionaries } from "@/lib/i18n/dictionaries";
+
 interface Certification {
   title: string;
   issuer: string;
@@ -15,6 +18,9 @@ interface CertificationsSectionProps {
 export function CertificationsSection({
   certifications,
 }: CertificationsSectionProps) {
+  const { language } = useLanguage();
+  const dict = dictionaries[language].certifications;
+
   return (
     <section className="w-full">
       {/* Section label */}
@@ -27,7 +33,7 @@ export function CertificationsSection({
             letterSpacing: "0.04em",
           }}
         >
-          08.
+          {dict.sectionNum.split(" ")[0]}
         </span>
         <h2
           style={{
@@ -38,7 +44,7 @@ export function CertificationsSection({
             fontStyle: "normal",
           }}
         >
-          Sertifikasi &amp; Pelatihan
+          {dict.title}
         </h2>
         <div
           className="flex-1"

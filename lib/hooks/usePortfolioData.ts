@@ -26,6 +26,7 @@ export interface CvEntry {
 export function usePortfolioData() {
   const [data, setData] = useState({
     about: staticAboutText,
+    aboutObj: { text: staticAboutText, text_en: "" },
     projects: dummyProjects,
     experiences: staticExperiences,
     organizationExperience: staticOrganizationExperience,
@@ -77,6 +78,7 @@ export function usePortfolioData() {
         if (!isMounted) return;
 
         const about = aboutDoc.exists() && aboutDoc.data().text ? aboutDoc.data().text : staticAboutText;
+        const aboutObj = aboutDoc.exists() ? aboutDoc.data() : { text: staticAboutText, text_en: "" };
         const projects = projectsSnap.empty ? dummyProjects : projectsSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
         const experiences = expSnap.empty ? staticExperiences : expSnap.docs.map(d => d.data() as any);
         const organizationExperience = orgSnap.empty ? staticOrganizationExperience : orgSnap.docs.map(d => d.data() as any);
@@ -91,6 +93,7 @@ export function usePortfolioData() {
 
         setData({
           about,
+          aboutObj,
           projects,
           experiences,
           organizationExperience,

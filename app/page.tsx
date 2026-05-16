@@ -12,7 +12,10 @@ import { AwardsSection } from "./components/AwardsSection";
 import { CertificationsSection } from "./components/CertificationsSection";
 import { Footer } from "./components/Footer";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { LanguageToggle } from "./components/LanguageToggle";
 import { usePortfolioData } from "../lib/hooks/usePortfolioData";
+import { useLanguage } from "../lib/contexts/LanguageContext";
+import { dictionaries } from "../lib/i18n/dictionaries";
 
 /**
  * Home — Halaman utama portfolio
@@ -25,8 +28,16 @@ import { usePortfolioData } from "../lib/hooks/usePortfolioData";
  */
 export default function Home() {
   const { data, loading } = usePortfolioData();
+  const { language } = useLanguage();
+  const dict = dictionaries[language];
   const navRef = useRef<HTMLElement>(null);
   const [navScrolled, setNavScrolled] = useState(false);
+
+  // Helper untuk mengambil field bahasa
+  const l = (item: any, field: string, fallback: string = "") => {
+    if (!item) return fallback;
+    return language === "en" && item[`${field}_en`] ? item[`${field}_en`] : (item[field] || fallback);
+  };
 
   // Nav scroll effect: transparent → solid
   useEffect(() => {
@@ -149,10 +160,10 @@ export default function Home() {
             <div className="flex items-center gap-4 sm:gap-6 shrink-0">
               {(
                 [
-                  ["about", "#about"],
-                  ["projects", "#projects"],
-                  ["skills", "#skills"],
-                  ["contact", "#contact"],
+                  [dict.nav.about, "#about"],
+                  [dict.nav.projects, "#projects"],
+                  [dict.nav.skills, "#skills"],
+                  [dict.nav.contact, "#contact"],
                 ] as const
               ).map(([label, href]) => (
                 <NavLink key={label} href={href}>
@@ -161,8 +172,9 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Theme Toggle */}
-            <div className="shrink-0">
+            {/* Language & Theme Toggles */}
+            <div className="flex items-center gap-2 shrink-0">
+              <LanguageToggle />
               <ThemeToggle />
             </div>
           </div>
@@ -183,9 +195,9 @@ export default function Home() {
         <section id="about" style={{ paddingBottom: "5rem" }}>
           <ProfileHeader
             name={data.profile?.name || "Muhammad Farhan"}
-            tagline={data.profile?.tagline || "Fullstack Web Developer"}
+            tagline={l(data.profile, "tagline", "Fullstack Web Developer")}
             avatarUrl={data.profile?.avatarUrl || "/img/foto.jpg"}
-            about={data.about}
+            about={l(data.aboutObj, "text")}
             cvData={data.cvData}
             email={data.profile?.email}
             github={data.profile?.github}
@@ -199,10 +211,10 @@ export default function Home() {
         <section style={{ paddingBottom: "5rem" }}>
           <TerminalBlock
             name={data.profile?.name || "Muhammad Farhan"}
-            role="Web Developer"
-            about={data.about}
+            role={l(data.profile, "tagline", "Web Developer").split("|")[0].trim()}
+            about={l(data.aboutObj, "text")}
             skills={data.skills}
-            status="Open to opportunities"
+            status={language === "id" ? "Terbuka untuk peluang baru" : "Open to opportunities"}
           />
         </section>
 
@@ -210,7 +222,7 @@ export default function Home() {
 
         {/* ===== ABOUT SECTION ===== */}
         <section style={{ paddingBottom: "5rem" }}>
-          <AboutSection text={data.about || "Belum ada teks..."} />
+          <AboutSection text={l(data.aboutObj, "text", "Belum ada teks...")} />
         </section>
 
         <SectionDivider />
@@ -218,9 +230,17 @@ export default function Home() {
         {/* ===== PROJECTS SECTION ===== */}
         <section id="projects" style={{ paddingBottom: "5rem" }}>
           <PortfolioSection
-            projects={data.projects.slice(0, 4)}
+            projects={data.projects.slice(0, 4).map((p: any) => ({
+              ...p,
+              title: l(p, "title"),
+              description: l(p, "description"),
+              fullDescription: l(p, "fullDescription"),
+            }))}
             showAllButton={true}
-            categories={data.categories}
+            categories={data.categories.map((c: any) => ({
+              ...c,
+              name: l(c, "name"),
+            }))}
           />
         </section>
 
@@ -236,9 +256,15 @@ export default function Home() {
         {/* ===== EXPERIENCE SECTION ===== */}
         <section style={{ paddingBottom: "5rem" }}>
           <ExperienceSection
-            title="Pengalaman Kerja"
+            title={dict.experience.workTitle}
             sectionNumber="05."
-            items={data.experiences}
+            items={data.experiences.map((exp: any) => ({
+              ...exp,
+              title: l(exp, "title"),
+              company: l(exp, "company"),
+              period: l(exp, "period"),
+              points: language === "en" && exp.points_en ? exp.points_en : exp.points,
+            }))}
           />
         </section>
 
@@ -248,9 +274,15 @@ export default function Home() {
             <SectionDivider />
             <section style={{ paddingBottom: "5rem" }}>
               <ExperienceSection
-                title="Pengalaman Organisasi"
+                title={dict.experience.orgTitle}
                 sectionNumber="05b."
-                items={data.organizationExperience}
+                items={data.organizationExperience.map((exp: any) => ({
+                  ...exp,
+                  title: l(exp, "title"),
+                  company: l(exp, "company"),
+                  period: l(exp, "period"),
+                  points: language === "en" && exp.points_en ? exp.points_en : exp.points,
+                }))}
               />
             </section>
           </>
@@ -262,9 +294,15 @@ export default function Home() {
             <SectionDivider />
             <section style={{ paddingBottom: "5rem" }}>
               <ExperienceSection
-                title="Pengalaman Kepanitiaan"
+                title={dict.experience.comTitle}
                 sectionNumber="05c."
-                items={data.committeeExperience}
+                items={data.committeeExperience.map((exp: any) => ({
+                  ...exp,
+                  title: l(exp, "title"),
+                  company: l(exp, "company"),
+                  period: l(exp, "period"),
+                  points: language === "en" && exp.points_en ? exp.points_en : exp.points,
+                }))}
               />
             </section>
           </>
@@ -272,23 +310,36 @@ export default function Home() {
 
         <SectionDivider />
 
-        {/* ===== EDUCATION SECTION ===== */}
         <section style={{ paddingBottom: "5rem" }}>
-          <EducationSection items={data.education} />
+          <EducationSection items={data.education.map((edu: any) => ({
+            ...edu,
+            institution: l(edu, "institution"),
+            degree: l(edu, "degree"),
+            period: l(edu, "period"),
+            note: l(edu, "note"),
+          }))} />
         </section>
 
         <SectionDivider />
 
-        {/* ===== AWARDS SECTION ===== */}
         <section style={{ paddingBottom: "5rem" }}>
-          <AwardsSection awards={data.awards} />
+          <AwardsSection awards={data.awards.map((aw: any) => ({
+            ...aw,
+            title: l(aw, "title"),
+            issuer: l(aw, "issuer"),
+            date: l(aw, "date"),
+          }))} />
         </section>
 
         <SectionDivider />
 
-        {/* ===== CERTIFICATIONS SECTION ===== */}
         <section style={{ paddingBottom: "5rem" }}>
-          <CertificationsSection certifications={data.certifications} />
+          <CertificationsSection certifications={data.certifications.map((cert: any) => ({
+            ...cert,
+            title: l(cert, "title"),
+            issuer: l(cert, "issuer"),
+            date: l(cert, "date"),
+          }))} />
         </section>
 
         {/* ===== FOOTER / CONTACT ===== */}

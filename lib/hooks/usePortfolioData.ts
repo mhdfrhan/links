@@ -77,15 +77,17 @@ export function usePortfolioData() {
 
         if (!isMounted) return;
 
-        const about = aboutDoc.exists() && aboutDoc.data().text ? aboutDoc.data().text : staticAboutText;
-        const aboutObj = aboutDoc.exists() ? aboutDoc.data() : { text: staticAboutText, text_en: "" };
+        const about = aboutDoc.exists() && aboutDoc.data()?.text ? aboutDoc.data()?.text : staticAboutText;
+        const aboutObj = aboutDoc.exists() 
+          ? { text: aboutDoc.data()?.text || "", text_en: aboutDoc.data()?.text_en || "" }
+          : { text: staticAboutText, text_en: "" };
         const projects = projectsSnap.empty ? dummyProjects : projectsSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
-        const experiences = expSnap.empty ? staticExperiences : expSnap.docs.map(d => d.data() as any);
-        const organizationExperience = orgSnap.empty ? staticOrganizationExperience : orgSnap.docs.map(d => d.data() as any);
-        const committeeExperience = comSnap.empty ? staticCommitteeExperience : comSnap.docs.map(d => d.data() as any);
-        const education = eduSnap.empty ? staticEducation : eduSnap.docs.map(d => d.data() as any);
-        const awards = awardsSnap.empty ? staticAwards : awardsSnap.docs.map(d => d.data() as any);
-        const certifications = certSnap.empty ? staticCertifications : certSnap.docs.map(d => d.data() as any);
+        const experiences = expSnap.empty ? staticExperiences : expSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const organizationExperience = orgSnap.empty ? staticOrganizationExperience : orgSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const committeeExperience = comSnap.empty ? staticCommitteeExperience : comSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const education = eduSnap.empty ? staticEducation : eduSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const awards = awardsSnap.empty ? staticAwards : awardsSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const certifications = certSnap.empty ? staticCertifications : certSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
         const skills = skillsSnap.empty ? staticSkills : skillsSnap.docs.map(d => d.data() as any);
         const profile = profileDoc.exists() ? profileDoc.data() : null;
         const categories = categoriesSnap.empty ? [] : categoriesSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));

@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { TerminalBlock } from "./components/TerminalBlock";
 import { AboutSection } from "./components/AboutSection";
@@ -37,13 +40,72 @@ export default function Home() {
   }, [language, dict.metadata.title]);
 
   const navRef = useRef<HTMLElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const [navScrolled, setNavScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Helper untuk mengambil field bahasa
   const l = (item: any, field: string, fallback: string = "") => {
     if (!item) return fallback;
     return language === "en" && item[`${field}_en`] ? item[`${field}_en`] : (item[field] || fallback);
   };
+
+  // Close menu on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 640) setIsMenuOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Close menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuOpen &&
+        navRef.current &&
+        !navRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
+
+  // Animasi Mobile Menu
+  useGSAP(() => {
+    if (!mobileMenuRef.current) return;
+
+    if (isMenuOpen) {
+      gsap.fromTo(
+        mobileMenuRef.current,
+        { opacity: 0, y: -10, scale: 0.95, pointerEvents: "none", display: "none" },
+        { 
+          opacity: 1, 
+          y: 0, 
+          scale: 1, 
+          pointerEvents: "auto", 
+          display: "block",
+          duration: 0.2, 
+          ease: "power2.out" 
+        }
+      );
+    } else {
+      gsap.to(mobileMenuRef.current, {
+        opacity: 0,
+        y: -10,
+        scale: 0.95,
+        pointerEvents: "none",
+        duration: 0.15,
+        ease: "power2.in",
+        onComplete: () => {
+          if (mobileMenuRef.current) mobileMenuRef.current.style.display = "none";
+        }
+      });
+    }
+  }, { dependencies: [isMenuOpen] });
 
   // Nav scroll effect: transparent → solid
   useEffect(() => {
@@ -107,27 +169,26 @@ export default function Home() {
         ref={navRef}
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
-          background: navScrolled
+          background: navScrolled || isMenuOpen
             ? "color-mix(in srgb, var(--bg-primary) 85%, transparent)"
             : "transparent",
-          backdropFilter: navScrolled ? "blur(12px)" : "none",
-          borderBottom: navScrolled
+          backdropFilter: navScrolled || isMenuOpen ? "blur(12px)" : "none",
+          borderBottom: navScrolled || isMenuOpen
             ? "1px solid var(--border)"
             : "1px solid transparent",
         }}
       >
         <div
-          className="flex flex-col sm:flex-row items-center justify-between"
+          className="relative flex items-center justify-between"
           style={{
             maxWidth: "1080px",
             margin: "0 auto",
             padding: "10px 1.5rem",
             minHeight: "56px",
-            height: "auto",
           }}
         >
-          {/* Layer 1: Logo & Theme Toggle (Mobile Only) */}
-          <div className="flex items-center justify-between w-full sm:w-auto">
+          {/* LEFT: Logo */}
+          <div className="flex items-center">
             <span
               style={{
                 fontFamily: "var(--font-jetbrains-mono), monospace",
@@ -138,55 +199,102 @@ export default function Home() {
             >
               ~/mhdfarhan
             </span>
-            <div className="sm:hidden">
-              <ThemeToggle />
-            </div>
           </div>
 
-          {/* Layer 2: Nav links */}
-          <div className="flex items-center gap-4 sm:gap-6 mt-3 sm:mt-0 shrink-0">
-            {/* Status dot (Desktop Only) */}
-            <div className="hidden sm:flex items-center gap-1.5">
-              <span
-                style={{
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  background: "var(--green)",
-                  display: "block",
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.65rem",
-                  color: "var(--text-muted)",
-                  letterSpacing: "0.03em",
-                }}
-              >
-                available
-              </span>
+          {/* RIGHT: Desktop Nav & Mobile Toggles */}
+          <div className="flex items-center gap-2 sm:gap-6">
+            {/* Desktop Nav Links */}
+            <div className="hidden sm:flex items-center gap-6">
+              <div className="flex items-center gap-1.5 mr-2">
+                <span
+                  style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: "var(--green)",
+                    display: "block",
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "0.65rem",
+                    color: "var(--text-muted)",
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  available
+                </span>
+              </div>
+
+              {(
+                [
+                  [dict.nav.about, "#about"],
+                  [dict.nav.projects, "#projects"],
+                  [dict.nav.skills, "#skills"],
+                  [dict.nav.contact, "#contact"],
+                ] as const
+              ).map(([label, href]) => (
+                <NavLink key={label} href={href}>
+                  {label}
+                </NavLink>
+              ))}
+              
+              <div className="h-4 w-[1px] bg-border/50 mx-1" />
+              <LanguageToggle />
             </div>
 
-            {(
-              [
-                [dict.nav.about, "#about"],
-                [dict.nav.projects, "#projects"],
-                [dict.nav.skills, "#skills"],
-                [dict.nav.contact, "#contact"],
-              ] as const
-            ).map(([label, href]) => (
-              <NavLink key={label} href={href}>
-                {label}
-              </NavLink>
-            ))}
+            {/* Common Theme Toggle */}
+            <ThemeToggle />
+
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="flex sm:hidden items-center justify-center w-8 h-8 rounded-full border border-border bg-card hover:bg-muted transition-colors focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? (
+                <XMarkIcon className="w-5 h-5 text-foreground" />
+              ) : (
+                <Bars3Icon className="w-5 h-5 text-foreground" />
+              )}
+            </button>
           </div>
 
-          {/* Layer 3: Language Toggle & Theme Toggle (Desktop Only) */}
-          <div className="flex items-center gap-2 mt-3 sm:mt-0 shrink-0">
-            <LanguageToggle />
-            <div className="hidden sm:block">
-              <ThemeToggle />
+          {/* MOBILE DROPDOWN MENU */}
+          <div
+            ref={mobileMenuRef}
+            className="absolute top-[calc(100%+8px)] right-6 w-[200px] bg-card border border-border rounded-2xl shadow-2xl p-2 z-50 hidden sm:hidden"
+            style={{ backdropFilter: "blur(16px)" }}
+          >
+            <div className="flex flex-col gap-1">
+              {(
+                [
+                  [dict.nav.about, "#about"],
+                  [dict.nav.projects, "#projects"],
+                  [dict.nav.skills, "#skills"],
+                  [dict.nav.contact, "#contact"],
+                ] as const
+              ).map(([label, href]) => (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-2.5 text-sm rounded-xl hover:bg-muted transition-colors text-muted-foreground hover:text-foreground flex items-center justify-between group"
+                >
+                  {label}
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-accent">
+                    →
+                  </span>
+                </a>
+              ))}
+              
+              <div className="h-[1px] bg-border/50 my-1 mx-2" />
+              
+              <div className="px-4 py-2 flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Language</span>
+                <LanguageToggle />
+              </div>
             </div>
           </div>
         </div>

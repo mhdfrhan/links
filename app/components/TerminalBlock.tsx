@@ -45,9 +45,9 @@ export function TerminalBlock({
 
   const skillNames = techSkills
     ? techSkills.skills
-        .slice(0, 8)
-        .map((s) => s.name.toLowerCase().replace(/\s/g, "-") + "/")
-        .join("  ")
+      .slice(0, 6)
+      .map((s) => s.name.toLowerCase().replace(/\s/g, "-") + "/")
+      .join("  ")
     : "react/  nextjs/  tailwind/  laravel/  php/  mysql/";
 
   // Truncate about text untuk JSON format

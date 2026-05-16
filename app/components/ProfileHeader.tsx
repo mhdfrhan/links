@@ -15,6 +15,7 @@ interface ProfileHeaderProps {
   avatarUrl?: string;
   about?: string;
   cvData?: { id?: CvEntry; en?: CvEntry } | null;
+  email?: string;
 }
 
 /**
@@ -29,6 +30,7 @@ export function ProfileHeader({
   avatarUrl = "/img/foto.jpg",
   about = "",
   cvData = null,
+  email,
 }: ProfileHeaderProps) {
   // Gunakan tagline sebagai role — ambil bagian pertama sebelum "|" jika ada
   const role = tagline.includes("|")
@@ -121,7 +123,7 @@ export function ProfileHeader({
               }
             />
             <SocialIcon
-              href="mailto:mhdfarhan04@gmail.com"
+              href={`mailto:${email || "mhdfarhan04@gmail.com"}`}
               label="Email"
               icon={
                 <svg

@@ -187,6 +187,7 @@ export default function Home() {
             avatarUrl={data.profile?.avatarUrl || "/img/foto.jpg"}
             about={data.about}
             cvData={data.cvData}
+            email={data.profile?.email}
           />
         </section>
 
@@ -290,7 +291,10 @@ export default function Home() {
 
         {/* ===== FOOTER / CONTACT ===== */}
         <section id="contact">
-          <Footer name={data.profile?.name || "Muhammad Farhan"} />
+          <Footer
+            name={data.profile?.name || "Muhammad Farhan"}
+            email={data.profile?.email}
+          />
         </section>
       </main>
     </div>

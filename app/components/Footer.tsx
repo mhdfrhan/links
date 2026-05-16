@@ -2,13 +2,14 @@
 
 interface FooterProps {
   name?: string;
+  email?: string;
 }
 
 /**
  * Footer — Contact section + copyright
  * "Let's connect", email monospace klikabel, copyright
  */
-export function Footer({ name = "Muhammad Farhan" }: FooterProps) {
+export function Footer({ name = "Muhammad Farhan", email }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -57,7 +58,7 @@ export function Footer({ name = "Muhammad Farhan" }: FooterProps) {
         {/* Email */}
         <div className="pt-2">
           <a
-            href="mailto:mhdfarhan04@gmail.com"
+            href={`mailto:${email || "mhdfarhan04@gmail.com"}`}
             style={{
               fontFamily: "var(--font-jetbrains-mono), monospace",
               fontSize: "0.875rem",
@@ -82,7 +83,7 @@ export function Footer({ name = "Muhammad Farhan" }: FooterProps) {
               el.style.background = "transparent";
             }}
           >
-            mhdfarhan04@gmail.com
+            {email || "mhdfarhan04@gmail.com"}
           </a>
         </div>
 

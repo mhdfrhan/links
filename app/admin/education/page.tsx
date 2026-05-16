@@ -195,7 +195,7 @@ export default function EducationPage() {
                           </span>
                         )}
                       </div>
-                      <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
+                      <div className="flex gap-1.5 opacity-100 transition-all">
                         <button 
                           onClick={() => startEdit(item)} 
                           className="p-1.5 text-accent bg-accent/5 rounded-lg hover:bg-accent/10 border border-accent/10 transition-colors"

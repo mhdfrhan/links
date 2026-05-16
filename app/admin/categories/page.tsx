@@ -176,7 +176,7 @@ export default function CategoriesPage() {
             <AdminCard key={cat.id} className="group border-border/50">
               <div className="flex items-start justify-between mb-4">
                 <h3 className="font-semibold text-foreground leading-tight">{cat.name}</h3>
-                <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
+                <div className="flex gap-1.5 opacity-100 transition-all">
                   <button 
                     onClick={() => startEdit(cat)} 
                     className="p-1.5 text-accent bg-accent/5 rounded-lg hover:bg-accent/10 border border-accent/10 transition-colors"

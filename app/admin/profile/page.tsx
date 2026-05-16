@@ -183,7 +183,7 @@ export default function ProfilePage() {
                       <p className="text-xs font-semibold text-foreground truncate">{link.label}</p>
                       <p className="text-[10px] text-muted-foreground truncate">{link.url}</p>
                     </div>
-                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-0.5 opacity-100 transition-opacity">
                       <button
                         type="button"
                         onClick={() => moveSocialLink(index, "up")}

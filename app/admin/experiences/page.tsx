@@ -328,7 +328,7 @@ export default function ExperiencesPage() {
                           </ul>
                         )}
                       </div>
-                      <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all flex-shrink-0 ml-4 relative z-20">
+                      <div className="flex gap-1.5 opacity-100 transition-all flex-shrink-0 ml-4 relative z-20">
                         <button 
                           onClick={() => startEdit(exp)} 
                           className="p-1.5 text-accent bg-accent/5 rounded-lg hover:bg-accent/10 border border-accent/10 transition-colors"

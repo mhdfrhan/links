@@ -223,7 +223,7 @@ export default function Home() {
                     letterSpacing: "0.03em",
                   }}
                 >
-                  available
+                  {dict.nav.available}
                 </span>
               </div>
 
@@ -292,7 +292,7 @@ export default function Home() {
               <div className="h-[1px] bg-border/50 my-1 mx-2" />
               
               <div className="px-4 py-2 flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Language</span>
+                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">{dict.misc.languageLabel}</span>
                 <LanguageToggle />
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function Home() {
         <section style={{ paddingBottom: "5rem" }}>
           <ExperienceSection
             title={dict.experience.workTitle}
-            sectionNumber="05."
+            sectionNumber="04."
             items={data.experiences.map((exp: any) => ({
               ...exp,
               title: l(exp, "title"),
@@ -388,7 +388,7 @@ export default function Home() {
             <section style={{ paddingBottom: "5rem" }}>
               <ExperienceSection
                 title={dict.experience.orgTitle}
-                sectionNumber="05b."
+                sectionNumber="04b."
                 items={data.organizationExperience.map((exp: any) => ({
                   ...exp,
                   title: l(exp, "title"),
@@ -408,7 +408,7 @@ export default function Home() {
             <section style={{ paddingBottom: "5rem" }}>
               <ExperienceSection
                 title={dict.experience.comTitle}
-                sectionNumber="05c."
+                sectionNumber="04c."
                 items={data.committeeExperience.map((exp: any) => ({
                   ...exp,
                   title: l(exp, "title"),

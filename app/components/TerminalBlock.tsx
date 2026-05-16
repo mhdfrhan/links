@@ -113,7 +113,7 @@ export function TerminalBlock({
             letterSpacing: "0.02em",
           }}
         >
-          terminal - ~/mhdfarhan
+          {dictionaries[language].terminal.terminalTitle}
         </span>
       </div>
 

@@ -38,7 +38,7 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
             letterSpacing: "0.04em",
           }}
         >
-          04.
+          {dict.sectionNum.split(" ")[0]}
         </span>
         <h2
           style={{

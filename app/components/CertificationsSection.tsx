@@ -115,7 +115,7 @@ export function CertificationsSection({
                         letterSpacing: "0.01em",
                       }}
                     >
-                      · s/d {cert.validUntil}
+                      · {dictionaries[language].misc.until} {cert.validUntil}
                     </span>
                   )}
                 </div>

@@ -28,7 +28,7 @@ export function AboutSection({ text }: AboutSectionProps) {
             letterSpacing: "0.04em",
           }}
         >
-          01.
+          {dict.sectionNum.split(" ")[0]}
         </span>
         <h2
           style={{

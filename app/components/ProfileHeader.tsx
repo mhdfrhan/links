@@ -38,6 +38,9 @@ export function ProfileHeader({
   github,
   linkedin,
 }: ProfileHeaderProps) {
+  const { language } = useLanguage();
+  const dict = dictionaries[language];
+
   // Gunakan tagline sebagai role — ambil bagian pertama sebelum "|" jika ada
   const role = tagline.includes("|")
     ? tagline.split("|")[1]?.trim()
@@ -65,7 +68,7 @@ export function ProfileHeader({
               letterSpacing: "0.04em",
             }}
           >
-            hi, i&apos;m
+            {dict.hero.greeting}
           </p>
 
           {/* Nama — Inter 500, bukan bold */}
@@ -168,7 +171,7 @@ export function ProfileHeader({
                 letterSpacing: "0.03em",
               }}
             >
-              available for new projects
+              {dict.hero.availability}
             </span>
           </div>
 
@@ -209,7 +212,7 @@ export function ProfileHeader({
               letterSpacing: "0.03em",
             }}
           >
-            4+ years experience
+            {dictionaries[useLanguage().language].hero.experience}
           </span>
         </div>
       </div>

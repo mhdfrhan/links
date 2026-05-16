@@ -130,7 +130,7 @@ export function Footer({ name = "Muhammad Farhan", email, github, linkedin }: Fo
             letterSpacing: "0.02em",
           }}
         >
-          © {currentYear} {name}. All rights reserved.
+          © {currentYear} {name}. {dict.copyright}
         </p>
       </div>
     </footer>

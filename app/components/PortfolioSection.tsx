@@ -66,7 +66,7 @@ export function PortfolioSection({
             letterSpacing: "0.04em",
           }}
         >
-          03.
+          {dict.sectionNum.split(" ")[0]}
         </span>
         <h2
           style={{

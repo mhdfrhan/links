@@ -57,7 +57,7 @@ export function ProfileHeader({
       <div className="flex flex-col-reverse md:flex-row items-start md:items-center gap-10 md:gap-12">
 
         {/* ——— Kolom Kiri: Teks ——— */}
-        <div className="flex-1 space-y-5">
+        <div className="flex-[1.5] space-y-5">
 
           {/* Greeting mono label */}
           <p
@@ -104,7 +104,7 @@ export function ProfileHeader({
               fontSize: "0.9375rem",
               color: "var(--text-secondary)",
               lineHeight: 1.7,
-              maxWidth: "480px",
+              maxWidth: "600px",
               fontStyle: "normal",
             }}
           >

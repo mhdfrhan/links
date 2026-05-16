@@ -172,33 +172,42 @@ export function ImageCropper({
         <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border">
           <p className="text-sm text-muted-foreground">Atur area crop untuk foto profil:</p>
 
-          <div ref={containerRef} className="relative inline-block mx-auto w-full max-w-md overflow-hidden rounded-xl bg-black/20" style={{ height: 320 }}>
-            <img
-              src={imageSrc}
-              alt="Crop source"
-              onLoad={onImgLoad}
-              className="block mx-auto"
-              style={{
-                maxWidth: "100%",
-                maxHeight: 320,
-                objectFit: "contain",
+          <div ref={containerRef} className="relative flex items-center justify-center w-full max-w-md overflow-hidden rounded-xl bg-black/20" style={{ height: 320 }}>
+            <div 
+              className="relative" 
+              style={{ 
+                width: imgDimensions.displayW || "100%", 
+                height: imgDimensions.displayH || "100%",
               }}
-              draggable={false}
-            />
-            {/* Overlay */}
-            <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.5)" }}>
-              <div
-                className="absolute border-2 border-white rounded-full cursor-move shadow-lg"
+            >
+              <img
+                src={imageSrc}
+                alt="Crop source"
+                onLoad={onImgLoad}
+                className="block"
                 style={{
-                  left: crop.x,
-                  top: crop.y,
-                  width: crop.size,
-                  height: crop.size,
-                  background: "transparent",
-                  boxShadow: `0 0 0 9999px rgba(0,0,0,0.5)`,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
                 }}
-                onMouseDown={handleMouseDown}
+                draggable={false}
               />
+              {/* Overlay strictly within image bounds */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div
+                  className="absolute border-2 border-white rounded-full cursor-move shadow-lg"
+                  style={{
+                    left: crop.x,
+                    top: crop.y,
+                    width: crop.size,
+                    height: crop.size,
+                    background: "transparent",
+                    boxShadow: `0 0 0 9999px rgba(0,0,0,0.5)`,
+                    touchAction: "none",
+                  }}
+                  onMouseDown={handleMouseDown}
+                />
+              </div>
             </div>
           </div>
 

@@ -100,16 +100,16 @@ export default function Home() {
         }}
       >
         <div
-          className="flex items-center justify-between"
+          className="sm:flex items-center justify-between"
           style={{
             maxWidth: "1080px",
             margin: "0 auto",
-            padding: "0 1.5rem",
+            padding: "10px 1.5rem",
             height: "56px",
           }}
         >
           {/* Logo monospace kiri */}
-          <span
+          <span className="text-center sm:text-left block sm:inline"
             style={{
               fontFamily: "var(--font-jetbrains-mono), monospace",
               fontSize: "0.8125rem",
@@ -121,7 +121,7 @@ export default function Home() {
           </span>
 
           {/* Nav links kanan */}
-          <div className="flex items-center gap-6">
+          <div className="flex justify-center sm:justify-start items-center gap-6">
             {/* Status dot */}
             <div className="hidden sm:flex items-center gap-1.5">
               <span
@@ -146,21 +146,25 @@ export default function Home() {
             </div>
 
             {/* Nav links */}
-            {(
-              [
-                ["about", "#about"],
-                ["projects", "#projects"],
-                ["skills", "#skills"],
-                ["contact", "#contact"],
-              ] as const
-            ).map(([label, href]) => (
-              <NavLink key={label} href={href}>
-                {label}
-              </NavLink>
-            ))}
+            <div className="flex items-center gap-4 sm:gap-6 shrink-0">
+              {(
+                [
+                  ["about", "#about"],
+                  ["projects", "#projects"],
+                  ["skills", "#skills"],
+                  ["contact", "#contact"],
+                ] as const
+              ).map(([label, href]) => (
+                <NavLink key={label} href={href}>
+                  {label}
+                </NavLink>
+              ))}
+            </div>
 
-            {/* Theme toggle */}
-            <ThemeToggle />
+            {/* Theme Toggle */}
+            <div className="shrink-0">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </nav>

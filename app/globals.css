@@ -153,6 +153,15 @@ body {
   background-size: 256px 256px;
 }
 
+/* Utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 /* ============================================================
    TYPOGRAPHY SCALE
    H1: Inter 500 / 2.25rem

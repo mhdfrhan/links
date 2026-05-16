@@ -109,7 +109,7 @@ export function TerminalBlock({
             letterSpacing: "0.02em",
           }}
         >
-          terminal — ~/mhdfarhan
+          terminal - ~/mhdfarhan
         </span>
       </div>
 

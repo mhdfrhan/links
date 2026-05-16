@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 
 export interface Project {
   id: string;
@@ -139,13 +140,15 @@ export function PortfolioSection({
       )}
 
       {/* Modal */}
-      {selectedProject && (
-        <ProjectModal
-          project={selectedProject}
-          onClose={() => setSelectedProject(null)}
-          categories={categories}
-        />
-      )}
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectModal
+            project={selectedProject}
+            onClose={() => setSelectedProject(null)}
+            categories={categories}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
@@ -291,17 +294,26 @@ function ProjectModal({
   if (!mounted) return null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
       onClick={onClose}
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ duration: 0.3, ease: [0.2, 0.9, 0.3, 1] }}
         className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         style={{
           background: "var(--bg-secondary)",
           border: "1px solid var(--border)",
           borderRadius: "12px",
+          boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -503,8 +515,8 @@ function ProjectModal({
             </div>
           </div>
         </div>
-      </div>
-    </div>,
+      </motion.div>
+    </motion.div>,
     document.body
   );
 }

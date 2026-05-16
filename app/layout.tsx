@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Muhammad Farhan — Web Developer",
+  title: "Muhammad Farhan | Web Developer",
   description:
     "Fullstack web developer dengan 4 tahun pengalaman. Spesialisasi React, Next.js, Laravel, dan PHP.",
   keywords: [
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Muhammad Farhan" }],
   openGraph: {
-    title: "Muhammad Farhan — Web Developer",
+    title: "Muhammad Farhan | Web Developer",
     description:
       "Fullstack web developer dengan 4 tahun pengalaman. Spesialisasi React, Next.js, Laravel, dan PHP.",
     type: "website",

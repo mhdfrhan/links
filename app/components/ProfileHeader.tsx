@@ -171,7 +171,7 @@ export function ProfileHeader({
         </div>
 
         {/* ——— Kolom Kanan: Foto Profil ——— */}
-        <div className="flex flex-col items-center gap-3 md:flex-shrink-0">
+        <div className="flex flex-col items-center gap-3 md:flex-shrink-0 self-center md:self-auto w-full md:w-auto mt-6 md:mt-0">
           {/* Foto container */}
           <div
             className="relative overflow-hidden"

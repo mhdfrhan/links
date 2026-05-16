@@ -48,7 +48,7 @@ export const staticExperiences = [
   {
     title: "Web Developer Intern",
     company: "PT Netviro",
-    period: "2022 – 2023",
+    period: "2022 - 2023",
     points: [
       "Mendesain dan mengembangkan website yang responsif, interaktif, dan user-friendly untuk berbagai klien",
       "Berkolaborasi dengan tim untuk memastikan website sesuai dengan kebutuhan bisnis dan standar kualitas",
@@ -58,7 +58,7 @@ export const staticExperiences = [
   {
     title: "Freelance Web Developer",
     company: "Self-employed",
-    period: "2023 – Sekarang",
+    period: "2023 - Sekarang",
     points: [
       "Membuat berbagai website untuk klien dari berbagai industri",
       "Menggunakan berbagai keterampilan dan teknologi untuk memenuhi kebutuhan klien",
@@ -71,7 +71,7 @@ export const staticOrganizationExperience = [
   {
     title: "Divisi Kominfo (Komunikasi dan Informasi)",
     company: "HM-TIFUMRI",
-    period: "2023 – 2024",
+    period: "2023 - 2024",
     points: [
       "Membuat desain flyer sebagai media informasi untuk kegiatan himpunan",
       "Mendesain konten Instagram himpunan untuk meningkatkan engagement",
@@ -81,7 +81,7 @@ export const staticOrganizationExperience = [
   {
     title: "Divisi PSDM Ristek",
     company: "HM-TIFUMRI",
-    period: "2024 – Sekarang",
+    period: "2024 - Sekarang",
     points: [
       "Menyelenggarakan workshop dan seminar untuk meningkatkan softskill dan hardskill mahasiswa",
       "Mengorganisir kegiatan olahraga antar mahasiswa untuk membangun team building",
@@ -94,7 +94,7 @@ export const staticCommitteeExperience = [
   {
     title: "Penanggung Jawab Lomba UI/UX Design",
     company: "NIFC 3.0 (Tingkat Nasional)",
-    period: "Feb 2024 – Mei 2024",
+    period: "Feb 2024 - Mei 2024",
     points: [
       "Mengelola dan menjadi penanggung jawab lomba UI/UX Design Tingkat Nasional",
       "Berkoordinasi dengan tim juri profesional untuk evaluasi desain"
@@ -103,7 +103,7 @@ export const staticCommitteeExperience = [
   {
     title: "Penanggung Jawab Lomba Web Development",
     company: "NIFC 4.0 (Tingkat Nasional)",
-    period: "Apr 2025 – Jun 2025",
+    period: "Apr 2025 - Jun 2025",
     points: [
       "Mengelola dan mengkoordinasikan lomba Web Development tingkat nasional",
       "Menyusun format kompetisi, timeline, dan kriteria penilaian"
@@ -122,14 +122,14 @@ export const staticCommitteeExperience = [
 export const staticEducation = [
   {
     institution: "Universitas Muhammadiyah Riau",
-    period: "2023 – Sekarang",
+    period: "2023 - Sekarang",
     degree: "S1 Teknik Informatika",
     score: "IPK: 3.91/4.0",
-    note: "Penerima Beasiswa Pemerintah Provinsi Riau (Semester 3 – 8, 2024–2027)"
+    note: "Penerima Beasiswa Pemerintah Provinsi Riau (Semester 3 - 8, 2024-2027)"
   },
   {
     institution: "SMKN 2 Pekanbaru",
-    period: "2020 – 2023",
+    period: "2020 - 2023",
     degree: "Rekayasa Perangkat Lunak",
     score: "Nilai Akhir: 90/100",
     note: "Siswa Berprestasi dan Menjadi Siswa Teknologi 2023"
@@ -176,7 +176,7 @@ export const staticCertifications = [
   {
     title: "Junior Web Developer - VSGA",
     issuer: "Digital Talent Scholarship Kominfo",
-    date: "Juni – Juli 2023"
+    date: "Juni - Juli 2023"
   },
   {
     title: "Coding Camp Front End Developer",

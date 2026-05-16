@@ -212,7 +212,7 @@ export default function PortfolioPage() {
               maxWidth: "520px",
             }}
           >
-            Kumpulan hasil karya dan proyek yang pernah saya kerjakan — dari
+            Kumpulan hasil karya dan proyek yang pernah saya kerjakan, mulai dari
             web app, sistem informasi, hingga company profile.
           </p>
         </div>

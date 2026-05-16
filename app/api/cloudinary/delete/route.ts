@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-const API_KEY = process.env.CLOUDINARY_API_KEY!;
-const API_SECRET = process.env.CLOUDINARY_API_SECRET!;
+
 
 /**
  * POST /api/cloudinary/delete
@@ -14,6 +12,27 @@ const API_SECRET = process.env.CLOUDINARY_API_SECRET!;
  */
 export async function POST(req: NextRequest) {
   try {
+    const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.trim().replace(/^["']|["']$/g, "");
+    const API_KEY = process.env.CLOUDINARY_API_KEY?.trim().replace(/^["']|["']$/g, "");
+    const API_SECRET = process.env.CLOUDINARY_API_SECRET?.trim().replace(/^["']|["']$/g, "");
+
+    if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
+      console.error("[Cloudinary Delete] Missing credentials:", {
+        hasCloudName: !!CLOUD_NAME,
+        hasApiKey: !!API_KEY,
+        hasApiSecret: !!API_SECRET,
+      });
+      return NextResponse.json(
+        { error: "Cloudinary credentials tidak lengkap" },
+        { status: 500 }
+      );
+    }
+
+    // Diagnostic log: Check if keys are swapped (API Key is usually numeric, Secret is alphanumeric)
+    if (API_KEY.length > 20 && /^[a-zA-Z0-9_-]+$/.test(API_KEY)) {
+      console.warn("[Cloudinary Delete] WARNING: API_KEY looks like an API_SECRET. Please check your .env file.");
+    }
+
     const { publicId, resourceType = "raw" } = await req.json();
 
     if (!publicId) {

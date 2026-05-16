@@ -4,6 +4,7 @@ interface Education {
   institution: string;
   period: string;
   degree: string;
+  score?: string;
   note?: string;
 }
 
@@ -72,11 +73,23 @@ export function EducationSection({ items }: EducationSectionProps) {
                     fontSize: "0.875rem",
                     color: "var(--accent)",
                     fontStyle: "normal",
-                    marginBottom: item.note ? "0.5rem" : 0,
+                    marginBottom: (item.score || item.note) ? "0.5rem" : 0,
                   }}
                 >
                   {item.degree}
                 </p>
+                {item.score && (
+                  <p
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "var(--text-secondary)",
+                      marginBottom: item.note ? "0.5rem" : 0,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {item.score}
+                  </p>
+                )}
                 {item.note && (
                   <p
                     style={{

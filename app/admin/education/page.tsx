@@ -30,6 +30,7 @@ interface Education {
   institution: string;
   degree: string;
   period: string;
+  score?: string;
   note: string;
   order: number;
 }
@@ -43,6 +44,7 @@ export default function EducationPage() {
   const [institution, setInstitution] = useState("");
   const [degree, setDegree] = useState("");
   const [period, setPeriod] = useState("");
+  const [score, setScore] = useState("");
   const [note, setNote] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Education | null>(null);
 
@@ -89,10 +91,10 @@ export default function EducationPage() {
     }
   };
 
-  const resetForm = () => { setIsEditing(false); setEditId(null); setInstitution(""); setDegree(""); setPeriod(""); setNote(""); };
+  const resetForm = () => { setIsEditing(false); setEditId(null); setInstitution(""); setDegree(""); setPeriod(""); setScore(""); setNote(""); };
 
   const startEdit = (item: Education) => {
-    setIsEditing(true); setEditId(item.id); setInstitution(item.institution); setDegree(item.degree); setPeriod(item.period); setNote(item.note || "");
+    setIsEditing(true); setEditId(item.id); setInstitution(item.institution); setDegree(item.degree); setPeriod(item.period); setScore(item.score || ""); setNote(item.note || "");
   };
 
   const handleSave = async () => {
@@ -101,7 +103,7 @@ export default function EducationPage() {
     try {
       const id = editId || `edu_${Date.now()}`;
       await setDoc(doc(db, "education", id), {
-        institution: institution.trim(), degree: degree.trim(), period: period.trim(), note: note.trim(),
+        institution: institution.trim(), degree: degree.trim(), period: period.trim(), score: score.trim(), note: note.trim(),
         order: editId ? (items.find((e) => e.id === editId)?.order || 0) : items.length,
       });
       showToast("success", editId ? "Berhasil diupdate!" : "Berhasil ditambahkan!");
@@ -142,6 +144,7 @@ export default function EducationPage() {
             <AdminFormField label="Institusi" value={institution} onChange={setInstitution} placeholder="Universitas Example" required />
             <AdminFormField label="Gelar / Jurusan" value={degree} onChange={setDegree} placeholder="S1 Teknik Informatika" required />
             <AdminFormField label="Periode" value={period} onChange={setPeriod} placeholder="2020 - Sekarang" />
+            <AdminFormField label="IPK / Nilai Akhir" value={score} onChange={setScore} placeholder="IPK: 3.8/4.0 atau Nilai Akhir: 90/100" />
             <AdminFormField label="Catatan" value={note} onChange={setNote} placeholder="Beasiswa, prestasi, dll (opsional)" hint="Akan ditampilkan sebagai badge di homepage" />
             
             <div className="flex gap-2 pt-2">
@@ -181,6 +184,11 @@ export default function EducationPage() {
                         <h3 className="font-semibold text-foreground leading-snug">{item.institution}</h3>
                         <p className="text-xs text-accent font-semibold mt-0.5">{item.degree}</p>
                         <p className="text-[10px] text-muted-foreground mt-1 font-medium">{item.period}</p>
+                        {item.score && (
+                          <p className="text-[10px] text-foreground mt-1 font-medium">
+                            {item.score}
+                          </p>
+                        )}
                         {item.note && (
                           <span className="inline-block mt-2.5 px-2 py-0.5 text-[10px] font-medium bg-accent/5 text-accent rounded-md border border-accent/10">
                             {item.note}

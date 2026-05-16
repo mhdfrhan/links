@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://mhdfrhan.com"), // Ganti dengan domain asli nanti
+  metadataBase: new URL("https://mhdfarhan.vercel.app/"), // Ganti dengan domain asli nanti
   alternates: {
     canonical: "/",
     languages: {
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     title: "Muhammad Farhan | Web Developer Portfolio",
     description:
       "Fullstack Web Developer specializing in React, Next.js, Laravel, and PHP. Explore my projects and experiences.",
-    url: "https://mhdfrhan.com",
+    url: "https://mhdfarhan.vercel.app/",
     siteName: "Muhammad Farhan Portfolio",
     images: [
       {

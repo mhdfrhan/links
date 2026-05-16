@@ -31,7 +31,11 @@ import {
 interface Project {
   id: string;
   title: string;
+  title_en: string;
   description: string;
+  description_en: string;
+  fullDescription?: string;
+  fullDescription_en?: string;
   imageUrl: string;
   cloudinaryPublicId: string;
   techStack: string[];

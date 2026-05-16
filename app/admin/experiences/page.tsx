@@ -29,9 +29,13 @@ import {
 interface Experience {
   id: string;
   title: string;
+  title_en: string;
   company: string;
+  company_en: string;
   period: string;
+  period_en: string;
   points: string[];
+  points_en: string[];
   order: number;
 }
 

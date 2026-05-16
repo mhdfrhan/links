@@ -29,10 +29,14 @@ import {
 interface Education {
   id: string;
   institution: string;
+  institution_en: string;
   degree: string;
+  degree_en: string;
   period: string;
+  period_en: string;
   score?: string;
   note: string;
+  note_en: string;
   order: number;
 }
 

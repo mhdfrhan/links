@@ -29,6 +29,7 @@ import {
 interface Certification {
   id: string;
   title: string;
+  title_en: string;
   issuer: string;
   date: string;
   validUntil: string;

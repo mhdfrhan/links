@@ -30,6 +30,7 @@ import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 interface Award {
   id: string;
   title: string;
+  title_en: string;
   year: string;
   highlight: boolean;
   order: number;

@@ -18,24 +18,77 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Muhammad Farhan | Web Developer",
+  title: {
+    default: "Muhammad Farhan | Web Developer Portfolio",
+    template: "%s | Muhammad Farhan"
+  },
   description:
-    "Fullstack web developer dengan 4 tahun pengalaman. Spesialisasi React, Next.js, Laravel, dan PHP.",
+    "Fullstack Web Developer specializing in React, Next.js, Laravel, and PHP. Explore my projects, experiences, and technical skills in modern web development.",
   keywords: [
-    "web developer",
-    "fullstack",
-    "react",
-    "next.js",
-    "laravel",
-    "portfolio",
     "Muhammad Farhan",
+    "Web Developer",
+    "Fullstack Developer",
+    "Indonesia Web Developer",
+    "React Developer",
+    "Next.js Developer",
+    "Laravel Specialist",
+    "Software Engineer Portfolio",
   ],
-  authors: [{ name: "Muhammad Farhan" }],
+  authors: [{ name: "Muhammad Farhan", url: "https://github.com/mhdfrhan" }],
+  creator: "Muhammad Farhan",
+  publisher: "Muhammad Farhan",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://mhdfrhan.com"), // Ganti dengan domain asli nanti
+  alternates: {
+    canonical: "/",
+    languages: {
+      "id-ID": "/?lang=id",
+      "en-US": "/?lang=en",
+    },
+  },
   openGraph: {
-    title: "Muhammad Farhan | Web Developer",
+    title: "Muhammad Farhan | Web Developer Portfolio",
     description:
-      "Fullstack web developer dengan 4 tahun pengalaman. Spesialisasi React, Next.js, Laravel, dan PHP.",
+      "Fullstack Web Developer specializing in React, Next.js, Laravel, and PHP. Explore my projects and experiences.",
+    url: "https://mhdfrhan.com",
+    siteName: "Muhammad Farhan Portfolio",
+    images: [
+      {
+        url: "/og-image.jpg", // Pastikan file ini ada atau buat nanti
+        width: 1200,
+        height: 630,
+        alt: "Muhammad Farhan Portfolio Preview",
+      },
+    ],
+    locale: "id_ID",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Muhammad Farhan | Web Developer Portfolio",
+    description: "Fullstack Web Developer specializing in React, Next.js, and Laravel.",
+    creator: "@mhdfrhan", // Ganti dengan handle twitter asli jika ada
+    images: ["/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
   },
 };
 

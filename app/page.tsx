@@ -30,6 +30,12 @@ export default function Home() {
   const { data, loading } = usePortfolioData();
   const { language } = useLanguage();
   const dict = dictionaries[language];
+
+  // Update dynamic page title on language change
+  useEffect(() => {
+    document.title = dict.metadata.title;
+  }, [language, dict.metadata.title]);
+
   const navRef = useRef<HTMLElement>(null);
   const [navScrolled, setNavScrolled] = useState(false);
 

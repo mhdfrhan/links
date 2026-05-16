@@ -66,6 +66,11 @@ export const dictionaries = {
       loading: "Memuat...",
       notFound: "Tidak ditemukan",
       present: "Sekarang",
+    },
+    metadata: {
+      title: "Muhammad Farhan | Portofolio Web Developer",
+      description: "Fullstack Web Developer spesialis React, Next.js, Laravel, dan PHP. Lihat proyek, pengalaman, dan keahlian teknis saya.",
+      keywords: "Muhammad Farhan, Web Developer, Fullstack, React, Next.js, Laravel, Portofolio",
     }
   },
   en: {
@@ -133,6 +138,11 @@ export const dictionaries = {
       loading: "Loading...",
       notFound: "Not found",
       present: "Present",
+    },
+    metadata: {
+      title: "Muhammad Farhan | Web Developer Portfolio",
+      description: "Fullstack Web Developer specializing in React, Next.js, Laravel, and PHP. Explore my projects, experiences, and technical skills.",
+      keywords: "Muhammad Farhan, Web Developer, Fullstack, React, Next.js, Laravel, Portfolio",
     }
   }
 };

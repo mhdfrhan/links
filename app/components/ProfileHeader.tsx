@@ -16,6 +16,8 @@ interface ProfileHeaderProps {
   about?: string;
   cvData?: { id?: CvEntry; en?: CvEntry } | null;
   email?: string;
+  github?: string;
+  linkedin?: string;
 }
 
 /**
@@ -31,6 +33,8 @@ export function ProfileHeader({
   about = "",
   cvData = null,
   email,
+  github,
+  linkedin,
 }: ProfileHeaderProps) {
   // Gunakan tagline sebagai role — ambil bagian pertama sebelum "|" jika ada
   const role = tagline.includes("|")
@@ -105,7 +109,7 @@ export function ProfileHeader({
           {/* Social icons row — subtle, kecil */}
           <div className="flex items-center gap-4 pt-1">
             <SocialIcon
-              href="https://github.com/mhdfarhan"
+              href={github || "https://github.com/mhdfrhan"}
               label="GitHub"
               icon={
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -114,7 +118,7 @@ export function ProfileHeader({
               }
             />
             <SocialIcon
-              href="https://www.linkedin.com/in/muhammad-farhan-79ba79294/"
+              href={linkedin || "https://www.linkedin.com/in/muhammad-farhan-79ba79294/"}
               label="LinkedIn"
               icon={
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -123,7 +127,7 @@ export function ProfileHeader({
               }
             />
             <SocialIcon
-              href={`mailto:${email || "mhdfarhan04@gmail.com"}`}
+              href={`mailto:${email || "hi.mhdfarhan@gmail.com"}`}
               label="Email"
               icon={
                 <svg

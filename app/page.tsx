@@ -188,6 +188,8 @@ export default function Home() {
             about={data.about}
             cvData={data.cvData}
             email={data.profile?.email}
+            github={data.profile?.github}
+            linkedin={data.profile?.linkedin}
           />
         </section>
 
@@ -294,6 +296,8 @@ export default function Home() {
           <Footer
             name={data.profile?.name || "Muhammad Farhan"}
             email={data.profile?.email}
+            github={data.profile?.github}
+            linkedin={data.profile?.linkedin}
           />
         </section>
       </main>

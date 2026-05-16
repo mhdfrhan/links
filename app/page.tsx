@@ -111,29 +111,35 @@ export default function Home() {
         }}
       >
         <div
-          className="sm:flex items-center justify-between"
+          className="flex flex-col sm:flex-row items-center justify-between"
           style={{
             maxWidth: "1080px",
             margin: "0 auto",
             padding: "10px 1.5rem",
-            height: "56px",
+            minHeight: "56px",
+            height: "auto",
           }}
         >
-          {/* Logo monospace kiri */}
-          <span className="text-center sm:text-left block sm:inline"
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: "0.8125rem",
-              color: "var(--text-muted)",
-              letterSpacing: "0.02em",
-            }}
-          >
-            ~/mhdfarhan
-          </span>
+          {/* Layer 1: Logo & Theme Toggle (Mobile Only) */}
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            <span
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: "0.8125rem",
+                color: "var(--text-muted)",
+                letterSpacing: "0.02em",
+              }}
+            >
+              ~/mhdfarhan
+            </span>
+            <div className="sm:hidden">
+              <ThemeToggle />
+            </div>
+          </div>
 
-          {/* Nav links kanan */}
-          <div className="flex justify-center sm:justify-start items-center gap-6">
-            {/* Status dot */}
+          {/* Layer 2: Nav links */}
+          <div className="flex items-center gap-4 sm:gap-6 mt-3 sm:mt-0 shrink-0">
+            {/* Status dot (Desktop Only) */}
             <div className="hidden sm:flex items-center gap-1.5">
               <span
                 style={{
@@ -156,25 +162,24 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Nav links */}
-            <div className="flex items-center gap-4 sm:gap-6 shrink-0">
-              {(
-                [
-                  [dict.nav.about, "#about"],
-                  [dict.nav.projects, "#projects"],
-                  [dict.nav.skills, "#skills"],
-                  [dict.nav.contact, "#contact"],
-                ] as const
-              ).map(([label, href]) => (
-                <NavLink key={label} href={href}>
-                  {label}
-                </NavLink>
-              ))}
-            </div>
+            {(
+              [
+                [dict.nav.about, "#about"],
+                [dict.nav.projects, "#projects"],
+                [dict.nav.skills, "#skills"],
+                [dict.nav.contact, "#contact"],
+              ] as const
+            ).map(([label, href]) => (
+              <NavLink key={label} href={href}>
+                {label}
+              </NavLink>
+            ))}
+          </div>
 
-            {/* Language & Theme Toggles */}
-            <div className="flex items-center gap-2 shrink-0">
-              <LanguageToggle />
+          {/* Layer 3: Language Toggle & Theme Toggle (Desktop Only) */}
+          <div className="flex items-center gap-2 mt-3 sm:mt-0 shrink-0">
+            <LanguageToggle />
+            <div className="hidden sm:block">
               <ThemeToggle />
             </div>
           </div>
@@ -183,13 +188,7 @@ export default function Home() {
 
       {/* ==================== MAIN CONTENT ==================== */}
       <main
-        style={{
-          maxWidth: "1080px",
-          margin: "0 auto",
-          padding: "0 1.5rem",
-          paddingTop: "96px",  /* offset navbar */
-          paddingBottom: "0",
-        }}
+        className="max-w-[1080px] mx-auto px-[1.5rem] pt-[150px] sm:pt-24 pb-0"
       >
         {/* ===== HERO SECTION ===== */}
         <section id="about" style={{ paddingBottom: "5rem" }}>

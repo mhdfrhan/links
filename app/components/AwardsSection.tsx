@@ -1,12 +1,5 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
-
 interface Award {
   title: string;
   year: string;
@@ -18,62 +11,74 @@ interface AwardsSectionProps {
 }
 
 export function AwardsSection({ awards }: AwardsSectionProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 85%",
-        once: true
-      }
-    });
-
-    tl.fromTo(sectionRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.1 }
-    )
-    .fromTo(".awards-title-container", 
-      { opacity: 0, y: 15, filter: "blur(4px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" }
-    )
-    .fromTo(".award-item", 
-      { opacity: 0, y: 10, filter: "blur(4px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, stagger: 0.05, ease: "power2.out" }, 
-      "-=0.3"
-    );
-  }, { scope: sectionRef, dependencies: [] });
-
   return (
-    <section ref={sectionRef} className="w-full gpu opacity-0">
-      <div className="awards-title-container flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-xl bg-accent/10 text-accent">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-2.927 0" />
-          </svg>
-        </div>
-        <h2 className="text-xl font-bold text-foreground">Penghargaan</h2>
+    <section className="w-full">
+      {/* Section label */}
+      <div className="flex items-center gap-3 mb-6">
+        <span
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: "0.75rem",
+            color: "var(--accent)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          07.
+        </span>
+        <h2
+          style={{
+            fontWeight: 500,
+            fontSize: "1.5rem",
+            letterSpacing: "-0.015em",
+            color: "var(--text-primary)",
+            fontStyle: "normal",
+          }}
+        >
+          Penghargaan
+        </h2>
+        <div
+          className="flex-1"
+          style={{ height: "1px", background: "var(--border)" }}
+        />
       </div>
 
-      <div className="grid gap-2">
+      <div className="space-y-2">
         {awards.map((award, index) => (
           <div
             key={index}
-            className={`award-item group flex items-start gap-3 p-3 rounded-xl transition-all duration-300 hover:translate-x-1 ${
-              award.highlight 
-                ? 'bg-accent/10 border border-accent/30' 
-                : 'bg-card/50 hover:bg-card border border-transparent hover:border-border'
-            }`}
+            className="flex items-start gap-4"
+            style={{
+              padding: "0.75rem 0",
+              borderBottom: "1px solid var(--border)",
+            }}
           >
-            <span className={`mt-0.5 ${award.highlight ? 'text-accent' : 'text-muted-foreground'}`}>
-              {award.highlight ? '🏆' : '🎖️'}
+            {/* Year — mono muted */}
+            <span
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: "0.7rem",
+                color: "var(--text-muted)",
+                letterSpacing: "0.02em",
+                flexShrink: 0,
+                marginTop: "0.1rem",
+                minWidth: "2.5rem",
+              }}
+            >
+              {award.year}
             </span>
-            <div className="flex-1 min-w-0">
-              <p className={`text-sm ${award.highlight ? 'font-semibold text-foreground' : 'text-foreground/90'}`}>
-                {award.title}
-              </p>
-              <p className="text-xs text-muted-foreground">{award.year}</p>
-            </div>
+
+            {/* Title */}
+            <p
+              style={{
+                fontSize: "0.9rem",
+                color: award.highlight ? "var(--text-primary)" : "var(--text-secondary)",
+                lineHeight: 1.5,
+                fontStyle: "normal",
+                fontWeight: award.highlight ? 500 : 400,
+              }}
+            >
+              {award.title}
+            </p>
           </div>
         ))}
       </div>

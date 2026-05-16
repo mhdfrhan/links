@@ -1,72 +1,109 @@
 @import "tailwindcss";
 
-/* Theme Color Variables */
+/* ============================================================
+   DESIGN TOKENS — Portfolio mhdfarhan 2026
+   Filosofi: "Clean Developer Space"
+   ============================================================ */
+
 :root {
-  /* Light mode colors */
-  --background: #fafafa;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  /* Emerald green accent - matching almamater */
-  --accent: #10b981;
-  --accent-dark: #059669;
-  --accent-light: #34d399;
-  --accent-foreground: #ffffff;
-  --border: #e4e4e7;
-  --ring: #10b981;
-  /* Dot colors */
-  --dot-color: rgba(16, 185, 129, 0.15);
-  --dot-glow: rgba(16, 185, 129, 0.3);
+  /* Backgrounds */
+  --bg-primary:   #0f1117;
+  --bg-secondary: #161820;
+  --bg-tertiary:  #1e2028;
+  --bg-code:      #1a1d26;
+
+  /* Borders */
+  --border:       #282a33;
+  --border-hover: #3a3d47;
+
+  /* Text */
+  --text-primary:   #e8e9ed;
+  --text-secondary: #9da1ae;
+  --text-muted:     #5c6070;
+
+  /* Accent — soft blue, dipakai hemat */
+  --accent:       #6c9ef5;
+  --accent-hover: #85b0f7;
+
+  /* Status */
+  --green:        #4ade80;
+
+  /* Mapped ke Tailwind utilities */
+  --background:         var(--bg-primary);
+  --foreground:         var(--text-primary);
+  --card:               var(--bg-secondary);
+  --card-foreground:    var(--text-primary);
+  --muted:              var(--bg-tertiary);
+  --muted-foreground:   var(--text-secondary);
+  --border-color:       var(--border);
+  --ring:               var(--accent);
 }
 
-.dark {
-  /* Dark mode colors */
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --card: #18181b;
-  --card-foreground: #fafafa;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  /* Emerald green accent */
-  --accent: #10b981;
-  --accent-dark: #059669;
-  --accent-light: #34d399;
-  --accent-foreground: #ffffff;
-  --border: #27272a;
-  --ring: #10b981;
-  /* Dot colors - more visible in dark mode */
-  --dot-color: rgba(16, 185, 129, 0.2);
-  --dot-glow: rgba(16, 185, 129, 0.4);
+/* ============================================================
+   LIGHT MODE OVERRIDES
+   next-themes tambah class "light" ke <html> saat light mode aktif
+   ============================================================ */
+html.light {
+  /* Backgrounds */
+  --bg-primary:   #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary:  #f0f1f4;
+  --bg-code:      #eef0f5;
+
+  /* Borders */
+  --border:       #e2e4ea;
+  --border-hover: #c8cad4;
+
+  /* Text */
+  --text-primary:   #111318;
+  --text-secondary: #4b505e;
+  --text-muted:     #8b909e;
+
+  /* Accent */
+  --accent:       #3b82f6;
+  --accent-hover: #2563eb;
+
+  /* Status */
+  --green:        #16a34a;
+
+  /* Mapped ke Tailwind utilities */
+  --background:       var(--bg-primary);
+  --foreground:       var(--text-primary);
+  --card:             var(--bg-secondary);
+  --card-foreground:  var(--text-primary);
+  --muted:            var(--bg-tertiary);
+  --muted-foreground: var(--text-secondary);
+  --border-color:     var(--border);
+  --ring:             var(--accent);
 }
 
+/* Tailwind v4 @theme mapping */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
+  --color-background:      var(--background);
+  --color-foreground:      var(--foreground);
+  --color-card:            var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-muted: var(--muted);
+  --color-muted:           var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-dark: var(--accent-dark);
-  --color-accent-light: var(--accent-light);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-border: var(--border);
-  --color-ring: var(--ring);
-  --font-mono: var(--font-geist-mono);
+  --color-border:          var(--border-color);
+  --color-accent:          var(--accent);
+  --color-accent-hover:    var(--accent-hover);
+  --color-green:           var(--green);
+  --color-bg-code:         var(--bg-code);
+  --color-bg-tertiary:     var(--bg-tertiary);
+  --color-text-primary:    var(--text-primary);
+  --color-text-secondary:  var(--text-secondary);
+  --color-text-muted:      var(--text-muted);
+  --color-border-hover:    var(--border-hover);
+
+  /* Fonts — set dari layout.tsx via CSS variable */
+  --font-sans: var(--font-plus-jakarta);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-/* Smooth theme transition - Optimized */
-body {
-  transition: background-color 0.3s ease, color 0.15s ease;
-}
-
-button,
-a,
-input {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease, opacity 0.2s ease, transform 0.2s ease;
-}
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
 
 html {
   scroll-behavior: smooth;
@@ -74,111 +111,206 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Theme color transition — aktif saat toggle, bukan hover */
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.2s ease,
+    fill 0.2s ease,
+    stroke 0.2s ease,
+    box-shadow 0.35s ease !important;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, sans-serif;
   min-height: 100vh;
   text-rendering: optimizeLegibility;
 }
 
-/* Hardware acceleration for smooth animations */
+/* GPU acceleration helper */
 .gpu {
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
 }
 
+/* ============================================================
+   NOISE GRAIN OVERLAY
+   opacity sangat tipis — hanya menghilangkan kesan flat digital
+   ============================================================ */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
 
-/* Focus states for accessibility */
+/* ============================================================
+   TYPOGRAPHY SCALE
+   H1: Inter 500 / 2.25rem
+   H2: Inter 500 / 1.5rem
+   H3: Inter 500 / 1.125rem
+   Body: Inter 400 / 0.9375rem
+   Mono: JetBrains Mono 400
+   TIDAK ADA font-weight: 700 di heading
+   TIDAK ADA font-style: italic di manapun
+   ============================================================ */
+
+h1 {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 2.25rem;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  font-style: normal;
+  color: var(--text-primary);
+}
+
+h2 {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 1.5rem;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  font-style: normal;
+  color: var(--text-primary);
+}
+
+h3 {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  font-style: normal;
+  color: var(--text-primary);
+}
+
+p {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  font-style: normal;
+  color: var(--text-secondary);
+}
+
+/* Mono label utility */
+.mono-label {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  font-style: normal;
+}
+
+/* Inline code styling — untuk sebut teknologi dalam teks */
+code {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8125rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-style: normal;
+}
+
+/* ============================================================
+   SECTION DIVIDER
+   ============================================================ */
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  margin: 5rem 0;
+}
+
+/* ============================================================
+   FOCUS & SELECTION
+   ============================================================ */
 *:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* Selection color */
 ::selection {
-  background-color: var(--accent);
-  color: var(--accent-foreground);
+  background-color: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--text-primary);
 }
 
-/* Animated dots keyframes */
-@keyframes pulse-dot {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.5);
-  }
+/* ============================================================
+   ANIMASI
+   Hanya yang diizinkan dari design prompt:
+   - fade-in scroll
+   - terminal cursor blink
+   - hover transitions (via Tailwind)
+   ============================================================ */
+
+/* Terminal cursor blink — satu-satunya looping animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
-@keyframes float-slow {
-  0%, 100% {
+.terminal-cursor {
+  display: inline-block;
+  width: 0.5ch;
+  height: 1em;
+  background: var(--green);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+
+/* Fade-in on scroll — digunakan via Framer Motion di komponen */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(-20px);
-  }
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.15;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.3;
-    transform: scale(1.1);
-  }
+/* Nav scroll transition */
+.nav-scrolled {
+  background-color: color-mix(in srgb, var(--bg-primary) 85%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+/* ============================================================
+   CARD STYLES
+   ============================================================ */
+.card-base {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  transition: border-color 200ms ease, transform 200ms ease;
 }
 
-.animate-pulse-dot {
-  animation: pulse-dot 3s ease-in-out infinite;
+.card-base:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
 }
 
-.animate-float-slow {
-  animation: float-slow 8s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 6s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 8s ease-in-out infinite;
-  background-size: 200% 100%;
-}
-
+/* ============================================================
+   VIEW TRANSITION (tidak diubah — sudah ada)
+   ============================================================ */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-::view-transition-new(root) {
-  z-index: 9999;
-}
-
-.dark::view-transition-old(root) {
-  z-index: 9999;
-}
-
-.dark::view-transition-new(root) {
-  z-index: 1;
-}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 9999; }

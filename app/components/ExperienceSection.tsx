@@ -1,12 +1,5 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
-
 interface ExperienceItem {
   title: string;
   company: string;
@@ -16,66 +9,141 @@ interface ExperienceItem {
 
 interface ExperienceSectionProps {
   title: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  sectionNumber?: string;
   items: ExperienceItem[];
 }
 
-export function ExperienceSection({ title, icon, items }: ExperienceSectionProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 85%",
-        once: true
-      }
-    });
-
-    tl.fromTo(sectionRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.1 }
-    )
-    .fromTo(".section-title-container", 
-      { opacity: 0, y: 15, filter: "blur(4px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" }
-    )
-    .fromTo(".experience-item", 
-      { opacity: 0, y: 20, filter: "blur(4px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.15, ease: "power3.out" }, 
-      "-=0.3"
-    );
-  }, { scope: sectionRef, dependencies: [] });
-
+/**
+ * ExperienceSection — Timeline bersih
+ * Vertical line tipis di kiri, dot accent kecil
+ * Warna accent soft blue sesuai design prompt
+ */
+export function ExperienceSection({
+  title,
+  sectionNumber = "05.",
+  items,
+}: ExperienceSectionProps) {
   return (
-    <section ref={sectionRef} className="w-full gpu opacity-0">
-      <div className="section-title-container flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-xl bg-accent/10 text-accent">
-          {icon}
-        </div>
-        <h2 className="text-xl font-bold text-foreground">{title}</h2>
+    <section className="w-full">
+      {/* Section label */}
+      <div className="flex items-center gap-3 mb-6">
+        <span
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: "0.75rem",
+            color: "var(--accent)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          {sectionNumber}
+        </span>
+        <h2
+          style={{
+            fontWeight: 500,
+            fontSize: "1.5rem",
+            letterSpacing: "-0.015em",
+            color: "var(--text-primary)",
+            fontStyle: "normal",
+          }}
+        >
+          {title}
+        </h2>
+        <div
+          className="flex-1"
+          style={{ height: "1px", background: "var(--border)" }}
+        />
       </div>
 
-      <div className="space-y-4">
+      {/* Timeline */}
+      <div className="space-y-0">
         {items.map((item, index) => (
           <div
             key={index}
-            className="experience-item relative pl-6 border-l-2 border-accent/30 hover:border-accent transition-colors duration-300"
+            className="relative pl-6"
+            style={{
+              borderLeft: "1px solid var(--border)",
+              paddingBottom: index < items.length - 1 ? "2rem" : "0",
+            }}
           >
-            <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-accent/20 border-2 border-accent" />
-            
-            <div className="pb-6">
-              <h3 className="font-semibold text-foreground text-lg">{item.title}</h3>
-              <p className="text-accent font-medium text-sm">{item.company}</p>
-              <p className="text-muted-foreground text-xs mb-3">{item.period}</p>
-              
-              <ul className="space-y-2">
+            {/* Timeline dot */}
+            <div
+              className="absolute"
+              style={{
+                left: "-5px",
+                top: "3px",
+                width: "9px",
+                height: "9px",
+                borderRadius: "50%",
+                background: "var(--bg-primary)",
+                border: "1px solid var(--border-hover)",
+              }}
+            />
+
+            {/* Content */}
+            <div>
+              {/* Period — mono, muted, di atas */}
+              <span
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "0.7rem",
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.02em",
+                  display: "block",
+                  marginBottom: "0.25rem",
+                }}
+              >
+                {item.period}
+              </span>
+
+              {/* Title */}
+              <h3
+                style={{
+                  fontWeight: 500,
+                  fontSize: "1rem",
+                  color: "var(--text-primary)",
+                  fontStyle: "normal",
+                  marginBottom: "0.15rem",
+                }}
+              >
+                {item.title}
+              </h3>
+
+              {/* Company */}
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "var(--accent)",
+                  marginBottom: "0.625rem",
+                  fontStyle: "normal",
+                }}
+              >
+                {item.company}
+              </p>
+
+              {/* Points */}
+              <ul className="space-y-1.5">
                 {item.points.map((point, pIndex) => (
-                  <li 
+                  <li
                     key={pIndex}
-                    className="text-sm text-muted-foreground flex items-center gap-2"
+                    className="flex items-start gap-2"
+                    style={{
+                      fontSize: "0.875rem",
+                      color: "var(--text-secondary)",
+                      lineHeight: 1.6,
+                      fontStyle: "normal",
+                    }}
                   >
-                    <span className="text-accent flex-shrink-0">•</span>
+                    <span
+                      style={{
+                        color: "var(--border-hover)",
+                        flexShrink: 0,
+                        marginTop: "0.1em",
+                        fontSize: "0.7rem",
+                      }}
+                    >
+                      ▸
+                    </span>
                     <span>{point}</span>
                   </li>
                 ))}

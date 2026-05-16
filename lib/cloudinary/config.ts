@@ -55,3 +55,49 @@ export function getCloudinaryUrl(publicId: string, transforms?: string): string 
   }
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${publicId}`;
 }
+
+interface CloudinaryRawResponse {
+  secure_url: string;
+  public_id: string;
+  bytes: number;
+  format: string;
+  resource_type: string;
+}
+
+/**
+ * Upload file non-image (PDF, dll) ke Cloudinary via endpoint /raw/upload.
+ * Berbeda dari uploadToCloudinary() yang menggunakan /image/upload.
+ */
+export async function uploadRawToCloudinary(
+  file: File,
+  options: UploadOptions = {}
+): Promise<CloudinaryRawResponse> {
+  const { folder = "portfolio/cv", onProgress } = options;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("folder", folder);
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(JSON.parse(xhr.responseText));
+      } else {
+        reject(new Error(`Upload gagal: ${xhr.statusText}`));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Upload gagal: Network error"));
+    xhr.send(formData);
+  });
+}

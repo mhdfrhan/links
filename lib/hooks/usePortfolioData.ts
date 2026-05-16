@@ -15,6 +15,14 @@ import {
   staticSkills 
 } from "../data";
 
+export interface CvEntry {
+  url: string;
+  cloudinaryPublicId: string;
+  fileName: string;
+  fileSize: number;
+  uploadedAt: string;
+}
+
 export function usePortfolioData() {
   const [data, setData] = useState({
     about: staticAboutText,
@@ -27,7 +35,8 @@ export function usePortfolioData() {
     certifications: staticCertifications,
     skills: staticSkills,
     profile: null as any,
-    categories: [] as any[]
+    categories: [] as any[],
+    cvData: null as { id?: CvEntry; en?: CvEntry } | null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +57,8 @@ export function usePortfolioData() {
           certSnap,
           skillsSnap,
           profileDoc,
-          categoriesSnap
+          categoriesSnap,
+          cvDoc
         ] = await Promise.all([
           getDoc(doc(db, "portfolio", "about")),
           getDocs(query(collection(db, "projects"), orderBy("order", "asc"))),
@@ -60,7 +70,8 @@ export function usePortfolioData() {
           getDocs(query(collection(db, "certifications"), orderBy("order", "asc"))),
           getDocs(query(collection(db, "skills"), orderBy("order", "asc"))),
           getDoc(doc(db, "portfolio", "profile")),
-          getDocs(query(collection(db, "categories"), orderBy("order", "asc")))
+          getDocs(query(collection(db, "categories"), orderBy("order", "asc"))),
+          getDoc(doc(db, "portfolio", "cv"))
         ]);
 
         if (!isMounted) return;
@@ -76,6 +87,7 @@ export function usePortfolioData() {
         const skills = skillsSnap.empty ? staticSkills : skillsSnap.docs.map(d => d.data() as any);
         const profile = profileDoc.exists() ? profileDoc.data() : null;
         const categories = categoriesSnap.empty ? [] : categoriesSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const cvData = cvDoc.exists() ? (cvDoc.data() as { id?: CvEntry; en?: CvEntry }) : null;
 
         setData({
           about,
@@ -88,7 +100,8 @@ export function usePortfolioData() {
           certifications,
           skills,
           profile,
-          categories
+          categories,
+          cvData,
         });
       } catch (error) {
         console.error("Error fetching portfolio data from Firebase:", error);

@@ -1,26 +1,40 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-sans",
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
+  display: "swap",
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
-  title: "Muhammad Farhan | Profile",
-  description: "Personal profile and links - Connect with me on social media",
-  keywords: ["profile", "personal", "links", "social media", "portfolio"],
+  title: "Muhammad Farhan — Web Developer",
+  description:
+    "Fullstack web developer dengan 4 tahun pengalaman. Spesialisasi React, Next.js, Laravel, dan PHP.",
+  keywords: [
+    "web developer",
+    "fullstack",
+    "react",
+    "next.js",
+    "laravel",
+    "portfolio",
+    "Muhammad Farhan",
+  ],
   authors: [{ name: "Muhammad Farhan" }],
   openGraph: {
-    title: "Muhammad Farhan | Profile",
-    description: "Personal profile and links - Connect with me on social media",
+    title: "Muhammad Farhan — Web Developer",
+    description:
+      "Fullstack web developer dengan 4 tahun pengalaman. Spesialisasi React, Next.js, Laravel, dan PHP.",
     type: "website",
   },
 };
@@ -31,9 +45,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       <body
-        className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased font-sans`}
+        className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} antialiased`}
+        style={{ fontFamily: "var(--font-plus-jakarta), system-ui, sans-serif" }}
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>

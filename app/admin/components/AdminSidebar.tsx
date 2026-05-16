@@ -41,7 +41,8 @@ const navItems: NavItem[] = [
     icon: UserIcon,
     subItems: [
       { name: "Profil & Sosial", href: "/admin/profile" },
-      { name: "Tentang Saya", href: "/admin/about" }
+      { name: "Tentang Saya", href: "/admin/about" },
+      { name: "CV / Resume", href: "/admin/cv" }
     ]
   },
   { 

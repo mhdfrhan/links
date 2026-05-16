@@ -3,12 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export interface Project {
   id: string;
@@ -29,38 +24,20 @@ interface PortfolioSectionProps {
   categories?: any[];
 }
 
-export function PortfolioSection({ projects, showAllButton = false, categories = [] }: PortfolioSectionProps) {
-  const sectionRef = useRef<HTMLElement>(null);
+/**
+ * PortfolioSection — Grid 2 kolom, card clean
+ * bg-secondary, border 1px, hover translateY(-2px)
+ * Tech tags: JetBrains Mono, bg-tertiary, rounded-md
+ * Modal tetap berfungsi
+ */
+export function PortfolioSection({
+  projects,
+  showAllButton = false,
+  categories = [],
+}: PortfolioSectionProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  // Scroll Entrance Animation
-  useGSAP(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 85%",
-        once: true
-      }
-    });
-
-    tl.fromTo(sectionRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.1 }
-    )
-    .fromTo(".portfolio-title-container", 
-      { opacity: 0, y: 15, filter: "blur(4px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" }
-    )
-    .fromTo(".portfolio-card", 
-      { opacity: 0, y: 20, filter: "blur(4px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, stagger: 0.15, ease: "power3.out" }, 
-      "-=0.3"
-    );
-  }, { scope: sectionRef, dependencies: [] });
-
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
-  
-  // Lock body scroll when modal is open
+  // Lock body scroll when modal open
   useEffect(() => {
     if (selectedProject) {
       document.body.style.overflow = "hidden";
@@ -73,88 +50,89 @@ export function PortfolioSection({ projects, showAllButton = false, categories =
   }, [selectedProject]);
 
   return (
-    <section ref={sectionRef} className="w-full gpu opacity-0">
-      <div className="portfolio-title-container flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-xl bg-accent/10 text-accent">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-          </svg>
-        </div>
-        <h2 className="text-xl font-bold text-foreground">Portofolio</h2>
+    <section className="w-full">
+      {/* Section label */}
+      <div className="flex items-center gap-3 mb-6">
+        <span
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: "0.75rem",
+            color: "var(--accent)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          03.
+        </span>
+        <h2
+          style={{
+            fontWeight: 500,
+            fontSize: "1.5rem",
+            letterSpacing: "-0.015em",
+            color: "var(--text-primary)",
+            fontStyle: "normal",
+          }}
+        >
+          Portofolio
+        </h2>
+        <div
+          className="flex-1"
+          style={{ height: "1px", background: "var(--border)" }}
+        />
       </div>
 
+      {/* Grid 2 kolom */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {projects.map((project) => (
-          <div
+          <ProjectCard
             key={project.id}
-            className="portfolio-card group relative flex flex-col overflow-hidden rounded-2xl bg-card border border-border hover:border-accent/50 transition-colors duration-300 cursor-pointer"
+            project={project}
+            categories={categories}
             onClick={() => setSelectedProject(project)}
-            onMouseEnter={(e) => {
-              gsap.to(e.currentTarget.querySelector('.card-img'), { scale: 1.05, duration: 0.5, ease: "power2.out" });
-            }}
-            onMouseLeave={(e) => {
-              gsap.to(e.currentTarget.querySelector('.card-img'), { scale: 1, duration: 0.5, ease: "power2.out" });
-            }}
-          >
-            <div className="relative aspect-video w-full overflow-hidden bg-muted">
-              <Image
-                src={project.imageUrl}
-                alt={project.title}
-                fill
-                className="card-img object-cover transition-transform"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <div className="p-4 flex flex-col flex-1">
-              <h3 className="font-semibold text-foreground text-lg mb-1 group-hover:text-accent transition-colors">
-                {project.title}
-              </h3>
-              {project.categoryId && categories.find(c => c.id === project.categoryId) && (
-                <div className="mb-2 flex flex-wrap gap-1.5">
-                  <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent rounded-full border border-accent/20">
-                    {categories.find(c => c.id === project.categoryId)?.name}
-                  </span>
-                  {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
-                    <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary rounded-full border border-primary/20">
-                      {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
-                    </span>
-                  )}
-                </div>
-              )}
-              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                {project.description}
-              </p>
-              <div className="mt-auto flex flex-wrap gap-1.5">
-                {project.techStack.slice(0, 3).map((tech, i) => (
-                  <span key={i} className="px-2 py-1 text-[10px] font-medium rounded-md bg-accent/10 text-accent">
-                    {tech}
-                  </span>
-                ))}
-                {project.techStack.length > 3 && (
-                  <span className="px-2 py-1 text-[10px] font-medium rounded-md bg-muted text-muted-foreground">
-                    +{project.techStack.length - 3}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+          />
         ))}
       </div>
 
+      {/* Button lihat semua */}
       {showAllButton && (
         <div className="mt-8 flex justify-center">
           <Link
             href="/portfolio"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-            onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
-            onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
-            onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.95, duration: 0.1 })}
-            onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm"
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: "0.8125rem",
+              color: "var(--accent)",
+              border: "1px solid var(--border)",
+              borderRadius: "8px",
+              background: "transparent",
+              transition: "border-color 200ms ease, background 200ms ease",
+              textDecoration: "none",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.borderColor = "var(--border-hover)";
+              el.style.background = "var(--bg-secondary)";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.borderColor = "var(--border)";
+              el.style.background = "transparent";
+            }}
           >
-            Lihat Semua Projek
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            lihat semua project
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-3.5 h-3.5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
             </svg>
           </Link>
         </div>
@@ -162,9 +140,9 @@ export function PortfolioSection({ projects, showAllButton = false, categories =
 
       {/* Modal */}
       {selectedProject && (
-        <ProjectModal 
-          project={selectedProject} 
-          onClose={() => setSelectedProject(null)} 
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
           categories={categories}
         />
       )}
@@ -172,128 +150,296 @@ export function PortfolioSection({ projects, showAllButton = false, categories =
   );
 }
 
-// Modal Component
-function ProjectModal({ project, onClose, categories = [] }: { project: Project; onClose: () => void; categories?: any[] }) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+/* ---- Project Card ---- */
+function ProjectCard({
+  project,
+  categories,
+  onClick,
+}: {
+  project: Project;
+  categories: any[];
+  onClick: () => void;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={cardRef}
+      onClick={onClick}
+      className="flex flex-col overflow-hidden cursor-pointer"
+      style={{
+        background: "var(--bg-secondary)",
+        border: "1px solid var(--border)",
+        borderRadius: "8px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+        transition: "border-color 200ms ease, transform 200ms ease",
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.borderColor = "var(--border-hover)";
+        el.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.borderColor = "var(--border)";
+        el.style.transform = "translateY(0)";
+      }}
+    >
+      {/* Thumbnail */}
+      <div
+        className="relative overflow-hidden"
+        style={{ aspectRatio: "16/9", background: "var(--bg-tertiary)" }}
+      >
+        <Image
+          src={project.imageUrl}
+          alt={project.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="p-4 flex flex-col flex-1">
+        {/* Title */}
+        <h3
+          style={{
+            fontWeight: 500,
+            fontSize: "1rem",
+            color: "var(--text-primary)",
+            fontStyle: "normal",
+            marginBottom: "0.375rem",
+          }}
+        >
+          {project.title}
+        </h3>
+
+        {/* Description */}
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "var(--text-secondary)",
+            lineHeight: 1.6,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            marginBottom: "0.875rem",
+            flex: 1,
+            fontStyle: "normal",
+          }}
+        >
+          {project.description}
+        </p>
+
+        {/* Tech tags — JetBrains Mono */}
+        <div className="flex flex-wrap gap-1.5 mt-auto">
+          {project.techStack.slice(0, 4).map((tech, i) => (
+            <span
+              key={i}
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: "0.6875rem",
+                color: "var(--text-muted)",
+                background: "var(--bg-tertiary)",
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+                padding: "0.15rem 0.4rem",
+                fontStyle: "normal",
+                fontWeight: 400,
+              }}
+            >
+              {tech}
+            </span>
+          ))}
+          {project.techStack.length > 4 && (
+            <span
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: "0.6875rem",
+                color: "var(--text-muted)",
+                background: "var(--bg-tertiary)",
+                borderRadius: "4px",
+                padding: "0.15rem 0.4rem",
+              }}
+            >
+              +{project.techStack.length - 4}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---- Project Modal ---- */
+function ProjectModal({
+  project,
+  onClose,
+  categories = [],
+}: {
+  project: Project;
+  onClose: () => void;
+  categories?: any[];
+}) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useGSAP(() => {
-    if (!mounted) return;
-    
-    // Animate overlay fade in
-    gsap.fromTo(overlayRef.current, 
-      { opacity: 0 }, 
-      { opacity: 1, duration: 0.3, ease: "power2.out" }
-    );
-    
-    // Animate modal pop in with bounce
-    gsap.fromTo(modalRef.current,
-      { scale: 0.8, opacity: 0, y: 20 },
-      { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" }
-    );
-  }, { dependencies: [mounted] });
-
-  const handleClose = () => {
-    // Animate out before closing
-    gsap.to(overlayRef.current, { opacity: 0, duration: 0.2, ease: "power2.in" });
-    gsap.to(modalRef.current, { 
-      scale: 0.9, 
-      opacity: 0, 
-      y: 10, 
-      duration: 0.2, 
-      ease: "power2.in",
-      onComplete: onClose
-    });
-  };
-
   if (!mounted) return null;
 
   return createPortal(
-    <div 
-      ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-      onClick={handleClose}
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
+      onClick={onClose}
     >
-      <div 
-        ref={modalRef}
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-card rounded-2xl shadow-2xl shadow-black/20"
+      <div
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        style={{
+          background: "var(--bg-secondary)",
+          border: "1px solid var(--border)",
+          borderRadius: "12px",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button 
-          onClick={handleClose}
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 backdrop-blur-md transition-colors"
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 flex items-center justify-center"
+          style={{
+            width: "32px",
+            height: "32px",
+            borderRadius: "6px",
+            background: "var(--bg-tertiary)",
+            border: "1px solid var(--border)",
+            color: "var(--text-secondary)",
+            cursor: "pointer",
+          }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-4 h-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18 18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
-        {/* Modal Content */}
-        <div className="relative w-full aspect-video bg-muted">
+        {/* Image */}
+        <div
+          className="relative w-full"
+          style={{ aspectRatio: "16/9", background: "var(--bg-tertiary)" }}
+        >
           <Image
             src={project.imageUrl}
             alt={project.title}
             fill
             className="object-cover"
+            style={{ borderRadius: "12px 12px 0 0" }}
             sizes="(max-width: 1024px) 100vw, 800px"
           />
         </div>
-        
+
+        {/* Modal content */}
         <div className="p-6 md:p-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+          <h2
+            style={{
+              fontWeight: 500,
+              fontSize: "1.5rem",
+              color: "var(--text-primary)",
+              fontStyle: "normal",
+              marginBottom: "1rem",
+            }}
+          >
             {project.title}
           </h2>
-          
-          <div className="flex flex-wrap gap-2 mb-8 items-center">
-            {project.categoryId && categories.find(c => c.id === project.categoryId) && (
-              <>
-                <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-accent/20 text-accent rounded-full border border-accent/30">
-                  {categories.find(c => c.id === project.categoryId)?.name}
-                </span>
-                {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
-                  <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-primary/20 text-primary rounded-full border border-primary/30">
-                    {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
-                  </span>
-                )}
-              </>
-            )}
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-accent">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                  </svg>
-                  Tentang Projek
-                </h3>
-                <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground bg-muted/30 p-5 rounded-2xl border border-border/50">
-                  <p className="whitespace-pre-wrap leading-relaxed m-0">
-                    {project.fullDescription || project.description}
-                  </p>
-                </div>
-              </div>
+          {/* Category tags jika ada */}
+          {project.categoryId && categories.find((c) => c.id === project.categoryId) && (
+            <div className="flex flex-wrap gap-2 mb-5">
+              <span
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "0.7rem",
+                  color: "var(--accent)",
+                  background: "var(--bg-tertiary)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "4px",
+                  padding: "0.2rem 0.5rem",
+                }}
+              >
+                {categories.find((c) => c.id === project.categoryId)?.name}
+              </span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Deskripsi */}
+            <div className="lg:col-span-2">
+              <h3
+                style={{
+                  fontWeight: 500,
+                  fontSize: "0.9375rem",
+                  color: "var(--text-primary)",
+                  fontStyle: "normal",
+                  marginBottom: "0.75rem",
+                }}
+              >
+                Tentang Projek
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.7,
+                  whiteSpace: "pre-wrap",
+                  fontStyle: "normal",
+                }}
+              >
+                {project.fullDescription || project.description}
+              </p>
             </div>
 
-            <div className="space-y-8">
+            {/* Sidebar */}
+            <div className="space-y-5">
+              {/* Tech stack */}
               {project.techStack && project.techStack.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-accent">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
-                    </svg>
+                  <h3
+                    style={{
+                      fontWeight: 500,
+                      fontSize: "0.9375rem",
+                      color: "var(--text-primary)",
+                      fontStyle: "normal",
+                      marginBottom: "0.625rem",
+                    }}
+                  >
                     Teknologi
                   </h3>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {project.techStack.map((tech, i) => (
-                      <span key={i} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent/10 text-accent border border-accent/20">
+                      <span
+                        key={i}
+                        style={{
+                          fontFamily: "var(--font-jetbrains-mono), monospace",
+                          fontSize: "0.7rem",
+                          color: "var(--text-secondary)",
+                          background: "var(--bg-tertiary)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "4px",
+                          padding: "0.2rem 0.5rem",
+                        }}
+                      >
                         {tech}
                       </span>
                     ))}
@@ -301,27 +447,55 @@ function ProjectModal({ project, onClose, categories = [] }: { project: Project;
                 </div>
               )}
 
+              {/* Link */}
               {project.link && (
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-accent">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                    </svg>
+                  <h3
+                    style={{
+                      fontWeight: 500,
+                      fontSize: "0.9375rem",
+                      color: "var(--text-primary)",
+                      fontStyle: "normal",
+                      marginBottom: "0.625rem",
+                    }}
+                  >
                     Tautan
                   </h3>
-                  <a 
+                  <a
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-                    onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 })}
-                    onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
-                    onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.98, duration: 0.1 })}
-                    onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 })}
+                    className="inline-flex items-center gap-2"
+                    style={{
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      fontSize: "0.8125rem",
+                      color: "var(--accent)",
+                      textDecoration: "none",
+                      border: "1px solid var(--border)",
+                      borderRadius: "6px",
+                      padding: "0.4rem 0.75rem",
+                      background: "var(--bg-tertiary)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.375rem",
+                      width: "100%",
+                      justifyContent: "center",
+                    }}
                   >
                     Kunjungi Projek
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-3.5 h-3.5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                      />
                     </svg>
                   </a>
                 </div>

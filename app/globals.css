@@ -28,6 +28,10 @@
   /* Status */
   --green:        #4ade80;
 
+  /* Grid background — subtle blue tint */
+  --grid-line:          rgba(108, 158, 245, 0.12);
+  --grid-glow-opacity:  0.04;
+
   /* Mapped ke Tailwind utilities */
   --background:         var(--bg-primary);
   --foreground:         var(--text-primary);
@@ -65,6 +69,10 @@ html.light {
 
   /* Status */
   --green:        #16a34a;
+
+  /* Grid background — refined blue for light mode */
+  --grid-line:          rgba(59, 130, 246, 0.15);
+  --grid-glow-opacity:  0.04;
 
   /* Mapped ke Tailwind utilities */
   --background:       var(--bg-primary);

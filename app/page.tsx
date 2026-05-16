@@ -16,6 +16,8 @@ import { CertificationsSection } from "./components/CertificationsSection";
 import { Footer } from "./components/Footer";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { LanguageToggle } from "./components/LanguageToggle";
+import { ChatWidget } from "./components/ChatWidget";
+import { GridBackground } from "./components/GridBackground";
 import { usePortfolioData } from "../lib/hooks/usePortfolioData";
 import { useLanguage } from "../lib/contexts/LanguageContext";
 import { dictionaries } from "../lib/i18n/dictionaries";
@@ -158,11 +160,19 @@ export default function Home() {
 
   return (
     <div
-      style={{ background: "var(--bg-primary)", minHeight: "100vh" }}
+      style={{
+        background: "var(--bg-primary)",
+        minHeight: "100vh",
+        position: "relative",
+        isolation: "isolate",   /* own stacking context — content always above z-index:-1 grid */
+      }}
       suppressHydrationWarning
     >
       {/* Grain overlay — opacity 0.02, hampir tidak terlihat */}
       <div className="grain-overlay" aria-hidden="true" />
+
+      {/* Fixed grid background */}
+      <GridBackground />
 
       {/* ==================== NAVBAR ==================== */}
       <nav
@@ -465,6 +475,8 @@ export default function Home() {
           />
         </section>
       </main>
+
+      <ChatWidget />
     </div>
   );
 }

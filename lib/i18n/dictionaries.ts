@@ -80,6 +80,17 @@ export const dictionaries = {
       title: "Muhammad Farhan | Portofolio Web Developer",
       description: "Fullstack Web Developer spesialis React, Next.js, Laravel, dan PHP. Lihat proyek, pengalaman, dan keahlian teknis saya.",
       keywords: "Muhammad Farhan, Web Developer, Fullstack, React, Next.js, Laravel, Portofolio",
+    },
+    chat: {
+      assistantName: "Asisten Chat",
+      welcomeMessage: "Hai! 👋 Saya Asisten Chat portfolio Farhan. Mau tanya apa tentang portfolio-nya?",
+      placeholder: "Tanya tentang Farhan...",
+      suggestedQ1: "Apa keahlian Farhan?",
+      suggestedQ2: "Ceritakan project-nya",
+      suggestedQ3: "Pengalaman kerja apa saja?",
+      errorMessage: "Maaf, terjadi kesalahan. Coba lagi nanti ya.",
+      typing: "Asisten sedang mengetik...",
+      online: "online",
     }
   },
   en: {
@@ -161,6 +172,17 @@ export const dictionaries = {
       title: "Muhammad Farhan | Web Developer Portfolio",
       description: "Fullstack Web Developer specializing in React, Next.js, Laravel, and PHP. Explore my projects, experiences, and technical skills.",
       keywords: "Muhammad Farhan, Web Developer, Fullstack, React, Next.js, Laravel, Portfolio",
+    },
+    chat: {
+      assistantName: "Chat Assistant",
+      welcomeMessage: "Hi! 👋 I'm the Chat Assistant for Farhan's portfolio. What would you like to know?",
+      placeholder: "Ask about Farhan...",
+      suggestedQ1: "What are Farhan's skills?",
+      suggestedQ2: "Tell me about his projects",
+      suggestedQ3: "What is his work experience?",
+      errorMessage: "Sorry, an error occurred. Please try again later.",
+      typing: "Assistant is typing...",
+      online: "online",
     }
   }
 };

@@ -19,7 +19,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     // Check local storage on mount
     const savedLang = localStorage.getItem("portfolio_lang") as Language;
     if (savedLang === "en" || savedLang === "id") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLanguageState(savedLang);
+    } else {
+      // Deteksi bahasa browser jika belum ada preferensi tersimpan
+      const browserLang = typeof navigator !== "undefined" 
+        ? (navigator.language || (navigator as unknown as { userLanguage?: string }).userLanguage) 
+        : "";
+      if (browserLang && browserLang.toLowerCase().startsWith("id")) {
+        setLanguageState("id");
+      } else {
+        setLanguageState("en");
+      }
     }
     setMounted(true);
   }, []);

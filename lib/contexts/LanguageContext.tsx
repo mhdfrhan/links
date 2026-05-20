@@ -38,7 +38,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem("portfolio_lang", lang);
-    // document.documentElement.lang = lang; // optional, but good for SEO/accessibility
+    document.documentElement.lang = lang;
   };
 
   const toggleLanguage = () => {

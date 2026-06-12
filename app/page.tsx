@@ -20,7 +20,6 @@ import { ChatWidget } from "./components/ChatWidget";
 import { usePortfolioData } from "../lib/hooks/usePortfolioData";
 import { useLanguage } from "../lib/contexts/LanguageContext";
 import { dictionaries } from "../lib/i18n/dictionaries";
-import { CustomCursor } from "./components/CustomCursor";
 
 /**
  * Home — Halaman utama portfolio
@@ -213,7 +212,6 @@ export default function Home() {
     >
       {/* Grain overlay — opacity 0.02, hampir tidak terlihat */}
       <div className="grain-overlay" aria-hidden="true" />
-      <CustomCursor />
 
       {/* ==================== NAVBAR ==================== */}
       <nav

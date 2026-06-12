@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 export function CustomCursor() {
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -112,6 +114,7 @@ export function CustomCursor() {
     };
   }, [mouseX, mouseY, targetX, targetY, targetWidth, targetHeight]);
 
+  if (pathname?.startsWith("/admin")) return null;
   if (!isVisible) return null;
 
   return (

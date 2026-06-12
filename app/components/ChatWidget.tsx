@@ -234,11 +234,13 @@ export function ChatWidget() {
     }
   }, [messages, isOpen, isMinimized]);
 
-  // Focus input when panel opens
+  // Focus input when panel opens (desktop only to prevent mobile keyboard popup)
   useEffect(() => {
     if (isOpen && !isMinimized) {
-      const t = setTimeout(() => inputRef.current?.focus(), 150);
-      return () => clearTimeout(t);
+      if (window.innerWidth > 768) {
+        const t = setTimeout(() => inputRef.current?.focus(), 150);
+        return () => clearTimeout(t);
+      }
     }
   }, [isOpen, isMinimized]);
 

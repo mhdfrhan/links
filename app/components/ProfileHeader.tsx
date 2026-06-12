@@ -112,7 +112,7 @@ export function ProfileHeader({
   );
 
   return (
-    <section ref={containerRef} className="w-full relative pt-8 md:pt-16">
+    <section ref={containerRef} className="w-full relative pt-8 md:pt-16 z-10">
       {/* Massive Typography Hero */}
       <h1 
         className="hero-text"
@@ -304,9 +304,9 @@ function CvDownloadButton({ cvData }: { cvData: { id?: CvEntry; en?: CvEntry } }
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute top-[calc(100%+12px)] left-0 z-20 min-w-[180px]  overflow-hidden shadow-2xl border border-border"
+            className="absolute top-[calc(100%+12px)] left-0 z-[100] min-w-[180px]  overflow-hidden shadow-2xl border border-border"
             style={{
-              background: "color-mix(in srgb, var(--bg-primary) 85%, transparent)",
+              background: "var(--bg-secondary)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
             }}

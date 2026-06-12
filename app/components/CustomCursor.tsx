@@ -138,8 +138,10 @@ export function CustomCursor() {
       >
         <motion.div
           animate={{
-            backgroundColor: isHovering ? "transparent" : "var(--accent)",
-            border: isHovering ? "2px solid var(--accent)" : "0px solid transparent",
+            backgroundColor: isHovering ? "rgba(237, 93, 49, 0)" : "var(--accent)",
+            borderWidth: isHovering ? "2px" : "0px",
+            borderColor: "var(--accent)",
+            borderStyle: "solid",
             borderRadius: 0,
             opacity: isHidden ? 0 : 1,
           }}

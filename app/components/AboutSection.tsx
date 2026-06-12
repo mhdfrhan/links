@@ -24,18 +24,35 @@ export function AboutSection({ text }: AboutSectionProps) {
 
   useGSAP(
     () => {
-      // Character reveal animation
-      gsap.to(".about-char", {
-        color: "var(--text-primary)",
+      if (!containerRef.current) return;
+
+      const chars = containerRef.current.querySelectorAll(".about-char");
+      if (chars.length === 0) return;
+
+      // Resolve the CSS variable to a concrete color value so GSAP can tween it.
+      const resolvedColor = getComputedStyle(containerRef.current)
+        .getPropertyValue("--text-primary")
+        .trim();
+
+      const tween = gsap.to(chars, {
+        color: resolvedColor || "#000000",
         stagger: 0.05,
         ease: "none",
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 70%",
-          end: "bottom 80%",
-          scrub: 1, // Smooth scrub effect
+          end: "+=600", // fixed distance instead of "bottom 80%" to avoid inverted start/end on short sections
+          scrub: 1,
         },
       });
+
+      // Make sure ScrollTrigger recalculates positions after layout/fonts settle
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+
+      return () => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      };
     },
     { scope: containerRef, dependencies: [text] }
   );
@@ -86,14 +103,19 @@ export function AboutSection({ text }: AboutSectionProps) {
               lineHeight: 1.6,
               fontStyle: "normal",
               fontWeight: 400,
-              // Starting color (muted/gray)
-              color: "color-mix(in srgb, var(--text-muted) 30%, transparent)",
             }}
           >
             {text.split(" ").map((word, wIndex) => (
               <span key={wIndex} style={{ display: "inline-block", marginRight: "0.25em" }}>
                 {word.split("").map((char, cIndex) => (
-                  <span key={cIndex} className="about-char">
+                  <span
+                    key={cIndex}
+                    className="about-char"
+                    style={{
+                      // Starting color (muted/gray) — set inline so it doesn't depend on a CSS rule
+                      color: "color-mix(in srgb, var(--text-muted) 30%, transparent)",
+                    }}
+                  >
                     {char}
                   </span>
                 ))}
@@ -105,4 +127,3 @@ export function AboutSection({ text }: AboutSectionProps) {
     </section>
   );
 }
-

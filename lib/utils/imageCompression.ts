@@ -85,7 +85,7 @@ export function cropImage(
   file: File | Blob,
   crop: { x: number; y: number; width: number; height: number },
   outputSize?: { width: number; height: number },
-  quality: number = 0.9
+  quality: number = 1.0
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();

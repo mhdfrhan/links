@@ -48,14 +48,14 @@ export default function LoginPage() {
   return (
     <div className="flex-1 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-card/50 backdrop-blur-xl shadow-2xl">
+        <div className="relative overflow-hidden  border border-border bg-card/50 backdrop-blur-xl shadow-2xl">
           {/* Decorative gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-emerald-500/5" />
           
           <div className="relative p-8 md:p-10">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16  bg-accent/10 mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-accent">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
                 </svg>
@@ -66,7 +66,7 @@ export default function LoginPage() {
 
             {/* Error Alert */}
             {error && (
-              <div className="flex items-start gap-3 p-4 mb-6 text-sm bg-destructive/10 border border-destructive/20 rounded-xl">
+              <div className="flex items-start gap-3 p-4 mb-6 text-sm bg-destructive/10 border border-destructive/20 ">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                 </svg>
@@ -83,7 +83,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 placeholder:text-muted-foreground/50"
+                  className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 placeholder:text-muted-foreground/50"
                   placeholder="admin@example.com"
                 />
               </div>
@@ -95,7 +95,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 placeholder:text-muted-foreground/50"
+                  className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 placeholder:text-muted-foreground/50"
                   placeholder="••••••••"
                 />
               </div>
@@ -103,11 +103,11 @@ export default function LoginPage() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full mt-2 py-3.5 px-4 bg-accent text-accent-foreground font-semibold rounded-xl hover:bg-accent/90 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg hover:shadow-accent/25"
+                className="w-full mt-2 py-3.5 px-4 bg-accent text-accent-foreground font-semibold  hover:bg-accent/90 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg hover:shadow-accent/25"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-accent-foreground"></div>
+                    <div className="animate-spin  h-4 w-4 border-t-2 border-b-2 border-accent-foreground"></div>
                     Memproses...
                   </span>
                 ) : "Masuk"}

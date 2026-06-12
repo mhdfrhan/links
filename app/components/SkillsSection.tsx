@@ -19,7 +19,7 @@ interface SkillsSectionProps {
 
 /**
  * SkillsSection — Chips grouped by kategori
- * JetBrains Mono, bg-tertiary, rounded-md
+ * JetBrains Mono, bg-tertiary, 
  * Tidak ada progress bar, tidak ada persentase
  */
 export function SkillsSection({ categories }: SkillsSectionProps) {
@@ -77,9 +77,14 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
             </h3>
 
             {/* Skill chips */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
               {category.skills.map((skill, skillIndex) => (
-                <SkillChip key={skillIndex} name={skill.name} />
+                <div key={skillIndex} className="flex items-center gap-4">
+                  <SkillChip name={skill.name} />
+                  {skillIndex < category.skills.length - 1 && (
+                    <span style={{ color: "var(--border)", fontSize: "0.8rem" }}>/</span>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -93,29 +98,20 @@ function SkillChip({ name }: { name: string }) {
   return (
     <span
       style={{
-        fontFamily: "var(--font-jetbrains-mono), monospace",
-        fontSize: "0.75rem",
+        fontFamily: "var(--font-sans), system-ui, sans-serif",
+        fontSize: "1rem",
         color: "var(--text-secondary)",
-        background: "var(--bg-tertiary)",
-        border: "1px solid var(--border)",
-        borderRadius: "6px",
-        padding: "0.25rem 0.625rem",
-        letterSpacing: "0.01em",
         fontStyle: "normal",
         fontWeight: 400,
         display: "inline-block",
-        transition: "border-color 150ms ease, color 150ms ease",
+        transition: "color 150ms ease",
         cursor: "default",
       }}
       onMouseEnter={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "var(--border-hover)";
-        el.style.color = "var(--text-primary)";
+        (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
       }}
       onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "var(--border)";
-        el.style.color = "var(--text-secondary)";
+        (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
       }}
     >
       {name}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -17,10 +17,18 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400"],
 });
 
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Muhammad Farhan | Web Developer Portfolio",
-    template: "%s | Muhammad Farhan"
+    template: "%s | Muhammad Farhan",
   },
   description:
     "Fullstack Web Developer specializing in React, Next.js, Laravel, and PHP. Explore my projects, experiences, and technical skills in modern web development.",
@@ -70,7 +78,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Muhammad Farhan | Web Developer Portfolio",
-    description: "Fullstack Web Developer specializing in React, Next.js, and Laravel.",
+    description:
+      "Fullstack Web Developer specializing in React, Next.js, and Laravel.",
     creator: "@mhdfrhan", // Ganti dengan handle twitter asli jika ada
     images: ["/og-image.jpg"],
   },
@@ -100,8 +109,10 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body
-        className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} antialiased`}
-        style={{ fontFamily: "var(--font-plus-jakarta), system-ui, sans-serif" }}
+        className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} antialiased`}
+        style={{
+          fontFamily: "var(--font-plus-jakarta), system-ui, sans-serif",
+        }}
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>

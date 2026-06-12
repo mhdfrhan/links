@@ -52,73 +52,62 @@ export function CertificationsSection({
         />
       </div>
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-8 mt-8">
         {certifications.map((cert, index) => (
           <div
             key={index}
-            style={{
-              background: "var(--bg-secondary)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "0.875rem 1rem",
-              transition: "border-color 200ms ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor =
-                "var(--border-hover)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor =
-                "var(--border)";
-            }}
+            className="flex flex-col md:flex-row gap-2 md:gap-12 items-start"
           >
-            <div className="flex items-start justify-between gap-3">
+            {/* Date */}
+            <div className="md:w-1/4 flex-shrink-0 md:text-right pt-1 md:pr-4">
+              <span
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "0.8125rem",
+                  color: "var(--text-secondary)",
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase"
+                }}
+              >
+                {cert.date}
+              </span>
+            </div>
+
+            {/* Content */}
+            <div className="md:w-3/4 flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3
                   style={{
-                    fontWeight: 500,
-                    fontSize: "0.9rem",
+                    fontFamily: "var(--font-serif), serif",
+                    fontWeight: 400,
+                    fontSize: "1.25rem",
                     color: "var(--text-primary)",
-                    fontStyle: "normal",
-                    marginBottom: "0.15rem",
+                    marginBottom: "0.25rem",
                   }}
                 >
                   {cert.title}
                 </h3>
                 <p
                   style={{
-                    fontSize: "0.8125rem",
+                    fontFamily: "var(--font-sans), system-ui, sans-serif",
+                    fontSize: "0.9375rem",
                     color: "var(--text-secondary)",
-                    fontStyle: "normal",
-                    marginBottom: "0.2rem",
                   }}
                 >
                   {cert.issuer}
                 </p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
+                {cert.validUntil && (
+                  <p
                     style={{
-                      fontFamily: "var(--font-jetbrains-mono), monospace",
-                      fontSize: "0.7rem",
+                      fontFamily: "var(--font-sans), system-ui, sans-serif",
+                      fontSize: "0.8125rem",
                       color: "var(--text-muted)",
-                      letterSpacing: "0.01em",
+                      marginTop: "0.25rem"
                     }}
                   >
-                    {cert.date}
-                  </span>
-                  {cert.validUntil && (
-                    <span
-                      style={{
-                        fontFamily: "var(--font-jetbrains-mono), monospace",
-                        fontSize: "0.7rem",
-                        color: "var(--text-muted)",
-                        letterSpacing: "0.01em",
-                      }}
-                    >
-                      · {dictionaries[language].misc.until} {cert.validUntil}
-                    </span>
-                  )}
-                </div>
+                    {dictionaries[language].misc.until} {cert.validUntil}
+                  </p>
+                )}
               </div>
 
               {/* Verify link jika ada */}
@@ -129,43 +118,26 @@ export function CertificationsSection({
                   rel="noopener noreferrer"
                   aria-label="Verifikasi sertifikat"
                   style={{
-                    flexShrink: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "6px",
-                    background: "var(--bg-tertiary)",
-                    border: "1px solid var(--border)",
-                    color: "var(--text-muted)",
-                    transition: "color 150ms ease, border-color 150ms ease",
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "0.75rem",
+                    color: "var(--text-secondary)",
+                    textDecoration: "underline",
+                    textDecorationColor: "var(--border)",
+                    textUnderlineOffset: "4px",
+                    transition: "color 150ms ease, text-decoration-color 150ms ease",
                   }}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.color = "var(--accent)";
-                    el.style.borderColor = "var(--border-hover)";
+                    el.style.color = "var(--text-primary)";
+                    el.style.textDecorationColor = "var(--text-primary)";
                   }}
                   onMouseLeave={(e) => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.color = "var(--text-muted)";
-                    el.style.borderColor = "var(--border)";
+                    el.style.color = "var(--text-secondary)";
+                    el.style.textDecorationColor = "var(--border)";
                   }}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    style={{ width: "14px", height: "14px" }}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                    />
-                  </svg>
+                  View
                 </a>
               )}
             </div>

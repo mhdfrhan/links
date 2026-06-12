@@ -129,7 +129,7 @@ export function ImageUploader({
 
       {/* Drop zone */}
       <div
-        className={`relative border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
+        className={`relative border-2 border-dashed  p-6 text-center transition-all cursor-pointer ${
           isDragOver ? "border-accent bg-accent/5" : "border-border hover:border-accent/50 hover:bg-accent/5"
         }`}
         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -153,7 +153,7 @@ export function ImageUploader({
             <img
               src={preview || currentImageUrl}
               alt="Preview"
-              className="max-h-48 mx-auto rounded-xl object-cover"
+              className="max-h-48 mx-auto  object-cover"
             />
             <p className="text-xs text-muted-foreground">Klik atau drag untuk ganti gambar</p>
           </div>
@@ -174,7 +174,7 @@ export function ImageUploader({
 
       {/* Compression info & settings */}
       {originalFile && (
-        <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border">
+        <div className="space-y-4 p-4  bg-muted/30 border border-border">
           {/* Size info */}
           <div className="flex items-center justify-between text-sm">
             <div className="space-y-1">
@@ -182,7 +182,7 @@ export function ImageUploader({
               <p className="text-muted-foreground">Terkompresi: <span className="text-accent font-medium">{formatFileSize(compressedSize)}</span></p>
             </div>
             {savings > 0 && (
-              <span className="px-3 py-1.5 bg-accent/10 text-accent text-xs font-bold rounded-lg">
+              <span className="px-3 py-1.5 bg-accent/10 text-accent text-xs font-bold ">
                 -{savings}%
               </span>
             )}
@@ -217,7 +217,7 @@ export function ImageUploader({
                     value={maxWidth}
                     onChange={(e) => setMaxWidth(Number(e.target.value))}
                     onBlur={recompress}
-                    className="w-full p-2 text-sm rounded-lg bg-background/50 border border-border focus:border-accent outline-none"
+                    className="w-full p-2 text-sm  bg-background/50 border border-border focus:border-accent outline-none"
                   />
                 </div>
                 <div>
@@ -225,7 +225,7 @@ export function ImageUploader({
                   <select
                     value={format}
                     onChange={(e) => { setFormat(e.target.value as any); setTimeout(recompress, 50); }}
-                    className="w-full p-2 text-sm rounded-lg bg-background/50 border border-border focus:border-accent outline-none"
+                    className="w-full p-2 text-sm  bg-background/50 border border-border focus:border-accent outline-none"
                   >
                     <option value="webp">WebP (Terkecil)</option>
                     <option value="jpeg">JPEG</option>
@@ -240,11 +240,11 @@ export function ImageUploader({
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className="w-full py-3 px-4 bg-accent text-accent-foreground font-semibold rounded-xl hover:bg-accent/90 disabled:opacity-70 transition-all"
+            className="w-full py-3 px-4 bg-accent text-accent-foreground font-semibold  hover:bg-accent/90 disabled:opacity-70 transition-all"
           >
             {uploading ? (
               <span className="flex items-center justify-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-accent-foreground" />
+                <div className="animate-spin  h-4 w-4 border-t-2 border-b-2 border-accent-foreground" />
                 Mengupload... {uploadProgress}%
               </span>
             ) : (
@@ -253,9 +253,9 @@ export function ImageUploader({
           </button>
 
           {uploading && (
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-muted  overflow-hidden">
               <div
-                className="h-full bg-accent rounded-full transition-all duration-300"
+                className="h-full bg-accent  transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>

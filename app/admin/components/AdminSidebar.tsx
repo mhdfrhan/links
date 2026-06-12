@@ -92,7 +92,7 @@ export function AdminSidebar() {
               <div key={item.name} className="flex flex-col">
                 <button
                   onClick={() => toggleDropdown(item.name)}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all duration-200 group w-full ${
+                  className={`flex items-center justify-between px-3 py-2  text-sm transition-all duration-200 group w-full ${
                     isActive && !isOpen
                       ? "bg-accent/10 text-accent font-semibold" 
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground font-medium"
@@ -120,7 +120,7 @@ export function AdminSidebar() {
                             <Link
                               key={sub.name}
                               href={sub.href}
-                              className={`flex items-center px-3 py-1.5 rounded-lg text-sm transition-all duration-200 relative ${
+                              className={`flex items-center px-3 py-1.5  text-sm transition-all duration-200 relative ${
                                 isSubActive
                                   ? "bg-accent/10 text-accent font-semibold"
                                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground font-medium"
@@ -128,7 +128,7 @@ export function AdminSidebar() {
                             >
                               {/* Optional: Add a small horizontal line connecting to the sub-item for better visuals */}
                               {isSubActive && (
-                                <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-accent" />
+                                <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-1  bg-accent" />
                               )}
                               {sub.name}
                             </Link>
@@ -146,7 +146,7 @@ export function AdminSidebar() {
             <Link
               key={item.name}
               href={item.href!}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group ${
+              className={`flex items-center gap-3 px-3 py-2  text-sm transition-all duration-200 group ${
                 isActive 
                   ? "bg-accent/10 text-accent font-semibold" 
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground font-medium"
@@ -162,7 +162,7 @@ export function AdminSidebar() {
       <div className="p-3 border-t border-border/50">
         <button
           onClick={() => signOut(auth)}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-red-500/5 hover:text-red-500 transition-all duration-200 group"
+          className="flex items-center gap-3 w-full px-3 py-2  text-sm font-medium text-muted-foreground hover:bg-red-500/5 hover:text-red-500 transition-all duration-200 group"
         >
           <ArrowRightOnRectangleIcon className="w-4.5 h-4.5 group-hover:text-red-500" />
           Logout

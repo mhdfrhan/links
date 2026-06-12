@@ -104,7 +104,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent" />
+        <div className="animate-spin  h-8 w-8 border-t-2 border-b-2 border-accent" />
       </div>
     );
   }
@@ -112,14 +112,14 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight">Pengaturan</h1>
+        <h1 className="text-lg lg:text-xl font-semibold text-foreground tracking-tight">Pengaturan</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Konfigurasi keamanan dan gambar.</p>
       </div>
 
       {/* Account Info */}
       <AdminCard title="Informasi Akun" description="Data akun admin kamu.">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 border border-border/50">
-          <div className="w-10 h-10 rounded-lg bg-accent/5 flex items-center justify-center border border-accent/10">
+        <div className="flex items-center gap-3 p-3  bg-muted/20 border border-border/50">
+          <div className="w-10 h-10  bg-accent/5 flex items-center justify-center border border-accent/10">
             <KeyIcon className="w-5 h-5 text-accent" />
           </div>
           <div>
@@ -146,7 +146,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => setRegistrationOpen(!registrationOpen)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all border ${
+              className={`flex items-center gap-2 px-4 py-2  text-xs font-semibold transition-all border ${
                 registrationOpen
                   ? "bg-accent/5 text-accent border-accent/10"
                   : "bg-red-500/5 text-red-500 border-red-500/10"
@@ -161,7 +161,7 @@ export default function SettingsPage() {
           <button
             onClick={handleSaveSecurity}
             disabled={savingSecurity}
-            className="px-5 py-2 bg-accent text-accent-foreground text-xs font-semibold rounded-xl hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
+            className="px-5 py-2 bg-accent text-accent-foreground text-xs font-semibold  hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
           >
             {savingSecurity ? "Menyimpan..." : "Simpan Keamanan"}
           </button>
@@ -183,7 +183,7 @@ export default function SettingsPage() {
                 step={5}
                 value={defaultQuality}
                 onChange={(e) => setDefaultQuality(Number(e.target.value))}
-                className="w-full accent-accent h-1.5 rounded-lg appearance-none bg-muted cursor-pointer"
+                className="w-full accent-accent h-1.5  appearance-none bg-muted cursor-pointer"
               />
             </div>
             <div className="space-y-2">
@@ -197,7 +197,7 @@ export default function SettingsPage() {
                 step={5}
                 value={profileQuality}
                 onChange={(e) => setProfileQuality(Number(e.target.value))}
-                className="w-full accent-accent h-1.5 rounded-lg appearance-none bg-muted cursor-pointer"
+                className="w-full accent-accent h-1.5  appearance-none bg-muted cursor-pointer"
               />
             </div>
             <div className="space-y-2">
@@ -211,7 +211,7 @@ export default function SettingsPage() {
                 step={5}
                 value={projectQuality}
                 onChange={(e) => setProjectQuality(Number(e.target.value))}
-                className="w-full accent-accent h-1.5 rounded-lg appearance-none bg-muted cursor-pointer"
+                className="w-full accent-accent h-1.5  appearance-none bg-muted cursor-pointer"
               />
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function SettingsPage() {
               <select
                 value={defaultFormat}
                 onChange={(e) => setDefaultFormat(e.target.value)}
-                className="w-full p-2.5 rounded-xl bg-background/50 border border-border/50 focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none text-xs font-medium transition-all"
+                className="w-full p-2.5  bg-background/50 border border-border/50 focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none text-xs font-medium transition-all"
               >
                 <option value="webp">WebP (Terkecil)</option>
                 <option value="jpeg">JPEG</option>
@@ -241,7 +241,7 @@ export default function SettingsPage() {
           <button
             onClick={handleSaveImage}
             disabled={savingImage}
-            className="px-5 py-2 bg-accent text-accent-foreground text-xs font-semibold rounded-xl hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
+            className="px-5 py-2 bg-accent text-accent-foreground text-xs font-semibold  hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
           >
             {savingImage ? "Menyimpan..." : "Simpan Pengaturan Gambar"}
           </button>

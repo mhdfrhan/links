@@ -102,7 +102,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent" />
+        <div className="animate-spin  h-8 w-8 border-t-2 border-b-2 border-accent" />
       </div>
     );
   }
@@ -111,14 +111,14 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight">Dashboard</h1>
+        <h1 className="text-lg lg:text-xl font-semibold text-foreground tracking-tight">Dashboard</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Overview konten portfolio kamu.</p>
       </div>
 
       {/* Profile Quick Preview */}
       <AdminCard>
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl overflow-hidden border border-border/50 bg-muted flex-shrink-0">
+          <div className="w-12 h-12  overflow-hidden border border-border/50 bg-muted flex-shrink-0">
             {profile?.avatarUrl ? (
               <img src={profile.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
             ) : (
@@ -133,7 +133,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/admin/profile"
-            className="px-3 py-1.5 text-xs font-medium text-accent bg-accent/10 rounded-lg border border-accent/20 hover:bg-accent/20 transition-all flex-shrink-0"
+            className="px-3 py-1.5 text-xs font-medium text-accent bg-accent/10  border border-accent/20 hover:bg-accent/20 transition-all flex-shrink-0"
           >
             Edit Profil
           </Link>
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                   <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground/70">{stat.label}</p>
                   <p className="text-2xl font-bold text-foreground mt-0.5 tracking-tight">{stat.value}</p>
                 </div>
-                <div className={`p-1.5 rounded-lg ${stat.color}`}>
+                <div className={`p-1.5  ${stat.color}`}>
                   <stat.icon className="w-4 h-4" />
                 </div>
               </div>
@@ -173,10 +173,10 @@ export default function DashboardPage() {
                 href={action.href}
                 target={action.external ? "_blank" : undefined}
                 rel={action.external ? "noopener noreferrer" : undefined}
-                className="flex items-center justify-between p-3 rounded-xl border border-border/50 hover:border-accent/30 hover:bg-accent/5 transition-all group"
+                className="flex items-center justify-between p-3  border border-border/50 hover:border-accent/30 hover:bg-accent/5 transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-1.5 rounded-lg bg-accent/10">
+                  <div className="p-1.5  bg-accent/10">
                     <action.icon className="w-3.5 h-3.5 text-accent" />
                   </div>
                   <span className="text-xs font-medium text-foreground group-hover:text-accent transition-colors">{action.label}</span>
@@ -203,8 +203,8 @@ export default function DashboardPage() {
                     <span className="text-muted-foreground font-medium">{item.label}</span>
                     <span className="font-semibold text-foreground">{item.count}</span>
                   </div>
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out`} style={{ width: `${percent}%` }} />
+                  <div className="h-1.5 bg-muted  overflow-hidden">
+                    <div className={`h-full ${item.color}  transition-all duration-1000 ease-out`} style={{ width: `${percent}%` }} />
                   </div>
                 </div>
               );

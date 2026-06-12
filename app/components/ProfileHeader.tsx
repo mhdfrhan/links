@@ -4,6 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CvEntry {
   url: string;
@@ -23,10 +26,8 @@ interface ProfileHeaderProps {
 }
 
 /**
- * ProfileHeader — Hero section 2 kolom
- * Kiri: greeting, nama, role, bio singkat, social icons kecil
- * Kanan: foto profil menonjol (rounded-xl, aspect 3:4), tag "4+ years experience"
- * Semua data dari backend via props
+ * ProfileHeader — Vibrant Editorial Hero
+ * Full landscape image, rich typography, and GSAP animations.
  */
 export function ProfileHeader({
   name = "Muhammad Farhan",
@@ -41,182 +42,208 @@ export function ProfileHeader({
   const { language } = useLanguage();
   const dict = dictionaries[language];
 
-  // Gunakan tagline sebagai role — ambil bagian pertama sebelum "|" jika ada
-  const role = tagline.includes("|")
-    ? tagline.split("|")[1]?.trim()
-    : tagline.replace(/[🎓💻🌟]/g, "").trim();
+  const containerRef = useRef<HTMLElement>(null);
 
-  // Bio singkat: 2 kalimat pertama dari about text, atau fallback
-  const bioLines = about
-    ? about.split(".").slice(0, 2).join(". ").trim() + "."
-    : "Fullstack web developer dengan pengalaman 4 tahun mengerjakan berbagai project web dari skala lokal hingga nasional.";
+  // Clean tagline to be professional and natural (avoiding AI/emoji clutter)
+  const cleanTagline = (() => {
+    if (language === "id") {
+      return "Fullstack Web Developer";
+    }
+    if (!tagline) return "Fullstack Web Developer";
+    if (tagline.includes("🎓") || tagline.includes("💻") || tagline.includes("|")) {
+      const parts = tagline.split("|").map(p => p.trim());
+      const devPart = parts.find(p => p.toLowerCase().includes("developer") || p.toLowerCase().includes("web") || p.toLowerCase().includes("engineer"));
+      if (devPart) {
+        return devPart.replace(/[🎓💻🌟]/g, "").trim();
+      }
+    }
+    return tagline.replace(/[🎓💻🌟]/g, "").trim();
+  })();
+
+  const [taglineIndex, setTaglineIndex] = useState(0);
+
+  // Generate words to rotate (keeps Firebase database tagline first, then transitions to others)
+  const taglineWords = (() => {
+    const list = [cleanTagline];
+    
+    // Add the user requested taglines
+    list.push("UI/UX Designer", "Mobile Developer");
+    
+    if (language === "id") {
+      list.push("Programmer Kreatif");
+    } else {
+      list.push("Creative Programmer");
+    }
+    return Array.from(new Set(list));
+  })();
+
+  useEffect(() => {
+    if (taglineWords.length <= 1) return;
+    const interval = setInterval(() => {
+      setTaglineIndex((prev) => (prev + 1) % taglineWords.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [taglineWords]);
+
+  // GSAP Animations
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1 } });
+      
+      tl.fromTo(
+        ".hero-text",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, stagger: 0.1 }
+      )
+      .fromTo(
+        ".hero-image",
+        { opacity: 0, scale: 0.95 },
+        { opacity: 1, scale: 1, duration: 1.2 },
+        "-=0.6"
+      )
+      .fromTo(
+        ".hero-meta",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.1 },
+        "-=0.8"
+      );
+    },
+    { scope: containerRef }
+  );
 
   return (
-    <section className="w-full">
-      {/* Desktop: 2 kolom | Mobile: stack vertikal */}
-      <div className="flex flex-col-reverse md:flex-row items-start md:items-center gap-10 md:gap-12">
+    <section ref={containerRef} className="w-full relative pt-8 md:pt-16">
+      {/* Massive Typography Hero */}
+      <h1 
+        className="hero-text"
+        style={{
+          fontFamily: "var(--font-serif), serif",
+          fontSize: "clamp(2rem, 8vw, 4.5rem)",
+          lineHeight: 1.1,
+          color: "var(--text-primary)",
+          letterSpacing: "-0.02em",
+          maxWidth: "1000px",
+          marginBottom: "1.5rem",
+          textWrap: "balance"
+        }}
+      >
+        {name} <br/>
+        <span style={{ color: "var(--accent)", display: "inline-grid", gridTemplateColumns: "1fr", justifyItems: "start", alignItems: "center" }}>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={taglineIndex}
+              initial={{ y: 15, opacity: 0, filter: "blur(4px)" }}
+              animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+              exit={{ y: -15, opacity: 0, filter: "blur(4px)" }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              style={{ gridArea: "1/1/2/2", whiteSpace: "normal", wordBreak: "keep-all" }}
+            >
+              {taglineWords[taglineIndex]}
+            </motion.span>
+          </AnimatePresence>
+        </span>
+      </h1>
 
-        {/* ——— Kolom Kiri: Teks ——— */}
-        <div className="flex-[1.5] space-y-5">
+      {/* Full Width Image (Breaking out of container) */}
+      <div className="w-screen relative left-1/2 -translate-x-1/2 mb-12 overflow-hidden hero-image">
+        <div 
+          className="relative w-full"
+          style={{
+            aspectRatio: "21/9",
+            background: "var(--bg-tertiary)",
+          }}
+        >
+          <Image
+            src={avatarUrl}
+            alt={`Photo of ${name}`}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        </div>
+      </div>
 
-          {/* Greeting mono label */}
+      {/* Asymmetrical Bottom Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start gap-12">
+        
+        {/* Left: Meta / Links */}
+        <div className="hero-meta flex flex-col gap-6 md:w-1/3">
           <p
             style={{
               fontFamily: "var(--font-jetbrains-mono), monospace",
               fontSize: "0.75rem",
-              color: "var(--text-muted)",
-              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: "var(--accent)",
+              fontWeight: 600,
             }}
           >
-            {dict.hero.greeting}
+            {dict.hero.availability || "Available for work"}
           </p>
 
-          {/* Nama — Inter 500, bukan bold */}
-          <h1
-            style={{
-              fontWeight: 500,
-              fontSize: "2.25rem",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-              color: "var(--text-primary)",
-              fontStyle: "normal",
-            }}
-          >
-            {name}
-          </h1>
-
-          {/* Role */}
-          <p
-            style={{
-              fontSize: "1rem",
-              color: "var(--text-secondary)",
-              lineHeight: 1.5,
-              fontStyle: "normal",
-              marginTop: "-0.5rem",
-            }}
-          >
-            Fullstack Web Developer
-          </p>
-
-          {/* Bio singkat */}
-          <p
-            style={{
-              fontSize: "0.9375rem",
-              color: "var(--text-secondary)",
-              lineHeight: 1.7,
-              maxWidth: "600px",
-              fontStyle: "normal",
-            }}
-          >
-            {bioLines}
-          </p>
-
-          {/* Social icons row — subtle, kecil */}
-          <div className="flex items-center gap-4 pt-1">
-            <SocialIcon
-              href={github || "https://github.com/mhdfrhan"}
-              label="GitHub"
-              icon={
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                </svg>
-              }
-            />
-            <SocialIcon
-              href={linkedin || "https://www.linkedin.com/in/muhammad-farhan-79ba79294/"}
-              label="LinkedIn"
-              icon={
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                </svg>
-              }
-            />
-            <SocialIcon
-              href={`mailto:${email || "hi.mhdfarhan@gmail.com"}`}
-              label="Email"
-              icon={
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-                  />
-                </svg>
-              }
-            />
+          <div className="flex flex-col gap-3">
+            <SocialLink href={github || "https://github.com/mhdfrhan"} label="GitHub" />
+            <SocialLink href={linkedin || "https://linkedin.com"} label="LinkedIn" />
+            <SocialLink href={`mailto:${email || "hi.mhdfarhan@gmail.com"}`} label="Email" />
           </div>
 
-          {/* Status badge */}
-          <div className="flex items-center gap-2 pt-1">
-            <span
-              className="block rounded-full"
-              style={{
-                width: "7px",
-                height: "7px",
-                background: "var(--green)",
-                flexShrink: 0,
-              }}
-            />
-            <span
-              style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: "0.7rem",
-                color: "var(--text-muted)",
-                letterSpacing: "0.03em",
-              }}
-            >
-              {dict.hero.availability}
-            </span>
-          </div>
-
-          {/* Download CV button */}
           {cvData && (cvData.id || cvData.en) && (
-            <CvDownloadButton cvData={cvData} />
+            <div className="pt-4">
+              <CvDownloadButton cvData={cvData} />
+            </div>
           )}
         </div>
 
-        {/* ——— Kolom Kanan: Foto Profil ——— */}
-        <div className="flex flex-col items-center gap-3 md:flex-shrink-0 self-center md:self-auto w-full md:w-auto mt-6 md:mt-0">
-          {/* Foto container */}
-          <div
-            className="relative overflow-hidden"
+        {/* Right: Bio */}
+        <div className="hero-meta flex flex-col md:w-1/2 gap-6 items-end text-right">
+          <p
             style={{
-              width: "180px",
-              height: "240px",
-              borderRadius: "12px",
-              border: "1px solid var(--border)",
+              fontFamily: "var(--font-sans), system-ui, sans-serif",
+              fontSize: "1.125rem",
+              lineHeight: 1.8,
+              color: "var(--text-secondary)",
+              maxWidth: "500px"
             }}
           >
-            <Image
-              src={avatarUrl}
-              alt={`Foto profil ${name}`}
-              fill
-              sizes="180px"
-              className="object-cover"
-              priority
-            />
-          </div>
-
-          {/* Experience tag di bawah foto */}
-          <span
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: "0.7rem",
-              color: "var(--text-muted)",
-              letterSpacing: "0.03em",
-            }}
-          >
-            {dictionaries[useLanguage().language].hero.experience}
-          </span>
+            {about || "Fullstack web developer dengan pengalaman 4 tahun mengerjakan berbagai project web dari skala lokal hingga nasional."}
+          </p>
         </div>
+
       </div>
     </section>
+  );
+}
+
+/* ---- Simple Social Link ---- */
+function SocialLink({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        fontFamily: "var(--font-sans), system-ui, sans-serif",
+        fontSize: "0.9375rem",
+        color: "var(--text-primary)",
+        textDecoration: "none",
+        borderBottom: "1px solid var(--border)",
+        paddingBottom: "2px",
+        display: "inline-block",
+        width: "fit-content",
+        transition: "border-color 0.2s ease, color 0.2s ease"
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)";
+        (e.currentTarget as HTMLElement).style.color = "var(--accent)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+        (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
+      }}
+    >
+      {label}
+    </a>
   );
 }
 
@@ -228,23 +255,15 @@ function formatSize(bytes: number): string {
 }
 
 /* ---- CV Download Button with Dropdown ---- */
-function CvDownloadButton({
-  cvData,
-}: {
-  cvData: { id?: CvEntry; en?: CvEntry };
-}) {
+function CvDownloadButton({ cvData }: { cvData: { id?: CvEntry; en?: CvEntry } }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
   const dict = dictionaries[language];
 
-  // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -255,219 +274,85 @@ function CvDownloadButton({
   }, [isOpen]);
 
   return (
-    <div className="relative pt-2" ref={dropdownRef}>
-      {/* Toggle button */}
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        className="px-5 py-2.5  flex items-center justify-center gap-2 transition-all duration-300 relative group overflow-hidden border"
         style={{
-          fontFamily: "var(--font-jetbrains-mono), monospace",
-          fontSize: "0.75rem",
+          background: "color-mix(in srgb, var(--accent) 10%, transparent)",
+          borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
           color: "var(--accent)",
-          background: "transparent",
-          border: "1px solid var(--border)",
-          borderRadius: "6px",
-          padding: "0.4rem 0.75rem",
+          fontFamily: "var(--font-sans), system-ui, sans-serif",
+          fontSize: "0.875rem",
+          fontWeight: 600,
           cursor: "pointer",
-          transition: "border-color 200ms ease, background 200ms ease",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "0.375rem",
-          letterSpacing: "0.02em",
-        }}
-        onMouseEnter={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.borderColor = "var(--border-hover)";
-          el.style.background = "var(--bg-secondary)";
-        }}
-        onMouseLeave={(e) => {
-          if (!isOpen) {
-            const el = e.currentTarget as HTMLElement;
-            el.style.borderColor = "var(--border)";
-            el.style.background = "transparent";
-          }
         }}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          style={{ width: "14px", height: "14px" }}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-          />
-        </svg>
-        {dict.hero.downloadCv.toLowerCase()}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="currentColor"
-          style={{
-            width: "10px",
-            height: "10px",
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 150ms ease",
-          }}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="m19.5 8.25-7.5 7.5-7.5-7.5"
-          />
-        </svg>
+        <span className="relative z-10">{dict.hero.downloadCv}</span>
+        <span className="relative z-10 transition-transform duration-300" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </span>
+        <div className="absolute inset-0 bg-[var(--accent)] opacity-0 group-hover:opacity-15 transition-opacity duration-300 z-0"></div>
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            left: 0,
-            zIndex: 20,
-            minWidth: "200px",
-            background: "var(--bg-secondary)",
-            border: "1px solid var(--border)",
-            borderRadius: "8px",
-            padding: "0.25rem",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-          }}
-        >
-          {cvData.id && (
-            <a
-              href={cvData.id.url}
-              download={cvData.id.fileName}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setIsOpen(false)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "0.5rem 0.625rem",
-                borderRadius: "6px",
-                textDecoration: "none",
-                transition: "background 150ms ease",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background =
-                  "var(--bg-tertiary)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background =
-                  "transparent";
-              }}
-            >
-              <span
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute top-[calc(100%+12px)] left-0 z-20 min-w-[180px]  overflow-hidden shadow-2xl border border-border"
+            style={{
+              background: "color-mix(in srgb, var(--bg-primary) 85%, transparent)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+            }}
+          >
+            {cvData.id && (
+              <a
+                href={cvData.id.url}
+                download={cvData.id.fileName}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors group/item"
                 style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.75rem",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "0.875rem",
                   color: "var(--text-primary)",
+                  textDecoration: "none",
+                  borderBottom: cvData.en ? "1px solid var(--border)" : "none",
                 }}
               >
-                🇮🇩 bahasa indonesia
-              </span>
-              <span
+                <span className="font-medium group-hover/item:text-accent transition-colors">Indonesia</span>
+                <span style={{color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-jetbrains-mono), monospace"}}>{formatSize(cvData.id.fileSize)}</span>
+              </a>
+            )}
+            {cvData.en && (
+              <a
+                href={cvData.en.url}
+                download={cvData.en.fileName}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors group/item"
                 style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.65rem",
-                  color: "var(--text-muted)",
-                }}
-              >
-                {formatSize(cvData.id.fileSize)}
-              </span>
-            </a>
-          )}
-          {cvData.en && (
-            <a
-              href={cvData.en.url}
-              download={cvData.en.fileName}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setIsOpen(false)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "0.5rem 0.625rem",
-                borderRadius: "6px",
-                textDecoration: "none",
-                transition: "background 150ms ease",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background =
-                  "var(--bg-tertiary)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background =
-                  "transparent";
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.75rem",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "0.875rem",
                   color: "var(--text-primary)",
+                  textDecoration: "none",
                 }}
               >
-                🇬🇧 english
-              </span>
-              <span
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.65rem",
-                  color: "var(--text-muted)",
-                }}
-              >
-                {formatSize(cvData.en.fileSize)}
-              </span>
-            </a>
-          )}
-        </div>
-      )}
+                <span className="font-medium group-hover/item:text-accent transition-colors">English</span>
+                <span style={{color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-jetbrains-mono), monospace"}}>{formatSize(cvData.en.fileSize)}</span>
+              </a>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  );
-}
-
-/* ---- Icon social kecil ---- */
-function SocialIcon({
-  href,
-  label,
-  icon,
-}: {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={label}
-      style={{
-        color: "var(--text-muted)",
-        transition: "color 150ms ease",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.color = "var(--accent)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-      }}
-    >
-      {icon}
-    </a>
   );
 }

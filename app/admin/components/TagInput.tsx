@@ -62,13 +62,13 @@ export function TagInput({ tags, onChange, placeholder = "Ketik lalu Enter...", 
     <div className="space-y-2">
       {label && <label className="block text-sm font-medium text-foreground">{label}</label>}
       <div
-        className="flex flex-wrap items-center gap-2 p-3 rounded-xl bg-background/50 border border-border focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all cursor-text min-h-[52px]"
+        className="flex flex-wrap items-center gap-2 p-3  bg-background/50 border border-border focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all cursor-text min-h-[52px]"
         onClick={() => inputRef.current?.focus()}
       >
         {tags.map((tag, i) => (
           <span
             key={i}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent text-xs font-medium rounded-lg border border-accent/20"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent text-xs font-medium  border border-accent/20"
           >
             {tag}
             <button

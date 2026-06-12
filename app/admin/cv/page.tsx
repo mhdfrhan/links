@@ -117,7 +117,7 @@ export default function CvPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent" />
+        <div className="animate-spin  h-8 w-8 border-t-2 border-b-2 border-accent" />
       </div>
     );
   }
@@ -126,7 +126,7 @@ export default function CvPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight">
+        <h1 className="text-lg lg:text-xl font-semibold text-foreground tracking-tight">
           CV / Resume
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -258,7 +258,7 @@ function CvUploadCard({
         {/* Status indikator */}
         <div className="flex items-center gap-2">
           <span
-            className={`w-2 h-2 rounded-full ${entry ? "bg-green-500" : "bg-muted-foreground/30"}`}
+            className={`w-2 h-2  ${entry ? "bg-green-500" : "bg-muted-foreground/30"}`}
           />
           <span className="text-xs text-muted-foreground">
             {entry ? "Sudah diupload" : "Belum diupload"}
@@ -267,7 +267,7 @@ function CvUploadCard({
 
         {/* File info jika sudah ada */}
         {entry && (
-          <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-2">
+          <div className="p-4  bg-muted/30 border border-border space-y-2">
             <div className="flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -300,7 +300,7 @@ function CvUploadCard({
               {/* Preview */}
               <button
                 onClick={() => window.open(entry.url, "_blank")}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground bg-muted/50  border border-border hover:bg-muted transition-colors"
               >
                 <EyeIcon className="w-3.5 h-3.5" />
                 Preview
@@ -312,7 +312,7 @@ function CvUploadCard({
                 download={entry.fileName}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-accent bg-accent/5 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-accent bg-accent/5  border border-accent/20 hover:bg-accent/10 transition-colors"
               >
                 <DocumentArrowDownIcon className="w-3.5 h-3.5" />
                 Download
@@ -321,7 +321,7 @@ function CvUploadCard({
               {/* Hapus */}
               <button
                 onClick={onDelete}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-500 bg-red-500/5 rounded-lg border border-red-500/10 hover:bg-red-500/10 transition-colors ml-auto"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-500 bg-red-500/5  border border-red-500/10 hover:bg-red-500/10 transition-colors ml-auto"
               >
                 <TrashIcon className="w-3.5 h-3.5" />
                 Hapus
@@ -332,7 +332,7 @@ function CvUploadCard({
 
         {/* Upload area */}
         <div
-          className={`relative border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
+          className={`relative border-2 border-dashed  p-6 text-center transition-all cursor-pointer ${
             isDragOver
               ? "border-accent bg-accent/5"
               : "border-border hover:border-accent/50 hover:bg-accent/5"
@@ -383,9 +383,9 @@ function CvUploadCard({
               <span className="text-muted-foreground">Mengupload...</span>
               <span className="font-medium text-accent">{uploadProgress}%</span>
             </div>
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-muted  overflow-hidden">
               <div
-                className="h-full bg-accent rounded-full transition-all duration-300"
+                className="h-full bg-accent  transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>

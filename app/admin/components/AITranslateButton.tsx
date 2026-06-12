@@ -51,10 +51,10 @@ export function AITranslateButton({ text, onTranslated, className = "", label = 
       type="button"
       onClick={handleTranslate}
       disabled={loading || !text}
-      className={`flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs font-semibold transition-all border border-accent/20 ${className}`}
+      className={`flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-50 disabled:cursor-not-allowed  text-xs font-semibold transition-all border border-accent/20 ${className}`}
     >
       {loading ? (
-        <div className="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        <div className="w-3.5 h-3.5 border-2 border-accent border-t-transparent  animate-spin" />
       ) : (
         <SparklesIcon className="w-3.5 h-3.5" />
       )}

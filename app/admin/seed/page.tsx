@@ -127,13 +127,13 @@ export default function SeedPage() {
       <button
         onClick={seedData}
         disabled={loading}
-        className="w-full py-3 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 disabled:opacity-50"
+        className="w-full py-3 bg-emerald-500 text-white  font-bold hover:bg-emerald-600 disabled:opacity-50"
       >
         {loading ? "Sedang Memproses..." : "Mulai Seed Data"}
       </button>
 
       {status && (
-        <div className="p-4 bg-muted/50 rounded-xl font-mono text-sm">
+        <div className="p-4 bg-muted/50  font-mono text-sm">
           {status}
         </div>
       )}

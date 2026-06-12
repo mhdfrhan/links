@@ -53,7 +53,6 @@ export default function PortfolioPage() {
       >
         <div className="flex flex-col items-center gap-3">
           <div
-            className="rounded-full"
             style={{
               width: "24px",
               height: "24px",
@@ -79,20 +78,16 @@ export default function PortfolioPage() {
   }
 
   const activeCategory = data.categories.find(
-    (c: any) => c.id === selectedCategory
+    (c: any) => c.id === selectedCategory,
   );
   const hasSubCategories =
-    selectedCategory !== "all" &&
-    activeCategory?.subCategories?.length > 0;
+    selectedCategory !== "all" && activeCategory?.subCategories?.length > 0;
 
   return (
     <div
       style={{ background: "var(--bg-primary)", minHeight: "100vh" }}
       suppressHydrationWarning
     >
-      {/* Grain overlay tipis */}
-      <div className="grain-overlay" aria-hidden="true" />
-
       {/* ---- Navbar ---- */}
       <nav
         style={{
@@ -106,10 +101,10 @@ export default function PortfolioPage() {
       >
         <div
           style={{
-            maxWidth: "1080px",
+            maxWidth: "1280px",
             margin: "0 auto",
             padding: "0 1.5rem",
-            height: "56px",
+            height: "64px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -118,53 +113,35 @@ export default function PortfolioPage() {
           {/* Back link */}
           <Link
             href="/"
+            className="group"
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "0.375rem",
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: "0.8125rem",
-              color: "var(--text-muted)",
+              gap: "0.5rem",
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              color: "var(--text-secondary)",
               textDecoration: "none",
-              transition: "color 150ms ease",
+              transition: "color 200ms ease",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.color =
-                "var(--text-primary)";
+              (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+              (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
             }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              style={{ width: "14px", height: "14px" }}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-              />
-            </svg>
-            ~/mhdfarhan
+            <div className="w-8 h-8 border border-[var(--border)] flex items-center justify-center group-hover:bg-[var(--accent)] group-hover:border-[var(--accent)] group-hover:text-white transition-all duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+              </svg>
+            </div>
+            Back to Home
           </Link>
 
-          {/* Right side: page label + theme toggle */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <span
-              style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: "0.75rem",
-                color: "var(--text-muted)",
-                letterSpacing: "0.02em",
-              }}
-            >
-              /portfolio
-            </span>
+          {/* Right side: theme toggle */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <ThemeToggle />
           </div>
         </div>
@@ -173,47 +150,35 @@ export default function PortfolioPage() {
       {/* ---- Main Content ---- */}
       <main
         style={{
-          maxWidth: "1080px",
+          maxWidth: "1280px",
           margin: "0 auto",
-          padding: "3rem 1.5rem 6rem",
+          padding: "4rem 1.5rem 8rem",
         }}
       >
         {/* Page header */}
-        <div style={{ marginBottom: "3rem" }}>
-          <p
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: "0.75rem",
-              color: "var(--text-muted)",
-              letterSpacing: "0.04em",
-              marginBottom: "0.5rem",
-            }}
-          >
-            ~/projects
-          </p>
+        <div style={{ marginBottom: "4rem" }}>
           <h1
             style={{
-              fontWeight: 500,
-              fontSize: "2.25rem",
+              fontFamily: "var(--font-serif), serif",
+              fontWeight: 400,
+              fontSize: "clamp(3rem, 6vw, 5rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
-              fontStyle: "normal",
-              marginBottom: "0.75rem",
+              lineHeight: 1.1,
+              marginBottom: "1.5rem",
             }}
           >
-            Semua Projek
+            All Projects
           </h1>
           <p
             style={{
-              fontSize: "0.9375rem",
+              fontSize: "1.125rem",
               color: "var(--text-secondary)",
-              lineHeight: 1.7,
-              fontStyle: "normal",
-              maxWidth: "520px",
+              lineHeight: 1.6,
+              maxWidth: "600px",
             }}
           >
-            Kumpulan hasil karya dan proyek yang pernah saya kerjakan, mulai dari
-            web app, sistem informasi, hingga company profile.
+            A comprehensive archive of my work, exploring digital experiences across web apps, systems, and creative profiles.
           </p>
         </div>
 
@@ -222,12 +187,16 @@ export default function PortfolioPage() {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "0.75rem",
-            marginBottom: "2.5rem",
+            gap: "1.5rem",
+            marginBottom: "4rem",
+            padding: "1.5rem",
+            background: "var(--bg-tertiary)",
+            borderRadius: 0,
+            border: "1px solid var(--border)",
           }}
         >
           {/* Category filter pills */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
             <FilterPill
               active={selectedCategory === "all"}
               onClick={() => {
@@ -235,7 +204,7 @@ export default function PortfolioPage() {
                 setSelectedSubCategory("all");
               }}
             >
-              semua
+              All Works
             </FilterPill>
             {data.categories.map((cat: any) => (
               <FilterPill
@@ -246,19 +215,20 @@ export default function PortfolioPage() {
                   setSelectedSubCategory("all");
                 }}
               >
-                {cat.name.toLowerCase()}
+                {cat.name}
               </FilterPill>
             ))}
           </div>
 
-          {/* SubCategory filter (muncul jika kategori dipilih & punya subcategories) */}
+          {/* SubCategory filter */}
           {hasSubCategories && (
             <div
               style={{
                 display: "flex",
                 flexWrap: "wrap",
-                gap: "0.375rem",
-                paddingLeft: "0.25rem",
+                gap: "0.5rem",
+                paddingTop: "1rem",
+                borderTop: "1px dashed var(--border)",
               }}
             >
               <FilterPill
@@ -266,7 +236,7 @@ export default function PortfolioPage() {
                 onClick={() => setSelectedSubCategory("all")}
                 small
               >
-                semua {activeCategory?.name?.toLowerCase()}
+                All {activeCategory?.name}
               </FilterPill>
               {activeCategory?.subCategories?.map((sub: any) => (
                 <FilterPill
@@ -275,112 +245,71 @@ export default function PortfolioPage() {
                   onClick={() => setSelectedSubCategory(sub.id)}
                   small
                 >
-                  {sub.name.toLowerCase()}
+                  {sub.name}
                 </FilterPill>
               ))}
             </div>
           )}
 
-          {/* Sort dropdown — kanan */}
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.375rem",
-                background: "var(--bg-secondary)",
-                border: "1px solid var(--border)",
-                borderRadius: "6px",
-                padding: "0.25rem 0.625rem",
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
+          {/* Sort dropdown */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-3rem", pointerEvents: "none" }}>
+            <div style={{ pointerEvents: "auto" }}>
+              <div
                 style={{
-                  width: "13px",
-                  height: "13px",
-                  color: "var(--text-muted)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  background: "var(--bg-primary)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 0,
+                  padding: "0.375rem 1rem",
                 }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-                />
-              </svg>
-              <select
-                value={sortOrder}
-                onChange={(e) =>
-                  setSortOrder(e.target.value as "newest" | "oldest")
-                }
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.75rem",
-                  color: "var(--text-secondary)",
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  cursor: "pointer",
-                  padding: "0.25rem 0",
-                }}
-              >
-                <option
-                  value="newest"
+                <select
+                  value={sortOrder}
+                  onChange={(e) =>
+                    setSortOrder(e.target.value as "newest" | "oldest")
+                  }
                   style={{
-                    background: "var(--bg-secondary)",
+                    fontFamily: "var(--font-sans), sans-serif",
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
                     color: "var(--text-primary)",
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    cursor: "pointer",
+                    appearance: "none",
+                    paddingRight: "1rem",
                   }}
                 >
-                  terbaru
-                </option>
-                <option
-                  value="oldest"
-                  style={{
-                    background: "var(--bg-secondary)",
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  terlama
-                </option>
-              </select>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                </select>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 text-[var(--text-secondary)]">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* ---- Project count label ---- */}
-        <p
-          style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: "0.7rem",
-            color: "var(--text-muted)",
-            letterSpacing: "0.02em",
-            marginBottom: "1.25rem",
-          }}
-        >
-          {filteredAndSortedProjects.length} project
-          {filteredAndSortedProjects.length !== 1 ? "s" : ""} ditemukan
-        </p>
 
         {/* ---- Projects Grid ---- */}
         {filteredAndSortedProjects.length === 0 ? (
           <div
             style={{
-              padding: "5rem 0",
+              padding: "8rem 0",
               textAlign: "center",
             }}
           >
             <p
               style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: "0.8125rem",
+                fontFamily: "var(--font-sans), sans-serif",
+                fontSize: "1.125rem",
                 color: "var(--text-muted)",
               }}
             >
-              belum ada projek di kategori ini.
+              No projects found in this category.
             </p>
           </div>
         ) : (
@@ -388,6 +317,7 @@ export default function PortfolioPage() {
             projects={filteredAndSortedProjects}
             showAllButton={false}
             categories={data.categories}
+            columns={3}
           />
         )}
       </main>
@@ -411,30 +341,28 @@ function FilterPill({
     <button
       onClick={onClick}
       style={{
-        fontFamily: "var(--font-jetbrains-mono), monospace",
-        fontSize: small ? "0.6875rem" : "0.75rem",
-        fontWeight: 400,
-        fontStyle: "normal",
-        color: active ? "var(--accent)" : "var(--text-muted)",
-        background: active ? "var(--bg-secondary)" : "transparent",
-        border: `1px solid ${active ? "var(--border-hover)" : "var(--border)"}`,
-        borderRadius: "6px",
-        padding: small ? "0.2rem 0.5rem" : "0.3rem 0.625rem",
+        fontFamily: "var(--font-sans), sans-serif",
+        fontSize: small ? "0.8125rem" : "0.875rem",
+        fontWeight: 500,
+        color: active ? "#fff" : "var(--text-secondary)",
+        background: active ? "var(--accent)" : "transparent",
+        border: `1px solid ${active ? "var(--accent)" : "var(--border)"}`,
+        borderRadius: 0,
+        padding: small ? "0.375rem 1rem" : "0.5rem 1.25rem",
         cursor: "pointer",
-        transition: "color 150ms ease, border-color 150ms ease, background 150ms ease",
-        letterSpacing: "0.02em",
+        transition: "all 300ms ease",
       }}
       onMouseEnter={(e) => {
         if (!active) {
           const el = e.currentTarget as HTMLElement;
-          el.style.color = "var(--text-secondary)";
-          el.style.borderColor = "var(--border-hover)";
+          el.style.color = "var(--text-primary)";
+          el.style.borderColor = "var(--text-secondary)";
         }
       }}
       onMouseLeave={(e) => {
         if (!active) {
           const el = e.currentTarget as HTMLElement;
-          el.style.color = "var(--text-muted)";
+          el.style.color = "var(--text-secondary)";
           el.style.borderColor = "var(--border)";
         }
       }}

@@ -40,14 +40,14 @@ export function TerminalBlock({
       cat.title.toLowerCase().includes("tech") ||
       cat.title.toLowerCase().includes("stack") ||
       cat.title.toLowerCase().includes("frontend") ||
-      cat.title.toLowerCase().includes("backend")
+      cat.title.toLowerCase().includes("backend"),
   );
 
   const skillNames = techSkills
     ? techSkills.skills
-      .slice(0, 6)
-      .map((s) => s.name.toLowerCase().replace(/\s/g, "-") + "/")
-      .join("  ")
+        .slice(0, 6)
+        .map((s) => s.name.toLowerCase().replace(/\s/g, "-") + "/")
+        .join("  ")
     : "react/  nextjs/  tailwind/  laravel/  php/  mysql/";
 
   // Truncate about text untuk JSON format
@@ -56,7 +56,7 @@ export function TerminalBlock({
 
   return (
     <div
-      className="w-full rounded-lg overflow-hidden"
+      className="w-full  overflow-hidden"
       style={{
         background: "var(--bg-code)",
         border: "1px solid var(--border)",
@@ -76,7 +76,7 @@ export function TerminalBlock({
         {/* Window control dots */}
         <div className="flex items-center gap-1.5">
           <span
-            className="block rounded-full"
+            className="block "
             style={{
               width: "10px",
               height: "10px",
@@ -85,7 +85,7 @@ export function TerminalBlock({
             }}
           />
           <span
-            className="block rounded-full"
+            className="block "
             style={{
               width: "10px",
               height: "10px",
@@ -94,7 +94,7 @@ export function TerminalBlock({
             }}
           />
           <span
-            className="block rounded-full"
+            className="block "
             style={{
               width: "10px",
               height: "10px",
@@ -122,8 +122,7 @@ export function TerminalBlock({
         {/* Command: whoami */}
         <TerminalLine prompt="$" command="whoami" />
         <TerminalOutput>
-          {name} &mdash;{" "}
-          <span style={{ color: "var(--accent)" }}>{role}</span>
+          {name} &mdash; <span style={{ color: "var(--accent)" }}>{role}</span>
         </TerminalOutput>
 
         {/* Spacer */}
@@ -164,9 +163,7 @@ export function TerminalBlock({
         {/* Command: echo $STATUS */}
         <TerminalLine prompt="$" command="echo $STATUS" />
         <TerminalOutput>
-          <span style={{ color: "var(--green)" }}>
-            &quot;{status}&quot;
-          </span>
+          <span style={{ color: "var(--green)" }}>&quot;{status}&quot;</span>
         </TerminalOutput>
 
         {/* Baris terakhir dengan blinking cursor */}

@@ -45,14 +45,14 @@ export function SortableItem({ id, children }: SortableItemProps) {
       <div 
         {...attributes}
         {...listeners}
-        className="absolute top-4 right-14 p-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-accent z-10 md:hidden bg-card/80 backdrop-blur-sm rounded-lg"
+        className="absolute top-4 right-14 p-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-accent z-10 md:hidden bg-card/80 backdrop-blur-sm "
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
         </svg>
       </div>
 
-      <div className={isDragging ? "ring-2 ring-accent rounded-2xl shadow-lg shadow-accent/20" : ""}>
+      <div className={isDragging ? "ring-2 ring-accent  shadow-lg shadow-accent/20" : ""}>
         {children}
       </div>
     </div>

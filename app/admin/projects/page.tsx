@@ -275,7 +275,7 @@ export default function ProjectsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent" />
+        <div className="animate-spin  h-8 w-8 border-t-2 border-b-2 border-accent" />
       </div>
     );
   }
@@ -284,13 +284,13 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight">Portofolio</h1>
+          <h1 className="text-lg lg:text-xl font-semibold text-foreground tracking-tight">Portofolio</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Kelola projek-projek portfolio kamu.</p>
         </div>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center justify-center gap-2 px-5 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-xl hover:bg-accent/90 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
+            className="flex items-center justify-center gap-2 px-5 py-2 bg-accent text-accent-foreground text-sm font-semibold  hover:bg-accent/90 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
           >
             <PlusIcon className="w-4 h-4" />
             Tambah Projek
@@ -314,7 +314,7 @@ export default function ProjectsPage() {
                   value={title_en}
                   onChange={(e) => setTitleEn(e.target.value)}
                   placeholder="Project Name (English)"
-                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                  className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
                 />
               </div>
             </div>
@@ -332,7 +332,7 @@ export default function ProjectsPage() {
                   rows={3}
                   placeholder="Short description..."
                   maxLength={500}
-                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                  className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
                 />
               </div>
             </div>
@@ -350,7 +350,7 @@ export default function ProjectsPage() {
                   rows={6}
                   placeholder="Full description for modal popup..."
                   maxLength={3000}
-                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                  className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
                 />
               </div>
             </div>
@@ -387,7 +387,7 @@ export default function ProjectsPage() {
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     placeholder="Ketik Kategori Baru..."
-                    className="flex-1 p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                    className="flex-1 p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
                     autoFocus
                     onKeyDown={(e) => e.key === "Enter" && handleQuickAddCategory()}
                   />
@@ -395,14 +395,14 @@ export default function ProjectsPage() {
                     type="button"
                     onClick={handleQuickAddCategory}
                     disabled={savingCategory || !newCategoryName.trim()}
-                    className="p-3.5 bg-accent text-accent-foreground rounded-xl hover:bg-accent/90 disabled:opacity-50 transition-all shadow-md"
+                    className="p-3.5 bg-accent text-accent-foreground  hover:bg-accent/90 disabled:opacity-50 transition-all shadow-md"
                   >
-                    {savingCategory ? <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" /> : <CheckIcon className="w-5 h-5" />}
+                    {savingCategory ? <div className="w-5 h-5 border-2 border-background border-t-transparent  animate-spin" /> : <CheckIcon className="w-5 h-5" />}
                   </button>
                   <button
                     type="button"
                     onClick={() => { setIsAddingCategory(false); setNewCategoryName(""); }}
-                    className="p-3.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all"
+                    className="p-3.5 bg-red-500/10 text-red-500  hover:bg-red-500/20 transition-all"
                   >
                     <XMarkIcon className="w-5 h-5" />
                   </button>
@@ -414,7 +414,7 @@ export default function ProjectsPage() {
                     setCategoryId(e.target.value);
                     setSubCategoryId("");
                   }}
-                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
+                  className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
                 >
                   <option value="">Pilih Kategori (Opsional)</option>
                   {categories.map(cat => (
@@ -446,7 +446,7 @@ export default function ProjectsPage() {
                       value={newSubCategoryName}
                       onChange={(e) => setNewSubCategoryName(e.target.value)}
                       placeholder="Ketik Sub-Kategori Baru..."
-                      className="flex-1 p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                      className="flex-1 p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
                       autoFocus
                       onKeyDown={(e) => e.key === "Enter" && handleQuickAddSubCategory()}
                     />
@@ -454,14 +454,14 @@ export default function ProjectsPage() {
                       type="button"
                       onClick={handleQuickAddSubCategory}
                       disabled={savingCategory || !newSubCategoryName.trim()}
-                      className="p-3.5 bg-accent text-accent-foreground rounded-xl hover:bg-accent/90 disabled:opacity-50 transition-all shadow-md"
+                      className="p-3.5 bg-accent text-accent-foreground  hover:bg-accent/90 disabled:opacity-50 transition-all shadow-md"
                     >
-                      {savingCategory ? <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" /> : <CheckIcon className="w-5 h-5" />}
+                      {savingCategory ? <div className="w-5 h-5 border-2 border-background border-t-transparent  animate-spin" /> : <CheckIcon className="w-5 h-5" />}
                     </button>
                     <button
                       type="button"
                       onClick={() => { setIsAddingSubCategory(false); setNewSubCategoryName(""); }}
-                      className="p-3.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all"
+                      className="p-3.5 bg-red-500/10 text-red-500  hover:bg-red-500/20 transition-all"
                     >
                       <XMarkIcon className="w-5 h-5" />
                     </button>
@@ -470,7 +470,7 @@ export default function ProjectsPage() {
                   <select
                     value={subCategoryId}
                     onChange={(e) => setSubCategoryId(e.target.value)}
-                    className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
+                    className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all appearance-none"
                   >
                     <option value="">Pilih Sub-Kategori (Opsional)</option>
                     {categories.find(c => c.id === categoryId)?.subCategories?.map((sub: any) => (
@@ -486,14 +486,14 @@ export default function ProjectsPage() {
             <div className="flex gap-2 pt-2">
               <button
                 onClick={resetForm}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted/50 border border-border/50 transition-all"
+                className="px-4 py-2  text-xs font-semibold text-muted-foreground hover:bg-muted/50 border border-border/50 transition-all"
               >
                 Batal
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-2 bg-accent text-accent-foreground text-xs font-semibold rounded-xl hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20"
+                className="px-5 py-2 bg-accent text-accent-foreground text-xs font-semibold  hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20"
               >
                 {saving ? "Menyimpan..." : editId ? "Update Projek" : "Simpan Projek"}
               </button>
@@ -518,7 +518,7 @@ export default function ProjectsPage() {
                   <AdminCard className="group border-border/50">
                     <div className="flex gap-4 pl-6 md:pl-8">
                       {project.imageUrl && (
-                        <div className="relative w-28 h-20 md:w-40 md:h-24 flex-shrink-0 overflow-hidden rounded-xl bg-muted/20">
+                        <div className="relative w-28 h-20 md:w-40 md:h-24 flex-shrink-0 overflow-hidden  bg-muted/20">
                           <img
                             src={project.imageUrl}
                             alt={project.title}
@@ -532,11 +532,11 @@ export default function ProjectsPage() {
                             <h3 className="font-semibold text-foreground leading-snug">{project.title}</h3>
                             {project.categoryId && categories.find(c => c.id === project.categoryId) && (
                               <div className="flex flex-wrap gap-1 mt-1">
-                                <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary rounded-md border border-primary/20">
+                                <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary  border border-primary/20">
                                   {categories.find(c => c.id === project.categoryId)?.name}
                                 </span>
                                 {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
-                                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-accent/10 text-accent rounded-md border border-accent/20">
+                                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-accent/10 text-accent  border border-accent/20">
                                     {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
                                   </span>
                                 )}
@@ -546,12 +546,12 @@ export default function ProjectsPage() {
                             {project.techStack?.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-2">
                                 {project.techStack.slice(0, 4).map((tech, i) => (
-                                  <span key={i} className="px-2 py-0.5 text-[10px] font-medium bg-accent/5 text-accent rounded-md border border-accent/10">
+                                  <span key={i} className="px-2 py-0.5 text-[10px] font-medium bg-accent/5 text-accent  border border-accent/10">
                                     {tech}
                                   </span>
                                 ))}
                                 {project.techStack.length > 4 && (
-                                  <span className="px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground rounded-md">
+                                  <span className="px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground ">
                                     +{project.techStack.length - 4}
                                   </span>
                                 )}
@@ -561,13 +561,13 @@ export default function ProjectsPage() {
                           <div className="flex gap-1.5 opacity-100 transition-all flex-shrink-0 ml-4 relative z-20">
                             <button
                               onClick={() => startEdit(project)}
-                              className="p-1.5 text-accent bg-accent/5 rounded-lg hover:bg-accent/10 border border-accent/10 transition-colors"
+                              className="p-1.5 text-accent bg-accent/5  hover:bg-accent/10 border border-accent/10 transition-colors"
                             >
                               <PencilIcon className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setDeleteTarget(project)}
-                              className="p-1.5 text-red-500 bg-red-500/5 rounded-lg hover:bg-red-500/10 border border-red-500/10 transition-colors"
+                              className="p-1.5 text-red-500 bg-red-500/5  hover:bg-red-500/10 border border-red-500/10 transition-colors"
                             >
                               <TrashIcon className="w-3.5 h-3.5" />
                             </button>

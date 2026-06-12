@@ -117,7 +117,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent" />
+        <div className="animate-spin  h-8 w-8 border-t-2 border-b-2 border-accent" />
       </div>
     );
   }
@@ -126,13 +126,13 @@ export default function ProfilePage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight">Profil & Sosial Media</h1>
+          <h1 className="text-lg lg:text-xl font-semibold text-foreground tracking-tight">Profil & Sosial Media</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Kelola informasi profil dan link sosial media.</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-5 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-xl hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
+          className="px-5 py-2 bg-accent text-accent-foreground text-sm font-semibold  hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
         >
           {saving ? "Menyimpan..." : "Simpan Perubahan"}
         </button>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
                 rows={3}
                 placeholder="Fullstack Developer & UI/UX Designer (English)..."
                 maxLength={200}
-                className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
               />
             </div>
           </div>
@@ -180,8 +180,8 @@ export default function ProfilePage() {
               setAvatarPublicId(publicId);
               showToast("success", "Foto profil berhasil diupload!");
             }}
-            aspectRatio={1}
-            outputSize={400}
+            aspectRatio={21/9}
+            outputSize={1200}
             folder="portfolio/profile"
           />
         </div>
@@ -198,9 +198,9 @@ export default function ProfilePage() {
                 return (
                    <div
                     key={index}
-                    className="flex items-center gap-3 p-2.5 rounded-xl border border-border/50 bg-muted/10 group"
+                    className="flex items-center gap-3 p-2.5  border border-border/50 bg-muted/10 group"
                   >
-                    <span className="text-base flex-shrink-0 w-8 h-8 flex items-center justify-center bg-background rounded-lg shadow-sm">{platform?.icon || "🔗"}</span>
+                    <span className="text-base flex-shrink-0 w-8 h-8 flex items-center justify-center bg-background  shadow-sm">{platform?.icon || "🔗"}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-foreground truncate">{link.label}</p>
                       <p className="text-[10px] text-muted-foreground truncate">{link.url}</p>
@@ -210,7 +210,7 @@ export default function ProfilePage() {
                         type="button"
                         onClick={() => moveSocialLink(index, "up")}
                         disabled={index === 0}
-                        className="p-1.5 rounded-lg hover:bg-background disabled:opacity-20"
+                        className="p-1.5  hover:bg-background disabled:opacity-20"
                         title="Pindah ke atas"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
@@ -219,7 +219,7 @@ export default function ProfilePage() {
                         type="button"
                         onClick={() => moveSocialLink(index, "down")}
                         disabled={index === socialLinks.length - 1}
-                        className="p-1.5 rounded-lg hover:bg-background disabled:opacity-20"
+                        className="p-1.5  hover:bg-background disabled:opacity-20"
                         title="Pindah ke bawah"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
@@ -227,7 +227,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => removeSocialLink(index)}
-                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500"
+                        className="p-1.5  hover:bg-red-500/10 text-red-500"
                         title="Hapus"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
@@ -240,7 +240,7 @@ export default function ProfilePage() {
           )}
 
           {/* Add new link */}
-          <div className="p-4 rounded-xl border border-dashed border-border space-y-3">
+          <div className="p-4  border border-dashed border-border space-y-3">
             <p className="text-sm font-medium text-foreground">Tambah Social Link</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <select
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                   const p = PLATFORM_OPTIONS.find((p) => p.value === e.target.value);
                   if (p && p.value !== "custom") setNewLabel(p.label);
                 }}
-                className="p-3 rounded-xl bg-background/50 border border-border focus:border-accent outline-none text-sm"
+                className="p-3  bg-background/50 border border-border focus:border-accent outline-none text-sm"
               >
                 {PLATFORM_OPTIONS.map((p) => (
                   <option key={p.value} value={p.value}>{p.icon} {p.label}</option>
@@ -261,21 +261,21 @@ export default function ProfilePage() {
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder="Label (opsional)"
-                className="p-3 rounded-xl bg-background/50 border border-border focus:border-accent outline-none text-sm placeholder:text-muted-foreground/50"
+                className="p-3  bg-background/50 border border-border focus:border-accent outline-none text-sm placeholder:text-muted-foreground/50"
               />
               <input
                 type="text"
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
                 placeholder="URL atau username"
-                className="p-3 rounded-xl bg-background/50 border border-border focus:border-accent outline-none text-sm placeholder:text-muted-foreground/50"
+                className="p-3  bg-background/50 border border-border focus:border-accent outline-none text-sm placeholder:text-muted-foreground/50"
               />
             </div>
             <button
               type="button"
               onClick={addSocialLink}
               disabled={!newUrl.trim()}
-              className="px-5 py-2.5 text-sm font-medium bg-accent/10 text-accent rounded-xl border border-accent/20 hover:bg-accent/20 disabled:opacity-50 transition-all"
+              className="px-5 py-2.5 text-sm font-medium bg-accent/10 text-accent  border border-accent/20 hover:bg-accent/20 disabled:opacity-50 transition-all"
             >
               + Tambah Link
             </button>

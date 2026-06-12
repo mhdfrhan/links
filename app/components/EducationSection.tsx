@@ -50,76 +50,75 @@ export function EducationSection({ items }: EducationSectionProps) {
         />
       </div>
 
-      <div className="space-y-4">
+      {/* List */}
+      <div className="flex flex-col gap-12 mt-8">
         {items.map((item, index) => (
           <div
             key={index}
-            style={{
-              background: "var(--bg-secondary)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "1rem 1.25rem",
-            }}
+            className="flex flex-col md:flex-row gap-4 md:gap-12"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <h3
-                  style={{
-                    fontWeight: 500,
-                    fontSize: "1rem",
-                    color: "var(--text-primary)",
-                    fontStyle: "normal",
-                    marginBottom: "0.2rem",
-                  }}
-                >
-                  {item.institution}
-                </h3>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--accent)",
-                    fontStyle: "normal",
-                    marginBottom: (item.score || item.note) ? "0.5rem" : 0,
-                  }}
-                >
-                  {item.degree}
-                </p>
-                {item.score && (
-                  <p
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "var(--text-secondary)",
-                      marginBottom: item.note ? "0.5rem" : 0,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {item.score}
-                  </p>
-                )}
-                {item.note && (
-                  <p
-                    style={{
-                      fontFamily: "var(--font-jetbrains-mono), monospace",
-                      fontSize: "0.7rem",
-                      color: "var(--text-muted)",
-                      letterSpacing: "0.01em",
-                    }}
-                  >
-                    {item.note}
-                  </p>
-                )}
-              </div>
+            {/* Period */}
+            <div className="md:w-1/4 flex-shrink-0 md:text-right pt-1 md:pr-4">
               <span
                 style={{
                   fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.7rem",
-                  color: "var(--text-muted)",
-                  whiteSpace: "nowrap",
-                  letterSpacing: "0.02em",
+                  fontSize: "0.8125rem",
+                  color: "var(--text-secondary)",
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase"
                 }}
               >
                 {item.period}
               </span>
+            </div>
+
+            {/* Content */}
+            <div className="md:w-3/4">
+              <h3
+                style={{
+                  fontFamily: "var(--font-serif), serif",
+                  fontWeight: 400,
+                  fontSize: "1.5rem",
+                  color: "var(--text-primary)",
+                  marginBottom: "0.25rem",
+                }}
+              >
+                {item.institution}
+              </h3>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans), system-ui, sans-serif",
+                  fontSize: "1rem",
+                  color: "var(--text-secondary)",
+                  marginBottom: item.score || item.note ? "0.5rem" : "0",
+                }}
+              >
+                {item.degree}
+              </p>
+              {item.score && (
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans), system-ui, sans-serif",
+                    fontSize: "0.9375rem",
+                    color: "var(--text-primary)",
+                    marginBottom: item.note ? "0.5rem" : "0",
+                  }}
+                >
+                  {item.score}
+                </p>
+              )}
+              {item.note && (
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans), system-ui, sans-serif",
+                    fontSize: "0.9375rem",
+                    color: "var(--text-secondary)",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {item.note}
+                </p>
+              )}
             </div>
           </div>
         ))}

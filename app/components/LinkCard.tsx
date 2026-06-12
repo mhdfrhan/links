@@ -71,7 +71,7 @@ export function LinkCard({
     >
       <div
         ref={innerRef}
-        className="relative flex items-center gap-4 p-4 rounded-2xl bg-card border border-border overflow-hidden"
+        className="relative flex items-center gap-4 p-4  bg-card border border-border overflow-hidden"
       >
         {/* Hover glow effect */}
         <div
@@ -80,7 +80,7 @@ export function LinkCard({
         />
 
         {/* Icon */}
-        <div className="relative flex-shrink-0 h-12 w-12 rounded-xl bg-muted flex items-center justify-center text-accent group-hover:bg-accent/10 transition-colors duration-300">
+        <div className="relative flex-shrink-0 h-12 w-12  bg-muted flex items-center justify-center text-accent group-hover:bg-accent/10 transition-colors duration-300">
           {icon}
         </div>
 

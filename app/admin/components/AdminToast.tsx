@@ -37,7 +37,7 @@ export function AdminToast() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border backdrop-blur-xl text-sm font-medium animate-in slide-in-from-bottom-4 fade-in duration-300 ${
+          className={`flex items-center gap-3 px-5 py-4  shadow-2xl border backdrop-blur-xl text-sm font-medium animate-in slide-in-from-bottom-4 fade-in duration-300 ${
             toast.type === "success"
               ? "bg-accent/10 border-accent/20 text-accent"
               : toast.type === "error"

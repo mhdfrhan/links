@@ -47,7 +47,7 @@ export default function AboutPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent" />
+        <div className="animate-spin  h-8 w-8 border-t-2 border-b-2 border-accent" />
       </div>
     );
   }
@@ -56,13 +56,13 @@ export default function AboutPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight">Tentang Saya</h1>
+          <h1 className="text-lg lg:text-xl font-semibold text-foreground tracking-tight">Tentang Saya</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Teks yang muncul di section "About" di homepage.</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-5 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-xl hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
+          className="px-5 py-2 bg-accent text-accent-foreground text-sm font-semibold  hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
         >
           {saving ? "Menyimpan..." : "Simpan Perubahan"}
         </button>
@@ -91,14 +91,14 @@ export default function AboutPage() {
                 rows={8}
                 placeholder="Write your bio / description here (English)..."
                 maxLength={2000}
-                className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
               />
             </div>
           </div>
         </AdminCard>
 
         <AdminCard title="Preview" description="Tampilan teks di website kamu.">
-          <div className="p-5 rounded-2xl bg-muted/10 border border-border/50">
+          <div className="p-5  bg-muted/10 border border-border/50">
             <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
               {text || <span className="opacity-40 font-medium">Belum ada teks...</span>}
             </p>

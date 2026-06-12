@@ -55,96 +55,65 @@ export function ExperienceSection({
         />
       </div>
 
-      {/* Timeline */}
-      <div className="space-y-0">
+      {/* List */}
+      <div className="flex flex-col gap-16 mt-8">
         {items.map((item, index) => (
           <div
             key={index}
-            className="relative pl-6"
-            style={{
-              borderLeft: "1px solid var(--border)",
-              paddingBottom: index < items.length - 1 ? "2rem" : "0",
-            }}
+            className="flex flex-col md:flex-row gap-4 md:gap-12"
           >
-            {/* Timeline dot */}
-            <div
-              className="absolute"
-              style={{
-                left: "-5px",
-                top: "3px",
-                width: "9px",
-                height: "9px",
-                borderRadius: "50%",
-                background: "var(--bg-primary)",
-                border: "1px solid var(--border-hover)",
-              }}
-            />
-
-            {/* Content */}
-            <div>
-              {/* Period — mono, muted, di atas */}
+            {/* Period */}
+            <div className="md:w-1/4 flex-shrink-0 md:text-right pt-1 md:pr-4">
               <span
                 style={{
                   fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.7rem",
-                  color: "var(--text-muted)",
-                  letterSpacing: "0.02em",
-                  display: "block",
-                  marginBottom: "0.25rem",
+                  fontSize: "0.8125rem",
+                  color: "var(--text-secondary)",
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase"
                 }}
               >
                 {item.period}
               </span>
+            </div>
 
-              {/* Title */}
+            {/* Content */}
+            <div className="md:w-3/4">
               <h3
                 style={{
-                  fontWeight: 500,
-                  fontSize: "1rem",
+                  fontFamily: "var(--font-serif), serif",
+                  fontWeight: 400,
+                  fontSize: "1.5rem",
                   color: "var(--text-primary)",
-                  fontStyle: "normal",
-                  marginBottom: "0.15rem",
+                  marginBottom: "0.25rem",
                 }}
               >
                 {item.title}
               </h3>
-
-              {/* Company */}
               <p
                 style={{
-                  fontSize: "0.875rem",
-                  color: "var(--accent)",
-                  marginBottom: "0.625rem",
-                  fontStyle: "normal",
+                  fontFamily: "var(--font-sans), system-ui, sans-serif",
+                  fontSize: "1rem",
+                  color: "var(--text-secondary)",
+                  marginBottom: "1rem",
                 }}
               >
                 {item.company}
               </p>
 
               {/* Points */}
-              <ul className="space-y-1.5">
+              <ul className="flex flex-col gap-3">
                 {item.points.map((point, pIndex) => (
                   <li
                     key={pIndex}
-                    className="flex items-start gap-2"
                     style={{
-                      fontSize: "0.875rem",
+                      fontFamily: "var(--font-sans), system-ui, sans-serif",
+                      fontSize: "0.9375rem",
                       color: "var(--text-secondary)",
                       lineHeight: 1.6,
-                      fontStyle: "normal",
                     }}
                   >
-                    <span
-                      style={{
-                        color: "var(--border-hover)",
-                        flexShrink: 0,
-                        marginTop: "0.1em",
-                        fontSize: "0.7rem",
-                      }}
-                    >
-                      ▸
-                    </span>
-                    <span>{point}</span>
+                    {point}
                   </li>
                 ))}
               </ul>

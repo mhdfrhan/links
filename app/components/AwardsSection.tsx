@@ -48,43 +48,41 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-6 mt-8">
         {awards.map((award, index) => (
           <div
             key={index}
-            className="flex items-start gap-4"
-            style={{
-              padding: "0.75rem 0",
-              borderBottom: "1px solid var(--border)",
-            }}
+            className="flex flex-col md:flex-row gap-2 md:gap-12 items-start"
           >
-            {/* Year — mono muted */}
-            <span
-              style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: "0.7rem",
-                color: "var(--text-muted)",
-                letterSpacing: "0.02em",
-                flexShrink: 0,
-                marginTop: "0.1rem",
-                minWidth: "2.5rem",
-              }}
-            >
-              {award.year}
-            </span>
+            {/* Year */}
+            <div className="md:w-1/4 flex-shrink-0 md:text-right pt-1 md:pr-4">
+              <span
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "0.8125rem",
+                  color: "var(--text-secondary)",
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase"
+                }}
+              >
+                {award.year}
+              </span>
+            </div>
 
             {/* Title */}
-            <p
-              style={{
-                fontSize: "0.9rem",
-                color: award.highlight ? "var(--text-primary)" : "var(--text-secondary)",
-                lineHeight: 1.5,
-                fontStyle: "normal",
-                fontWeight: award.highlight ? 500 : 400,
-              }}
-            >
-              {award.title}
-            </p>
+            <div className="md:w-3/4">
+              <h3
+                style={{
+                  fontFamily: "var(--font-serif), serif",
+                  fontWeight: 400,
+                  fontSize: "1.25rem",
+                  color: "var(--text-primary)",
+                  marginBottom: "0.25rem",
+                }}
+              >
+                {award.title}
+              </h3>
+            </div>
           </div>
         ))}
       </div>

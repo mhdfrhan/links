@@ -118,19 +118,19 @@ export default function AwardsPage() {
     catch (err) { showToast("error", "Gagal menghapus."); }
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="animate-spin  h-8 w-8 border-t-2 border-b-2 border-accent" /></div>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight">Penghargaan</h1>
+          <h1 className="text-lg lg:text-xl font-semibold text-foreground tracking-tight">Penghargaan</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Kelola penghargaan dan prestasi kamu.</p>
         </div>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center justify-center gap-2 px-5 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-xl hover:bg-accent/90 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
+            className="flex items-center justify-center gap-2 px-5 py-2 bg-accent text-accent-foreground text-sm font-semibold  hover:bg-accent/90 transition-all shadow-md hover:shadow-accent/20 active:scale-95"
           >
             <PlusIcon className="w-4 h-4" />
             Tambah Data
@@ -153,7 +153,7 @@ export default function AwardsPage() {
                   value={title_en}
                   onChange={(e) => setTitleEn(e.target.value)}
                   placeholder="1st Place Hackathon XYZ"
-                  className="w-full p-3.5 rounded-xl bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
+                  className="w-full p-3.5  bg-background/50 border border-border focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-sm transition-all"
                 />
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function AwardsPage() {
               <button
                 type="button"
                 onClick={() => setHighlight(!highlight)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-2 px-3 py-1.5  text-xs font-semibold transition-all ${
                   highlight 
                     ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" 
                     : "bg-muted/30 text-muted-foreground border border-border/50"
@@ -178,14 +178,14 @@ export default function AwardsPage() {
             <div className="flex gap-2 pt-2">
               <button
                 onClick={resetForm}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted/50 border border-border/50 transition-all"
+                className="px-4 py-2  text-xs font-semibold text-muted-foreground hover:bg-muted/50 border border-border/50 transition-all"
               >
                 Batal
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-2 bg-accent text-accent-foreground text-xs font-semibold rounded-xl hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20"
+                className="px-5 py-2 bg-accent text-accent-foreground text-xs font-semibold  hover:bg-accent/90 disabled:opacity-70 transition-all shadow-md hover:shadow-accent/20"
               >
                 {saving ? "Menyimpan..." : editId ? "Update Data" : "Simpan Data"}
               </button>
@@ -218,13 +218,13 @@ export default function AwardsPage() {
                       <div className="flex gap-1.5 opacity-100 transition-all">
                         <button 
                           onClick={() => startEdit(item)} 
-                          className="p-1.5 text-accent bg-accent/5 rounded-lg hover:bg-accent/10 border border-accent/10 transition-colors"
+                          className="p-1.5 text-accent bg-accent/5  hover:bg-accent/10 border border-accent/10 transition-colors"
                         >
                           <PencilIcon className="w-3.5 h-3.5" />
                         </button>
                         <button 
                           onClick={() => setDeleteTarget(item)} 
-                          className="p-1.5 text-red-500 bg-red-500/5 rounded-lg hover:bg-red-500/10 border border-red-500/10 transition-colors"
+                          className="p-1.5 text-red-500 bg-red-500/5  hover:bg-red-500/10 border border-red-500/10 transition-colors"
                         >
                           <TrashIcon className="w-3.5 h-3.5" />
                         </button>

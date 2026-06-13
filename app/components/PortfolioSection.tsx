@@ -12,6 +12,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 export interface Project {
   id: string;
@@ -81,7 +82,7 @@ export function PortfolioSection({
             start: "center 55%", // Pin slightly below the true center to give breathing room for the header
             end: () => `+=${container.scrollWidth - window.innerWidth}`,
             pin: section,
-            scrub: 1,
+            scrub: true, // Change from 1 to true to prevent double-smoothing conflict with Lenis
             invalidateOnRefresh: true,
           },
         });
@@ -102,8 +103,8 @@ export function PortfolioSection({
           });
 
           // Animate to 1 in the first half (center), back to 0.85 in second half
-          tl.to(card, { scale: 1, opacity: 1, ease: "power1.inOut", duration: 1 })
-            .to(card, { scale: 0.85, opacity: 0.4, ease: "power1.inOut", duration: 1 });
+          tl.to(card, { scale: 1, opacity: 1, ease: "power1.inOut", duration: 1, force3D: true })
+            .to(card, { scale: 0.85, opacity: 0.4, ease: "power1.inOut", duration: 1, force3D: true });
         });
       } else {
         gsap.fromTo(
@@ -182,12 +183,12 @@ export function PortfolioSection({
         <div className="w-[100vw] overflow-hidden relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw]">
           <div 
             ref={containerRef}
-            className="flex flex-nowrap items-center gap-6 md:gap-12 w-max px-[10vw] sm:px-[20vw] lg:px-[30vw]"
+            className="flex flex-nowrap items-center gap-6 md:gap-12 w-max px-[10vw] sm:px-[20vw] lg:px-[30vw] will-change-transform"
           >
             {projects.map((project, index) => (
               <div 
                 key={project.id} 
-                className="horizontal-project-card w-[80vw] sm:w-[60vw] lg:w-[40vw] flex-shrink-0 origin-center"
+                className="horizontal-project-card w-[80vw] sm:w-[60vw] lg:w-[40vw] flex-shrink-0 origin-center will-change-transform"
               >
                 <ProjectCard
                   project={project}

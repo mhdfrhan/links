@@ -18,7 +18,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1,
-      touchMultiplier: 2,
+      smoothTouch: false, // Let native mobile scroll handle touch to offload CPU
+      syncTouch: true, // Syncs ScrollTrigger with native touch scroll without hijacking
     });
 
     // Update ScrollTrigger on Lenis scroll

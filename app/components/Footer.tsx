@@ -117,7 +117,7 @@ export function Footer({
             color: "var(--text-muted)",
             letterSpacing: "0.02em",
           }}
-          className="mb-4 sm:mb-0"
+          className="mb-4 sm:mb-0 text-center sm:text-left"
         >
           © {currentYear} {name}. {dict.copyright}
         </p>

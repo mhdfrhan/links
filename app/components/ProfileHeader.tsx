@@ -128,7 +128,7 @@ export function ProfileHeader({
         }}
       >
         {name} <br/>
-        <span style={{ color: "var(--accent)", display: "inline-grid", gridTemplateColumns: "1fr", justifyItems: "start", alignItems: "center" }}>
+        <span className="min-h-[2.2em] md:min-h-0" style={{ color: "var(--accent)", display: "inline-grid", gridTemplateColumns: "1fr", justifyItems: "start", alignItems: "start" }}>
           <AnimatePresence mode="wait">
             <motion.span
               key={taglineIndex}

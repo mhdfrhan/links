@@ -107,7 +107,7 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
                       className="whitespace-nowrap transition-colors duration-500 group-hover:text-[var(--text-primary)]"
                       style={{
                         fontFamily: "var(--font-serif), serif",
-                        fontSize: "3rem",
+                        fontSize: "clamp(2rem, 6vw, 3rem)",
                         fontWeight: 400,
                         color: "var(--text-secondary)",
                         opacity: 0.6,

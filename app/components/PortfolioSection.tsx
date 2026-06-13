@@ -31,6 +31,7 @@ interface PortfolioSectionProps {
   showAllButton?: boolean;
   categories?: any[];
   columns?: number;
+  horizontalScroll?: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ export function PortfolioSection({
   showAllButton = false,
   categories = [],
   columns = 2,
+  horizontalScroll = false,
 }: PortfolioSectionProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const { language } = useLanguage();
@@ -60,25 +62,68 @@ export function PortfolioSection({
     };
   }, [selectedProject]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useGSAP(
     () => {
-      gsap.fromTo(
-        ".project-card",
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.15,
-          duration: 1,
-          ease: "power3.out",
+      if (horizontalScroll) {
+        const section = sectionRef.current;
+        const container = containerRef.current;
+        if (!section || !container) return;
+
+        // Horizontal scroll animation for the container
+        const wrapper = container.parentElement;
+        const scrollTween = gsap.to(container, {
+          x: () => -(container.scrollWidth - window.innerWidth),
+          ease: "none",
           scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 75%",
+            trigger: wrapper,
+            start: "center 55%", // Pin slightly below the true center to give breathing room for the header
+            end: () => `+=${container.scrollWidth - window.innerWidth}`,
+            pin: section,
+            scrub: 1,
+            invalidateOnRefresh: true,
           },
-        }
-      );
+        });
+
+        // Coverflow scale effect for each card
+        const cards = gsap.utils.toArray<HTMLElement>(".horizontal-project-card");
+        cards.forEach((card) => {
+          gsap.set(card, { scale: 0.85, opacity: 0.4 });
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: card,
+              containerAnimation: scrollTween,
+              start: "left right", // Left edge enters screen from right
+              end: "right left",   // Right edge leaves screen to left
+              scrub: true,
+            }
+          });
+
+          // Animate to 1 in the first half (center), back to 0.85 in second half
+          tl.to(card, { scale: 1, opacity: 1, ease: "power1.inOut", duration: 1 })
+            .to(card, { scale: 0.85, opacity: 0.4, ease: "power1.inOut", duration: 1 });
+        });
+      } else {
+        gsap.fromTo(
+          ".project-card",
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.15,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 75%",
+            },
+          }
+        );
+      }
     },
-    { scope: sectionRef }
+    { scope: sectionRef, dependencies: [horizontalScroll, projects.length] }
   );
 
   return (
@@ -132,25 +177,48 @@ export function PortfolioSection({
         )}
       </div>
 
-      {/* Modern Editorial Grid */}
-      <div 
-        className={
-          columns === 3
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 md:gap-x-8 md:gap-y-12"
-            : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 md:gap-x-12 md:gap-y-16"
-        }
-      >
-        {projects.map((project, index) => (
-          <div key={project.id} className="project-card">
-            <ProjectCard
-              project={project}
-              index={index}
-              categories={categories}
-              onClick={() => setSelectedProject(project)}
-            />
+      {/* Modern Editorial Grid / Horizontal Scroll */}
+      {horizontalScroll ? (
+        <div className="w-[100vw] overflow-hidden relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw]">
+          <div 
+            ref={containerRef}
+            className="flex flex-nowrap items-center gap-6 md:gap-12 w-max px-[10vw] sm:px-[20vw] lg:px-[30vw]"
+          >
+            {projects.map((project, index) => (
+              <div 
+                key={project.id} 
+                className="horizontal-project-card w-[80vw] sm:w-[60vw] lg:w-[40vw] flex-shrink-0 origin-center"
+              >
+                <ProjectCard
+                  project={project}
+                  index={index}
+                  categories={categories}
+                  onClick={() => setSelectedProject(project)}
+                />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div 
+          className={
+            columns === 3
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 md:gap-x-8 md:gap-y-12"
+              : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 md:gap-x-12 md:gap-y-16"
+          }
+        >
+          {projects.map((project, index) => (
+            <div key={project.id} className="project-card">
+              <ProjectCard
+                project={project}
+                index={index}
+                categories={categories}
+                onClick={() => setSelectedProject(project)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Modern Sleek Modal */}
       <AnimatePresence>

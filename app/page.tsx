@@ -386,13 +386,14 @@ export default function Home() {
         {/* ===== PROJECTS SECTION ===== */}
         <section id="projects" style={{ paddingBottom: "2rem" }}>
           <PortfolioSection
-            projects={data.projects.slice(0, 4).map((p: any) => ({
+            projects={data.projects.slice(0, 5).map((p: any) => ({
               ...p,
               title: l(p, "title"),
               description: l(p, "description"),
               fullDescription: l(p, "fullDescription"),
             }))}
             showAllButton={true}
+            horizontalScroll={true}
             categories={data.categories.map((c: any) => ({
               ...c,
               name: l(c, "name"),

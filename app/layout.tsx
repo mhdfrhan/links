@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import { Providers } from "./providers";
 import { CustomCursor } from "./components/CustomCursor";
+import { SmoothScroll } from "./components/SmoothScroll";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -117,8 +118,10 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          <CustomCursor />
-          {children}
+          <SmoothScroll>
+            <CustomCursor />
+            {children}
+          </SmoothScroll>
         </Providers>
       </body>
     </html>

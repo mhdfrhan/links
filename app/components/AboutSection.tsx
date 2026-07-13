@@ -29,19 +29,14 @@ export function AboutSection({ text }: AboutSectionProps) {
       const chars = containerRef.current.querySelectorAll(".about-char");
       if (chars.length === 0) return;
 
-      // Resolve the CSS variable to a concrete color value so GSAP can tween it.
-      const resolvedColor = getComputedStyle(containerRef.current)
-        .getPropertyValue("--text-primary")
-        .trim();
-
       const tween = gsap.to(chars, {
-        color: resolvedColor || "#000000",
+        opacity: 1,
         stagger: 0.05,
         ease: "none",
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 70%",
-          end: "+=600", // fixed distance instead of "bottom 80%" to avoid inverted start/end on short sections
+          end: "+=600",
           scrub: 1,
         },
       });
@@ -111,10 +106,7 @@ export function AboutSection({ text }: AboutSectionProps) {
                   <span
                     key={cIndex}
                     className="about-char"
-                    style={{
-                      // Starting color (muted/gray) — set inline so it doesn't depend on a CSS rule
-                      color: "color-mix(in srgb, var(--text-muted) 30%, transparent)",
-                    }}
+                    style={{ opacity: 0.15 }}
                   >
                     {char}
                   </span>

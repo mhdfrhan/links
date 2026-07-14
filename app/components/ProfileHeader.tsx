@@ -25,6 +25,17 @@ interface ProfileHeaderProps {
   linkedin?: string;
 }
 
+function formatExperienceText(text: string): string {
+  if (!text) return "";
+  const years = new Date().getFullYear() - 2022;
+  
+  let formatted = text.replace(/(pengalaman\s+(?:[^]*?))\b\d+\b(\s+tahun)/gi, `$1${years}$2`);
+  formatted = formatted.replace(/(experience\s+(?:[^]*?))\b\d+\b(\s+years)/gi, `$1${years}$2`);
+  formatted = formatted.replace(/\b4\s*tahun/gi, `${years} tahun`);
+  formatted = formatted.replace(/\b4\s*years/gi, `${years} years`);
+  return formatted;
+}
+
 /**
  * ProfileHeader — Vibrant Editorial Hero
  * Full landscape image, rich typography, and GSAP animations.
@@ -206,7 +217,7 @@ export function ProfileHeader({
               maxWidth: "500px"
             }}
           >
-            {about || "Fullstack web developer dengan pengalaman 4 tahun mengerjakan berbagai project web dari skala lokal hingga nasional."}
+            {formatExperienceText(about || "Fullstack web developer dengan pengalaman 4 tahun mengerjakan berbagai project web dari skala lokal hingga nasional.")}
           </p>
         </div>
 

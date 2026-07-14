@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import * as adminModule from "firebase-admin";
 
+function formatExperienceText(text: string): string {
+  if (!text) return "";
+  const years = new Date().getFullYear() - 2022;
+  
+  let formatted = text.replace(/(pengalaman\s+(?:[^]*?))\b\d+\b(\s+tahun)/gi, `$1${years}$2`);
+  formatted = formatted.replace(/(experience\s+(?:[^]*?))\b\d+\b(\s+years)/gi, `$1${years}$2`);
+  formatted = formatted.replace(/\b4\s*tahun/gi, `${years} tahun`);
+  formatted = formatted.replace(/\b4\s*years/gi, `${years} years`);
+  return formatted;
+}
+
 // ============================================================
 // RATE LIMITER — In-memory, per IP, max 15 req/menit
 // ============================================================
@@ -118,7 +129,8 @@ async function buildPortfolioContext(): Promise<string> {
       db.collection("skills").orderBy("order", "asc").get(),
     ]);
 
-    const about = aboutDoc.exists ? aboutDoc.data()?.text || "" : "";
+    const aboutRaw = aboutDoc.exists ? aboutDoc.data()?.text || "" : "";
+    const about = formatExperienceText(aboutRaw);
     const profile = profileDoc.exists ? profileDoc.data() : {};
 
     const projects = projectsSnap.docs

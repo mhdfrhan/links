@@ -13,6 +13,17 @@ interface AboutSectionProps {
   text: string;
 }
 
+function formatExperienceText(text: string): string {
+  if (!text) return "";
+  const years = new Date().getFullYear() - 2022;
+  
+  let formatted = text.replace(/(pengalaman\s+(?:[^]*?))\b\d+\b(\s+tahun)/gi, `$1${years}$2`);
+  formatted = formatted.replace(/(experience\s+(?:[^]*?))\b\d+\b(\s+years)/gi, `$1${years}$2`);
+  formatted = formatted.replace(/\b4\s*tahun/gi, `${years} tahun`);
+  formatted = formatted.replace(/\b4\s*years/gi, `${years} years`);
+  return formatted;
+}
+
 /**
  * AboutSection — Bold Typography layout
  * Oversized text to make it feel less empty, animated character by character on scroll.
@@ -100,7 +111,7 @@ export function AboutSection({ text }: AboutSectionProps) {
               fontWeight: 400,
             }}
           >
-            {text.split(" ").map((word, wIndex) => (
+            {formatExperienceText(text).split(" ").map((word, wIndex) => (
               <span key={wIndex} style={{ display: "inline-block", marginRight: "0.25em" }}>
                 {word.split("").map((char, cIndex) => (
                   <span

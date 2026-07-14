@@ -10,30 +10,27 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     // Register ScrollTrigger
     gsap.registerPlugin(ScrollTrigger);
 
-    // Initialize Lenis
+    // Initialize Lenis with autoRaf: false to let GSAP's ticker handle physics synchronously
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
+      autoRaf: false,
       smoothWheel: true,
-      wheelMultiplier: 1,
     });
 
     // Update ScrollTrigger on Lenis scroll
-    lenis.on("scroll", ScrollTrigger.update);
-
-    // Add Lenis's requestAnimationFrame to GSAP's ticker
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
+    lenis.on("scroll", () => {
+      ScrollTrigger.update();
     });
 
-    // Disable GSAP's lag smoothing to avoid conflicts with Lenis
-    gsap.ticker.lagSmoothing(0);
+    // Unified render loop (synchronized with GSAP animations)
+    const updateLenis = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateLenis);
 
     return () => {
       lenis.destroy();
-      gsap.ticker.remove((time) => lenis.raf(time * 1000));
+      gsap.ticker.remove(updateLenis); // Properly clean up the handler using its reference
     };
   }, []);
 

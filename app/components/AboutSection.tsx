@@ -37,18 +37,18 @@ export function AboutSection({ text }: AboutSectionProps) {
     () => {
       if (!containerRef.current) return;
 
-      const chars = containerRef.current.querySelectorAll(".about-char");
-      if (chars.length === 0) return;
+      const words = containerRef.current.querySelectorAll(".about-word");
+      if (words.length === 0) return;
 
-      const tween = gsap.to(chars, {
+      const tween = gsap.to(words, {
         opacity: 1,
-        stagger: 0.05,
+        stagger: 0.02,
         ease: "none",
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 70%",
           end: "+=600",
-          scrub: 1,
+          scrub: true,
         },
       });
 
@@ -112,16 +112,12 @@ export function AboutSection({ text }: AboutSectionProps) {
             }}
           >
             {formatExperienceText(text).split(" ").map((word, wIndex) => (
-              <span key={wIndex} style={{ display: "inline-block", marginRight: "0.25em" }}>
-                {word.split("").map((char, cIndex) => (
-                  <span
-                    key={cIndex}
-                    className="about-char"
-                    style={{ opacity: 0.15 }}
-                  >
-                    {char}
-                  </span>
-                ))}
+              <span
+                key={wIndex}
+                className="about-word inline-block mr-[0.25em] will-change-opacity"
+                style={{ opacity: 0.15 }}
+              >
+                {word}
               </span>
             ))}
           </p>

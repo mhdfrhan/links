@@ -14,8 +14,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
-    const completion = await openai.chat.completions.create({
-      model: "openai/gpt-oss-120b",
+    const completion = await (openai.chat.completions.create as any)({
+      model: "nvidia/nemotron-3-ultra-550b-a55b",
       messages: [
         {
           role: "system",
@@ -27,8 +27,13 @@ export async function POST(request: Request) {
           content: text
         }
       ],
-      temperature: 0.3, // Lower temperature for more consistent translations
-      max_tokens: 2000,
+      temperature: 1,
+      top_p: 0.95,
+      max_tokens: 16384,
+      extra_body: {
+        chat_template_kwargs: { enable_thinking: true },
+        reasoning_budget: 16384,
+      },
     });
 
     const translatedText = completion.choices[0]?.message?.content?.trim();

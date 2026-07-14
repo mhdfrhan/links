@@ -30,10 +30,8 @@ export async function POST(request: Request) {
       temperature: 1,
       top_p: 0.95,
       max_tokens: 16384,
-      extra_body: {
-        chat_template_kwargs: { enable_thinking: true },
-        reasoning_budget: 16384,
-      },
+      chat_template_kwargs: { enable_thinking: true },
+      reasoning_budget: 16384,
     });
 
     const translatedText = completion.choices[0]?.message?.content?.trim();

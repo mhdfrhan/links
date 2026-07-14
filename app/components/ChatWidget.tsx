@@ -5,6 +5,32 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 
+// Simple markdown-to-HTML renderer for chat messages
+function renderMarkdown(text: string): string {
+  return text
+    // Code blocks
+    .replace(/```[\s\S]*?```/g, (m) => {
+      const code = m.replace(/```(\w+)?\n?/, "").replace(/```$/, "");
+      return `<pre style="background:var(--bg-tertiary);padding:8px 12px;overflow-x:auto;font-size:0.75rem;border-radius:4px;margin:6px 0;"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
+    })
+    // Bold
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    // Italic
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    // Headers h3
+    .replace(/^###\s+(.+)$/gm, "<h3 style='font-size:0.875rem;font-weight:600;margin:8px 0 4px;'>$1</h3>")
+    // Headers h2
+    .replace(/^##\s+(.+)$/gm, "<h2 style='font-size:0.9375rem;font-weight:700;margin:10px 0 4px;'>$1</h2>")
+    // Horizontal rule
+    .replace(/^---$/gm, "<hr style='border:none;border-top:1px solid var(--border);margin:8px 0;'/>")
+    // Unordered list items
+    .replace(/^[\-\*]\s+(.+)$/gm, "<li style='margin:2px 0;padding-left:4px;'>$1</li>")
+    // Wrap consecutive <li> in <ul>
+    .replace(/(<li[^>]*>.*<\/li>\n?)+/g, (m) => `<ul style='padding-left:16px;margin:4px 0;list-style:disc;'>${m}</ul>`)
+    // Newlines to <br> (only for non-block elements)
+    .replace(/(?<!>)\n(?!<)/g, "<br/>");
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -173,12 +199,13 @@ function MessageBubble({
           borderRadius: 0,
           fontSize: "0.8125rem",
           lineHeight: 1.6,
-          whiteSpace: "pre-wrap",
           wordBreak: "break-word",
+          overflowWrap: "break-word",
           ...(isUser
             ? {
                 background: "var(--accent)",
                 color: "#fff",
+                whiteSpace: "pre-wrap",
               }
             : {
                 background: "color-mix(in srgb, var(--bg-tertiary) 70%, transparent)",
@@ -188,7 +215,16 @@ function MessageBubble({
               }),
         }}
       >
-        {isEmpty ? <TypingDots /> : msg.content}
+        {isEmpty ? (
+          <TypingDots />
+        ) : isUser ? (
+          msg.content
+        ) : (
+          <div
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+            style={{ overflow: "hidden" }}
+          />
+        )}
       </div>
     </motion.div>
   );
@@ -618,6 +654,7 @@ export function ChatWidget() {
                   {/* Messages */}
                   <div
                     className="chat-scroll"
+                    data-lenis-prevent
                     style={{
                       flex: 1,
                       overflowY: "auto",

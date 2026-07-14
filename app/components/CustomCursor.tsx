@@ -33,14 +33,14 @@ export function CustomCursor() {
     setIsVisible(true);
 
     let hoveredEl: HTMLElement | null = null;
+    let hoveredRect: DOMRect | null = null;
 
     const updateCursor = () => {
-      if (hoveredEl) {
-        const rect = hoveredEl.getBoundingClientRect();
-        targetX.set(rect.left);
-        targetY.set(rect.top);
-        targetWidth.set(rect.width);
-        targetHeight.set(rect.height);
+      if (hoveredEl && hoveredRect) {
+        targetX.set(hoveredRect.left);
+        targetY.set(hoveredRect.top);
+        targetWidth.set(hoveredRect.width);
+        targetHeight.set(hoveredRect.height);
       } else {
         targetX.set(mouseX.get() - 6);
         targetY.set(mouseY.get() - 6);
@@ -62,6 +62,7 @@ export function CustomCursor() {
       if (target.closest("input, textarea")) {
         setIsHidden(true);
         hoveredEl = null;
+        hoveredRect = null;
         setIsHovering(false);
         updateCursor();
         return;
@@ -73,12 +74,13 @@ export function CustomCursor() {
       const interactiveEl = target.closest("a, button, [role='button'], select");
       
       if (interactiveEl || window.getComputedStyle(target).cursor === "pointer") {
-        const el = interactiveEl || target;
+        const el = (interactiveEl || target) as HTMLElement;
         const rect = el.getBoundingClientRect();
         
         // Prevent snapping to massive elements like whole project cards
         if (rect.width < 400 && rect.height < 300) {
-          hoveredEl = el as HTMLElement;
+          hoveredEl = el;
+          hoveredRect = rect;
           setIsHovering(true);
           updateCursor();
           return;
@@ -86,17 +88,22 @@ export function CustomCursor() {
       }
       
       hoveredEl = null;
+      hoveredRect = null;
       setIsHovering(false);
       updateCursor();
     };
 
     const handleMouseOut = (e: MouseEvent) => {
       hoveredEl = null;
+      hoveredRect = null;
       setIsHovering(false);
       updateCursor();
     };
 
     const handleScroll = () => {
+      if (hoveredEl) {
+        hoveredRect = hoveredEl.getBoundingClientRect();
+      }
       updateCursor();
     };
 

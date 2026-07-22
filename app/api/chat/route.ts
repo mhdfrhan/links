@@ -5,9 +5,15 @@ import * as adminModule from "firebase-admin";
 function formatExperienceText(text: string): string {
   if (!text) return "";
   const years = new Date().getFullYear() - 2022;
-  
-  let formatted = text.replace(/(pengalaman\s+(?:[^]*?))\b\d+\b(\s+tahun)/gi, `$1${years}$2`);
-  formatted = formatted.replace(/(experience\s+(?:[^]*?))\b\d+\b(\s+years)/gi, `$1${years}$2`);
+
+  let formatted = text.replace(
+    /(pengalaman\s+(?:[^]*?))\b\d+\b(\s+tahun)/gi,
+    `$1${years}$2`,
+  );
+  formatted = formatted.replace(
+    /(experience\s+(?:[^]*?))\b\d+\b(\s+years)/gi,
+    `$1${years}$2`,
+  );
   formatted = formatted.replace(/\b4\s*tahun/gi, `${years} tahun`);
   formatted = formatted.replace(/\b4\s*years/gi, `${years} years`);
   return formatted;
@@ -185,7 +191,9 @@ async function buildPortfolioContext(): Promise<string> {
     const skills = skillsSnap.docs
       .map((d) => {
         const s = d.data();
-        const skillNames = (s.skills || []).map((sk: any) => sk.name).join(", ");
+        const skillNames = (s.skills || [])
+          .map((sk: any) => sk.name)
+          .join(", ");
         return `- ${s.title}: ${skillNames}`;
       })
       .join("\n");
@@ -229,7 +237,10 @@ ${skills || "Tidak ada data keahlian."}
     contextCache = { data: context, cachedAt: Date.now() };
     return context;
   } catch (err) {
-    console.error("[Chat API] Firebase fetch failed, using static context:", err);
+    console.error(
+      "[Chat API] Firebase fetch failed, using static context:",
+      err,
+    );
     return buildStaticContext();
   }
 }
@@ -325,7 +336,7 @@ export async function POST(req: NextRequest) {
           error:
             "Terlalu banyak pesan. Tunggu sebentar dan coba lagi. / Too many messages. Please wait a moment.",
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -336,7 +347,10 @@ export async function POST(req: NextRequest) {
 
     // Validate message
     if (!rawMessage || typeof rawMessage !== "string") {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Message is required" },
+        { status: 400 },
+      );
     }
 
     // Sanitize input
@@ -353,7 +367,9 @@ export async function POST(req: NextRequest) {
       const stream = new ReadableStream({
         start(controller) {
           const encoder = new TextEncoder();
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: refusal })}\n\n`));
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ text: refusal })}\n\n`),
+          );
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
         },
@@ -383,15 +399,13 @@ export async function POST(req: NextRequest) {
       { role: "user", content: message },
     ];
 
-    // Call NVIDIA API dengan streaming
-    const completion = await (openai.chat.completions.create as any)({
-      model: "nvidia/nemotron-3-ultra-550b-a55b",
+    // Call NVIDIA API dengan model openai/gpt-oss-120b
+    const completion = await openai.chat.completions.create({
+      model: "openai/gpt-oss-120b",
       messages,
-      temperature: 0.6,
-      top_p: 0.95,
-      max_tokens: 2048,
-      chat_template_kwargs: { enable_thinking: true },
-      reasoning_budget: 1024,
+      temperature: 1,
+      top_p: 1,
+      max_tokens: 4096,
       stream: true,
     });
 
@@ -410,7 +424,7 @@ export async function POST(req: NextRequest) {
             if (text) {
               fullResponse += text;
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
+                encoder.encode(`data: ${JSON.stringify({ text })}\n\n`),
               );
             }
 
@@ -423,8 +437,8 @@ export async function POST(req: NextRequest) {
                     : "Sorry, I can only discuss things related to Farhan's portfolio. Is there something you'd like to know about Farhan?";
                 controller.enqueue(
                   encoder.encode(
-                    `data: ${JSON.stringify({ text: "", replace: fallback })}\n\n`
-                  )
+                    `data: ${JSON.stringify({ text: "", replace: fallback })}\n\n`,
+                  ),
                 );
               }
               controller.enqueue(encoder.encode("data: [DONE]\n\n"));
@@ -435,8 +449,8 @@ export async function POST(req: NextRequest) {
           console.error("[Chat API] Streaming error:", err);
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ error: "Stream error" })}\n\n`
-            )
+              `data: ${JSON.stringify({ error: "Stream error" })}\n\n`,
+            ),
           );
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
@@ -455,7 +469,7 @@ export async function POST(req: NextRequest) {
     console.error("[Chat API] Error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

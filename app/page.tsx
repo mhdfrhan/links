@@ -150,12 +150,13 @@ export default function Home() {
             }}
           >
             <span style={{ opacity: 0.15 }}>Farhan.</span>
-            <span 
+            <span
               className="absolute top-0 left-0 whitespace-nowrap"
-              style={{ 
+              style={{
                 color: "var(--text-primary)",
                 overflow: "hidden",
-                animation: "revealText 1.8s cubic-bezier(0.77, 0, 0.175, 1) infinite alternate" 
+                animation:
+                  "revealText 1.8s cubic-bezier(0.77, 0, 0.175, 1) infinite alternate",
               }}
             >
               Farhan.
@@ -163,12 +164,18 @@ export default function Home() {
           </div>
 
           {/* Minimalist Progress Line */}
-          <div className="w-32 h-[1px] relative overflow-hidden" style={{ background: "color-mix(in srgb, var(--border) 50%, transparent)" }}>
-            <div 
+          <div
+            className="w-32 h-[1px] relative overflow-hidden"
+            style={{
+              background: "color-mix(in srgb, var(--border) 50%, transparent)",
+            }}
+          >
+            <div
               className="absolute top-0 left-0 h-full w-full"
               style={{
                 background: "var(--accent)",
-                animation: "slideLine 1.8s cubic-bezier(0.77, 0, 0.175, 1) infinite"
+                animation:
+                  "slideLine 1.8s cubic-bezier(0.77, 0, 0.175, 1) infinite",
               }}
             />
           </div>
@@ -179,7 +186,7 @@ export default function Home() {
               fontSize: "0.65rem",
               color: "var(--text-muted)",
               letterSpacing: "0.15em",
-              textTransform: "uppercase"
+              textTransform: "uppercase",
             }}
           >
             Memuat Data
@@ -218,14 +225,17 @@ export default function Home() {
         ref={navRef}
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pointer-events-auto"
         style={{
-          background: navScrolled || isMenuOpen
-            ? "color-mix(in srgb, var(--bg-primary) 80%, transparent)"
-            : "transparent",
+          background:
+            navScrolled || isMenuOpen
+              ? "color-mix(in srgb, var(--bg-primary) 80%, transparent)"
+              : "transparent",
           backdropFilter: navScrolled || isMenuOpen ? "blur(16px)" : "none",
-          WebkitBackdropFilter: navScrolled || isMenuOpen ? "blur(16px)" : "none",
-          borderBottom: navScrolled || isMenuOpen
-            ? "1px solid var(--border)"
-            : "1px solid transparent",
+          WebkitBackdropFilter:
+            navScrolled || isMenuOpen ? "blur(16px)" : "none",
+          borderBottom:
+            navScrolled || isMenuOpen
+              ? "1px solid var(--border)"
+              : "1px solid transparent",
           boxShadow: navScrolled ? "0 4px 24px -8px rgba(0,0,0,0.05)" : "none",
         }}
       >
@@ -240,7 +250,11 @@ export default function Home() {
         >
           {/* LEFT: Logo */}
           <div className="flex items-center shrink-0">
-            <a href="#" className="flex items-center gap-1 group" style={{ textDecoration: "none" }}>
+            <a
+              href="#"
+              className="flex items-center gap-1 group"
+              style={{ textDecoration: "none" }}
+            >
               <span
                 style={{
                   fontFamily: "var(--font-plus-jakarta), sans-serif",
@@ -274,10 +288,19 @@ export default function Home() {
           {/* RIGHT: Toggles & Mobile Menu */}
           <div className="flex items-center gap-2 shrink-0">
             <div className="hidden sm:flex items-center gap-2 mr-2">
-              <div className="flex items-center gap-2 px-3 py-1.5  border border-border/50 bg-background/30" title="Available for work">
+              <div
+                className="flex items-center gap-2 px-3 py-1.5  border border-border/50 bg-background/30"
+                title="Available for work"
+              >
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full  opacity-75" style={{ backgroundColor: "var(--green)" }}></span>
-                  <span className="relative inline-flex  h-2 w-2" style={{ backgroundColor: "var(--green)" }}></span>
+                  <span
+                    className="animate-ping absolute inline-flex h-full w-full  opacity-75"
+                    style={{ backgroundColor: "var(--green)" }}
+                  ></span>
+                  <span
+                    className="relative inline-flex  h-2 w-2"
+                    style={{ backgroundColor: "var(--green)" }}
+                  ></span>
                 </span>
                 <span
                   style={{
@@ -315,7 +338,10 @@ export default function Home() {
           <div
             ref={mobileMenuRef}
             className="absolute top-[calc(100%+12px)] right-6 w-[240px] bg-card border border-border  shadow-2xl p-2 z-50 hidden md:hidden"
-            style={{ backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+            style={{
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+            }}
           >
             <div className="flex flex-col gap-1">
               {(
@@ -331,15 +357,18 @@ export default function Home() {
                   href={href}
                   onClick={() => setIsMenuOpen(false)}
                   className="px-4 py-3 text-sm  hover:bg-muted transition-colors flex items-center justify-between group"
-                  style={{ 
-                    fontFamily: "var(--font-plus-jakarta), sans-serif", 
+                  style={{
+                    fontFamily: "var(--font-plus-jakarta), sans-serif",
                     fontWeight: 500,
                     color: "var(--text-muted)",
-                    textDecoration: "none"
+                    textDecoration: "none",
                   }}
                 >
                   {label}
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px]" style={{ color: "var(--accent)" }}>
+                  <span
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px]"
+                    style={{ color: "var(--accent)" }}
+                  >
                     →
                   </span>
                 </a>
@@ -348,7 +377,10 @@ export default function Home() {
               <div className="h-[1px] bg-border/50 my-2 mx-2" />
 
               <div className="px-4 py-2 flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                <span
+                  className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider"
+                  style={{ color: "var(--text-muted)" }}
+                >
                   {dict.misc.languageLabel}
                 </span>
                 <LanguageToggle />
@@ -551,7 +583,8 @@ function NavLink({
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
-        (e.currentTarget as HTMLElement).style.backgroundColor = "color-mix(in srgb, var(--text-primary) 5%, transparent)";
+        (e.currentTarget as HTMLElement).style.backgroundColor =
+          "color-mix(in srgb, var(--text-primary) 5%, transparent)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";

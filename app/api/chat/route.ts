@@ -399,9 +399,9 @@ export async function POST(req: NextRequest) {
       { role: "user", content: message },
     ];
 
-    // Call NVIDIA API dengan model openai/gpt-oss-120b
+    // Call NVIDIA API dengan model openai/gpt-oss-20b
     const completion = await openai.chat.completions.create({
-      model: "openai/gpt-oss-120b",
+      model: "openai/gpt-oss-20b",
       messages,
       temperature: 1,
       top_p: 1,

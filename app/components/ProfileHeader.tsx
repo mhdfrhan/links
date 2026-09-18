@@ -7,6 +7,7 @@ import { dictionaries } from "@/lib/i18n/dictionaries";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { motion, AnimatePresence } from "framer-motion";
+import { SocialLink as ISocialLink, getPlatformPrefix } from "./SocialLinks";
 
 interface CvEntry {
   url: string;
@@ -23,6 +24,7 @@ interface ProfileHeaderProps {
   email?: string;
   github?: string;
   linkedin?: string;
+  socialLinks?: ISocialLink[];
 }
 
 function formatExperienceText(text: string): string {
@@ -49,6 +51,7 @@ export function ProfileHeader({
   email,
   github,
   linkedin,
+  socialLinks,
 }: ProfileHeaderProps) {
   const { language } = useLanguage();
   const dict = dictionaries[language];
@@ -194,9 +197,23 @@ export function ProfileHeader({
           </p>
 
           <div className="flex flex-col gap-3">
-            <SocialLink href={github || "https://github.com/mhdfrhan"} label="GitHub" />
-            <SocialLink href={linkedin || "https://linkedin.com"} label="LinkedIn" />
-            <SocialLink href={`mailto:${email || "hi.mhdfarhan@gmail.com"}`} label="Email" />
+            {socialLinks && socialLinks.length > 0 ? (
+              [...socialLinks]
+                .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                .map((link, idx) => (
+                  <SocialLink
+                    key={link.platform + idx}
+                    href={getPlatformPrefix(link.platform, link.url)}
+                    label={link.label || link.platform}
+                  />
+                ))
+            ) : (
+              <>
+                <SocialLink href={github || "https://github.com/mhdfrhan"} label="GitHub" />
+                <SocialLink href={linkedin || "https://linkedin.com"} label="LinkedIn" />
+                <SocialLink href={`mailto:${email || "hi.mhdfarhan@gmail.com"}`} label="Email" />
+              </>
+            )}
           </div>
 
           {cvData && (cvData.id || cvData.en) && (

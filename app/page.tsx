@@ -403,6 +403,7 @@ export default function Home() {
             email={data.profile?.email}
             github={data.profile?.github}
             linkedin={data.profile?.linkedin}
+            socialLinks={data.profile?.socialLinks}
           />
         </section>
 
@@ -552,6 +553,7 @@ export default function Home() {
             email={data.profile?.email}
             github={data.profile?.github}
             linkedin={data.profile?.linkedin}
+            socialLinks={data.profile?.socialLinks}
           />
         </section>
       </main>

@@ -2,12 +2,14 @@
 
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
+import { SocialLink as ISocialLink, getPlatformPrefix } from "./SocialLinks";
 
 interface FooterProps {
   name?: string;
   email?: string;
   github?: string;
   linkedin?: string;
+  socialLinks?: ISocialLink[];
 }
 
 /**
@@ -19,10 +21,19 @@ export function Footer({
   email,
   github,
   linkedin,
+  socialLinks,
 }: FooterProps) {
   const { language } = useLanguage();
   const dict = dictionaries[language].footer;
   const currentYear = new Date().getFullYear();
+
+  const emailItem = socialLinks?.find(
+    (s) => s.platform.toLowerCase() === "email"
+  );
+  const contactEmail = emailItem?.url || email || "hi.mhdfarhan@gmail.com";
+  const mailtoHref = contactEmail.startsWith("mailto:")
+    ? contactEmail
+    : `mailto:${contactEmail}`;
 
   return (
     <footer className="w-full mt-24">
@@ -71,7 +82,7 @@ export function Footer({
 
         {/* Action Button */}
         <a
-          href={`mailto:${email || "hi.mhdfarhan@gmail.com"}`}
+          href={mailtoHref}
           className="group relative inline-flex items-center justify-center overflow-hidden  p-4 px-8 font-medium"
           style={{
             background: "var(--accent)",
@@ -95,16 +106,32 @@ export function Footer({
         </a>
 
         {/* Social Links */}
-        <div className="flex items-center justify-center gap-6 mt-12 relative z-1">
-          <FooterSocialLink href={github || "https://github.com/mhdfrhan"} label="GitHub">
-            GitHub
-          </FooterSocialLink>
-          <FooterSocialLink href={linkedin || "https://www.linkedin.com/in/muhammad-farhan-79ba79294/"} label="LinkedIn">
-            LinkedIn
-          </FooterSocialLink>
-          <FooterSocialLink href="https://instagram.com/mhdfarhan04" label="Instagram">
-            Instagram
-          </FooterSocialLink>
+        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 relative z-1">
+          {socialLinks && socialLinks.length > 0 ? (
+            [...socialLinks]
+              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+              .map((link, idx) => (
+                <FooterSocialLink
+                  key={link.platform + idx}
+                  href={getPlatformPrefix(link.platform, link.url)}
+                  label={link.label || link.platform}
+                >
+                  {link.label || link.platform}
+                </FooterSocialLink>
+              ))
+          ) : (
+            <>
+              <FooterSocialLink href={github || "https://github.com/mhdfrhan"} label="GitHub">
+                GitHub
+              </FooterSocialLink>
+              <FooterSocialLink href={linkedin || "https://www.linkedin.com/in/muhammad-farhan-79ba79294/"} label="LinkedIn">
+                LinkedIn
+              </FooterSocialLink>
+              <FooterSocialLink href="https://instagram.com/mhdfarhan04" label="Instagram">
+                Instagram
+              </FooterSocialLink>
+            </>
+          )}
         </div>
       </div>
 

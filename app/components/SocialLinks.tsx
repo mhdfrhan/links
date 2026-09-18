@@ -70,18 +70,23 @@ const getPlatformIcon = (platform: string) => {
   }
 };
 
-const getPlatformPrefix = (platform: string, url: string) => {
-  if (url.startsWith("http") || url.startsWith("mailto:")) return url;
+export const getPlatformPrefix = (platform: string, url: string) => {
+  if (!url) return "#";
+  const trimmedUrl = url.trim();
+  if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://") || trimmedUrl.startsWith("mailto:")) {
+    return trimmedUrl;
+  }
   
   switch (platform.toLowerCase()) {
-    case "whatsapp": return `https://wa.me/${url.replace(/\D/g, "")}`;
-    case "instagram": return `https://instagram.com/${url.replace("@", "")}`;
-    case "github": return `https://github.com/${url}`;
-    case "twitter": return `https://x.com/${url.replace("@", "")}`;
-    case "youtube": return `https://youtube.com/${url}`;
-    case "tiktok": return `https://tiktok.com/@${url.replace("@", "")}`;
-    case "email": return `mailto:${url}`;
-    default: return `https://${url}`;
+    case "whatsapp": return `https://wa.me/${trimmedUrl.replace(/\D/g, "")}`;
+    case "instagram": return `https://instagram.com/${trimmedUrl.replace("@", "")}`;
+    case "linkedin": return trimmedUrl.includes("linkedin.com") ? `https://${trimmedUrl}` : `https://linkedin.com/in/${trimmedUrl}`;
+    case "github": return `https://github.com/${trimmedUrl}`;
+    case "twitter": return `https://x.com/${trimmedUrl.replace("@", "")}`;
+    case "youtube": return `https://youtube.com/${trimmedUrl.startsWith("@") ? trimmedUrl : `@${trimmedUrl}`}`;
+    case "tiktok": return `https://tiktok.com/@${trimmedUrl.replace("@", "")}`;
+    case "email": return `mailto:${trimmedUrl}`;
+    default: return `https://${trimmedUrl}`;
   }
 };
 

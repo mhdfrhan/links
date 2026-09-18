@@ -198,13 +198,22 @@ async function buildPortfolioContext(): Promise<string> {
       })
       .join("\n");
 
+    const socialLinks = (profile?.socialLinks || []) as any[];
+    const emailFromSocial = socialLinks.find((s) => s.platform?.toLowerCase() === "email")?.url;
+    const githubFromSocial = socialLinks.find((s) => s.platform?.toLowerCase() === "github")?.url;
+    const linkedinFromSocial = socialLinks.find((s) => s.platform?.toLowerCase() === "linkedin")?.url;
+    const socialsFormatted = socialLinks.length > 0
+      ? socialLinks.map((s) => `- ${s.label || s.platform}: ${s.url}`).join("\n")
+      : "";
+
     const context = `
 PROFIL:
 Nama: ${profile?.name || "Muhammad Farhan"}
 Role: ${profile?.tagline || "Fullstack Web Developer"}
-Email: ${profile?.email || "hi.mhdfarhan@gmail.com"}
-GitHub: ${profile?.github || "https://github.com/mhdfrhan"}
-LinkedIn: ${profile?.linkedin || "https://www.linkedin.com/in/muhammad-farhan-79ba79294/"}
+Email: ${profile?.email || emailFromSocial || "hi.mhdfarhan@gmail.com"}
+GitHub: ${profile?.github || (githubFromSocial ? (githubFromSocial.startsWith("http") ? githubFromSocial : `https://github.com/${githubFromSocial}`) : "https://github.com/mhdfrhan")}
+LinkedIn: ${profile?.linkedin || (linkedinFromSocial ? (linkedinFromSocial.startsWith("http") ? linkedinFromSocial : `https://linkedin.com/in/${linkedinFromSocial}`) : "https://www.linkedin.com/in/muhammad-farhan-79ba79294/")}
+${socialsFormatted ? `\nKONTAK & SOSIAL MEDIA LAINNYA:\n${socialsFormatted}` : ""}
 
 TENTANG:
 ${about || "Mahasiswa Teknik Informatika di Universitas Muhammadiyah Riau dengan pengalaman web development."}

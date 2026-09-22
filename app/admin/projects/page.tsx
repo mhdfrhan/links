@@ -43,6 +43,7 @@ interface Project {
   order: number;
   categoryId?: string;
   subCategoryId?: string;
+  shareToApi?: boolean;
 }
 
 export default function ProjectsPage() {
@@ -65,6 +66,7 @@ export default function ProjectsPage() {
   const [link, setLink] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [subCategoryId, setSubCategoryId] = useState("");
+  const [shareToApi, setShareToApi] = useState(false);
 
   // Quick Add State
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -123,6 +125,7 @@ export default function ProjectsPage() {
     setLink("");
     setCategoryId("");
     setSubCategoryId("");
+    setShareToApi(false);
   };
 
   // DnD sensors and handlers
@@ -173,6 +176,7 @@ export default function ProjectsPage() {
     setLink(project.link || "");
     setCategoryId(project.categoryId || "");
     setSubCategoryId(project.subCategoryId || "");
+    setShareToApi(!!project.shareToApi);
   };
 
   const handleSave = async () => {
@@ -197,6 +201,7 @@ export default function ProjectsPage() {
         link: link.trim(),
         categoryId,
         subCategoryId,
+        shareToApi: !!shareToApi,
         order: editId ? (projects.find((p) => p.id === editId)?.order || 0) : projects.length,
       });
       showToast("success", editId ? "Projek berhasil diupdate!" : "Projek berhasil ditambahkan!");
@@ -483,6 +488,33 @@ export default function ProjectsPage() {
 
             <AdminFormField label="Link URL" type="url" value={link} onChange={setLink} placeholder="https://example.com" hint="Link ke live demo atau repository (opsional)" />
 
+            {/* Share to API toggle */}
+            <div className="p-4 rounded-xl border border-border bg-background/50 flex items-center justify-between gap-4 transition-colors hover:border-accent/40">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <label htmlFor="shareToApi" className="text-sm font-medium text-foreground cursor-pointer">
+                    Bagikan ke API (Han Digital Solutions)
+                  </label>
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-accent/10 text-accent border border-accent/20">
+                    API
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Centang jika projek ini ingin dibagikan ke website Han Digital Solutions via endpoint API.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                <input
+                  type="checkbox"
+                  id="shareToApi"
+                  checked={shareToApi}
+                  onChange={(e) => setShareToApi(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
+              </label>
+            </div>
+
             <div className="flex gap-2 pt-2">
               <button
                 onClick={resetForm}
@@ -530,14 +562,22 @@ export default function ProjectsPage() {
                         <div className="flex items-start justify-between">
                           <div className="min-w-0">
                             <h3 className="font-semibold text-foreground leading-snug">{project.title}</h3>
-                            {project.categoryId && categories.find(c => c.id === project.categoryId) && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary  border border-primary/20">
-                                  {categories.find(c => c.id === project.categoryId)?.name}
-                                </span>
+                            {(project.categoryId || project.shareToApi) && (
+                              <div className="flex flex-wrap items-center gap-1 mt-1">
+                                {project.categoryId && categories.find(c => c.id === project.categoryId) && (
+                                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
+                                    {categories.find(c => c.id === project.categoryId)?.name}
+                                  </span>
+                                )}
                                 {project.subCategoryId && categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId) && (
-                                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-accent/10 text-accent  border border-accent/20">
+                                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-accent/10 text-accent border border-accent/20">
                                     {categories.find(c => c.id === project.categoryId)?.subCategories?.find((s: any) => s.id === project.subCategoryId)?.name}
+                                  </span>
+                                )}
+                                {project.shareToApi && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    Shared to API
                                   </span>
                                 )}
                               </div>

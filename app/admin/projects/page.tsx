@@ -67,6 +67,7 @@ export default function ProjectsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [subCategoryId, setSubCategoryId] = useState("");
   const [shareToApi, setShareToApi] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   // Quick Add State
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -225,6 +226,36 @@ export default function ProjectsPage() {
     } catch (err) {
       console.error("Error deleting project:", err);
       showToast("error", "Gagal menghapus projek.");
+    }
+  };
+
+  const handleToggleShareApi = async (project: Project) => {
+    const nextVal = !project.shareToApi;
+    setTogglingId(project.id);
+
+    // Optimistic UI update
+    setProjects((prev) =>
+      prev.map((p) => (p.id === project.id ? { ...p, shareToApi: nextVal } : p))
+    );
+
+    try {
+      const docRef = doc(db, "projects", project.id);
+      await setDoc(docRef, { shareToApi: nextVal }, { merge: true });
+      showToast(
+        "success",
+        nextVal
+          ? `"${project.title}" dibagikan ke API!`
+          : `"${project.title}" dinonaktifkan dari API.`
+      );
+    } catch (err) {
+      console.error("Error toggling shareToApi:", err);
+      showToast("error", "Gagal mengubah status share API.");
+      // Rollback on error
+      setProjects((prev) =>
+        prev.map((p) => (p.id === project.id ? { ...p, shareToApi: !nextVal } : p))
+      );
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -598,16 +629,39 @@ export default function ProjectsPage() {
                               </div>
                             )}
                           </div>
-                          <div className="flex gap-1.5 opacity-100 transition-all flex-shrink-0 ml-4 relative z-20">
+                          <div className="flex items-center gap-2 sm:gap-3 opacity-100 transition-all flex-shrink-0 ml-4 relative z-20">
+                            {/* Quick Toggle Share to API */}
+                            <div 
+                              className="flex items-center gap-1.5 bg-background/80 px-2.5 py-1.5 border border-border transition-colors hover:border-accent/40"
+                              title={project.shareToApi ? "Klik untuk mematikan share ke API" : "Klik untuk membagikan ke API (Han Digital Solutions)"}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider select-none hidden sm:inline">
+                                API
+                              </span>
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={!!project.shareToApi}
+                                  onChange={() => handleToggleShareApi(project)}
+                                  disabled={togglingId === project.id}
+                                  className="sr-only peer"
+                                />
+                                <div className="w-7 h-4 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-3 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
+                              </label>
+                            </div>
+
                             <button
                               onClick={() => startEdit(project)}
-                              className="p-1.5 text-accent bg-accent/5  hover:bg-accent/10 border border-accent/10 transition-colors"
+                              className="p-1.5 text-accent bg-accent/5 hover:bg-accent/10 border border-accent/10 transition-colors"
+                              title="Edit Projek"
                             >
                               <PencilIcon className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setDeleteTarget(project)}
-                              className="p-1.5 text-red-500 bg-red-500/5  hover:bg-red-500/10 border border-red-500/10 transition-colors"
+                              className="p-1.5 text-red-500 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 transition-colors"
+                              title="Hapus Projek"
                             >
                               <TrashIcon className="w-3.5 h-3.5" />
                             </button>

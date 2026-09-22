@@ -10,7 +10,7 @@ Dokumentasi ini menjelaskan cara mengintegrasikan dan mengambil data portofolio 
 - **Path**: `/api/projects`
 - **Method**: `GET` (Mendukung `OPTIONS` untuk CORS Preflight)
 - **Response Format**: JSON
-- **CORS**: Didukung (`Access-Control-Allow-Origin: *`)
+- **CORS**: Didukung penuh (`Access-Control-Allow-Origin: *`)
 
 ---
 
@@ -120,3 +120,17 @@ Dengan API Key:
 ```bash
 curl -X GET "https://hannn.my.id/api/projects" -H "x-api-key: KUNCI_ANDA"
 ```
+
+---
+
+## 6. Cara Mengaktifkan / Menonaktifkan Projek di Dashboard
+
+Anda memiliki 2 cara mudah:
+1. **Cara Cepat (1-Klik langsung dari daftar projek)**:
+   - Buka dashboard di [https://hannn.my.id/admin/projects](https://hannn.my.id/admin/projects).
+   - Pada kartu projek yang diinginkan, langsung klik **toggle switch "API"** di samping tombol edit/hapus.
+   - Status akan langsung terupdate ke Firebase secara instan (optimistic UI) dan badge hijau **"Shared to API"** akan otomatis aktif/nonaktif!
+2. **Melalui Form Edit**:
+   - Klik tombol **Edit (ikon pensil)** pada projek.
+   - Centang/uncentang toggle **"Bagikan ke API (Han Digital Solutions)"**.
+   - Klik **"Update Projek"**.

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase/config";
+import * as adminModule from "firebase-admin";
+import { db as clientDb } from "@/lib/firebase/config";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,65 @@ export async function OPTIONS() {
     status: 204,
     headers: corsHeaders,
   });
+}
+
+function getAdminFirestore() {
+  if (!adminModule.apps.length) {
+    const serviceAccountStr = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (serviceAccountStr) {
+      try {
+        const serviceAccount = JSON.parse(serviceAccountStr);
+        adminModule.initializeApp({
+          credential: adminModule.credential.cert(serviceAccount),
+        });
+      } catch (err) {
+        console.error("[Projects API] Error initializing Firebase Admin:", err);
+      }
+    }
+  }
+  return adminModule.apps.length ? adminModule.firestore() : null;
+}
+
+async function getCategoriesAndProjects() {
+  const adminDb = getAdminFirestore();
+
+  if (adminDb) {
+    // 1. Gunakan Firebase Admin SDK (Standar untuk Node.js / Vercel Serverless)
+    const [categoriesSnap, projectsSnap] = await Promise.all([
+      adminDb.collection("categories").orderBy("order", "asc").get(),
+      adminDb.collection("projects").orderBy("order", "asc").get(),
+    ]);
+
+    const categories = categoriesSnap.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+
+    const projects = projectsSnap.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+
+    return { categories, projects };
+  }
+
+  // 2. Fallback ke Firebase Client SDK (Jika service account tidak ada di env lokal)
+  const [categoriesSnap, projectsSnap] = await Promise.all([
+    getDocs(query(collection(clientDb, "categories"), orderBy("order", "asc"))),
+    getDocs(query(collection(clientDb, "projects"), orderBy("order", "asc"))),
+  ]);
+
+  const categories = categoriesSnap.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+  }));
+
+  const projects = projectsSnap.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+  }));
+
+  return { categories, projects };
 }
 
 export async function GET(req: NextRequest) {
@@ -85,36 +145,31 @@ export async function GET(req: NextRequest) {
     const limitParam = searchParams.get("limit");
     const categoryParam = searchParams.get("category");
 
-    // Fetch categories dan projects secara paralel dari Firestore
-    const [categoriesSnap, projectsSnap] = await Promise.all([
-      getDocs(query(collection(db, "categories"), orderBy("order", "asc"))),
-      getDocs(query(collection(db, "projects"), orderBy("order", "asc"))),
-    ]);
+    // Fetch categories dan projects
+    const { categories, projects } = await getCategoriesAndProjects();
 
     // Buat mapping kategori untuk mempermudah pencarian nama kategori & subkategori
     const categoryMap = new Map<
       string,
       { name: string; subCategories?: { id: string; name: string }[] }
     >();
-    categoriesSnap.docs.forEach((doc) => {
-      const data = doc.data();
-      categoryMap.set(doc.id, {
-        name: data.name || "",
-        subCategories: data.subCategories || [],
+    categories.forEach((cat: any) => {
+      categoryMap.set(cat.id, {
+        name: cat.name || "",
+        subCategories: cat.subCategories || [],
       });
     });
 
     // Ambil dan filter hanya projek yang memiliki shareToApi === true
-    let sharedProjects = projectsSnap.docs
-      .map((doc) => {
-        const data = doc.data();
+    let sharedProjects = projects
+      .map((data: any) => {
         const catInfo = data.categoryId ? categoryMap.get(data.categoryId) : undefined;
         const subCatName = catInfo?.subCategories?.find(
-          (s) => s.id === data.subCategoryId
+          (s: any) => s.id === data.subCategoryId
         )?.name;
 
         return {
-          id: doc.id,
+          id: data.id,
           title: data.title || "",
           title_en: data.title_en || "",
           description: data.description || "",
@@ -133,12 +188,12 @@ export async function GET(req: NextRequest) {
           shareToApi: !!data.shareToApi,
         };
       })
-      .filter((p) => p.shareToApi);
+      .filter((p: any) => p.shareToApi);
 
     // Filter opsional berdasarkan category ID atau category Name
     if (categoryParam) {
       sharedProjects = sharedProjects.filter(
-        (p) =>
+        (p: any) =>
           p.categoryId === categoryParam ||
           p.categoryName?.toLowerCase() === categoryParam.toLowerCase()
       );
@@ -162,7 +217,7 @@ export async function GET(req: NextRequest) {
         status: 200,
         headers: {
           ...corsHeaders,
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
         },
       }
     );

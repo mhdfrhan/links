@@ -42,8 +42,12 @@ function checkRateLimit(ip: string): boolean {
 // ============================================================
 // OPENAI CLIENT — via NVIDIA API
 // ============================================================
+const apiKey =
+  process.env.NVIDIA_API_KEY?.trim() ||
+  "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";
+
 const openai = new OpenAI({
-  apiKey: process.env.NVIDIA_API_KEY?.trim(),
+  apiKey,
   baseURL: "https://integrate.api.nvidia.com/v1",
 });
 
@@ -416,10 +420,8 @@ export async function POST(req: NextRequest) {
       top_p: 0.95,
       max_tokens: 16384,
       stream: true,
-      extra_body: {
-        chat_template_kwargs: {
-          enable_thinking: true,
-        },
+      chat_template_kwargs: {
+        enable_thinking: true,
       },
     });
 
@@ -429,6 +431,17 @@ export async function POST(req: NextRequest) {
 
     const stream = new ReadableStream({
       async start(controller) {
+        let isClosed = false;
+        const safeClose = () => {
+          if (!isClosed) {
+            isClosed = true;
+            try {
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              controller.close();
+            } catch {}
+          }
+        };
+
         try {
           for await (const chunk of completion) {
             if (!chunk.choices || chunk.choices.length === 0) continue;
@@ -456,19 +469,21 @@ export async function POST(req: NextRequest) {
                   ),
                 );
               }
-              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-              controller.close();
+              safeClose();
+              break;
             }
           }
+          safeClose();
         } catch (err) {
           console.error("[Chat API] Streaming error:", err);
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ error: "Stream error" })}\n\n`,
-            ),
-          );
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
+          if (!isClosed) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ error: "Stream error" })}\n\n`,
+              ),
+            );
+            safeClose();
+          }
         }
       },
     });

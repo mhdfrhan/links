@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 
@@ -20,10 +21,9 @@ export function EducationSection({ items }: EducationSectionProps) {
   const dict = dictionaries[language].education;
 
   return (
-    <section className="w-full relative flex flex-col md:flex-row gap-8 md:gap-16 items-start mt-8">
-      
-      {/* Sticky Section Label */}
-      <div className="md:w-1/4 md:sticky md:top-32 flex flex-col gap-2">
+    <section className="w-full">
+      {/* Section label */}
+      <div className="flex items-center gap-3 mb-6">
         <span
           style={{
             fontFamily: "var(--font-jetbrains-mono), monospace",
@@ -37,7 +37,7 @@ export function EducationSection({ items }: EducationSectionProps) {
         <h2
           style={{
             fontWeight: 500,
-            fontSize: "1.75rem",
+            fontSize: "1.5rem",
             letterSpacing: "-0.015em",
             color: "var(--text-primary)",
             fontStyle: "normal",
@@ -45,86 +45,115 @@ export function EducationSection({ items }: EducationSectionProps) {
         >
           {dict.title}
         </h2>
-        <div className="w-12 h-[1px] bg-[var(--border)] mt-4" />
+        <div
+          className="flex-1"
+          style={{ height: "1px", background: "var(--border)" }}
+        />
       </div>
 
-      {/* List */}
-      <div className="md:w-3/4 flex flex-col">
+      {/* Cards List */}
+      <div className="flex flex-col gap-3">
         {items.map((item, index) => (
-          <div
+          <motion.div
             key={index}
-            className="group relative flex flex-col py-10 border-b border-[var(--border)] first:border-t"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20px" }}
+            transition={{
+              duration: 0.35,
+              delay: index * 0.06,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            whileHover={{ y: -2 }}
+            style={{
+              borderRadius: "12px",
+              border: "1px solid var(--border)",
+              background: "var(--bg-secondary)",
+              padding: "1.25rem 1.5rem",
+              transition: "border-color 200ms ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "var(--border-hover)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "var(--border)";
+            }}
           >
-            {/* Massive Background Year */}
-            <div 
-              className="absolute right-0 top-1/2 -translate-y-1/2 text-[4rem] md:text-[6rem] font-black opacity-[0.02] group-hover:opacity-[0.05] group-hover:-translate-x-4 transition-all duration-700 pointer-events-none select-none z-0 whitespace-nowrap"
-              style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}
-            >
-              {item.period.split(" ")[0]}
-            </div>
-
-            <div className="relative z-10 flex flex-col md:flex-row md:items-baseline justify-between gap-4">
-              <div className="flex-1">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
+              <div className="space-y-1">
                 <span
-                  className="inline-block mb-3"
                   style={{
                     fontFamily: "var(--font-jetbrains-mono), monospace",
-                    fontSize: "0.85rem",
+                    fontSize: "0.75rem",
                     color: "var(--text-muted)",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase"
+                    display: "block",
                   }}
                 >
                   {item.period}
                 </span>
                 <h3
-                  className="transition-colors duration-300 group-hover:text-[var(--text-primary)]"
                   style={{
-                    fontFamily: "var(--font-serif), serif",
-                    fontWeight: 400,
-                    fontSize: "1.75rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.5rem",
+                    fontFamily: "var(--font-inter), system-ui, sans-serif",
+                    fontWeight: 500,
+                    fontSize: "1.125rem",
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.01em",
                   }}
                 >
                   {item.institution}
                 </h3>
                 <p
                   style={{
-                    fontFamily: "var(--font-sans), system-ui, sans-serif",
-                    fontSize: "1.05rem",
-                    color: "var(--text-muted)",
+                    fontFamily: "var(--font-inter), system-ui, sans-serif",
+                    fontSize: "0.875rem",
+                    color: "var(--text-secondary)",
                   }}
                 >
                   {item.degree}
                 </p>
               </div>
 
-              {/* Right Side Info */}
-              <div className="flex flex-col md:items-end md:text-right mt-4 md:mt-0">
-                {item.score && (
-                  <div className="mb-2">
-                    <span className="text-[0.7rem] uppercase tracking-widest text-[var(--text-muted)] font-mono block mb-1">Score / GPA</span>
-                    <span className="text-[1.25rem] font-semibold text-[var(--text-primary)]">{item.score}</span>
-                  </div>
-                )}
-                {item.note && (
-                  <p
-                    className="mt-2"
-                    style={{
-                      fontFamily: "var(--font-sans), system-ui, sans-serif",
-                      fontSize: "0.875rem",
-                      color: "var(--text-muted)",
-                      lineHeight: 1.5,
-                      maxWidth: "250px",
-                    }}
-                  >
-                    {item.note}
-                  </p>
-                )}
-              </div>
+              {/* Score & Note */}
+              {(item.score || item.note) && (
+                <div className="flex flex-col md:items-end text-left md:text-right pt-1 md:pt-0">
+                  {item.score && (
+                    <span
+                      style={{
+                        fontFamily: "var(--font-jetbrains-mono), monospace",
+                        fontSize: "0.8125rem",
+                        color: "var(--accent)",
+                        background:
+                          "color-mix(in srgb, var(--accent) 10%, transparent)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
+                        padding: "0.2rem 0.55rem",
+                        borderRadius: "6px",
+                        display: "inline-block",
+                      }}
+                    >
+                      {item.score}
+                    </span>
+                  )}
+                  {item.note && (
+                    <p
+                      style={{
+                        fontFamily: "var(--font-inter), system-ui, sans-serif",
+                        fontSize: "0.8125rem",
+                        color: "var(--text-muted)",
+                        marginTop: "0.35rem",
+                        maxWidth: "320px",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {item.note}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

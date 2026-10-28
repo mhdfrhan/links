@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 
@@ -20,9 +19,8 @@ interface SkillsSectionProps {
 }
 
 /**
- * SkillsSection — Chips grouped by kategori
- * JetBrains Mono, bg-tertiary, 
- * Tidak ada progress bar, tidak ada persentase
+ * SkillsSection — Clean categorized chips
+ * JetBrains Mono 400, flexbox wrap layout, iOS hover animation, responsive.
  */
 export function SkillsSection({ categories }: SkillsSectionProps) {
   const { language } = useLanguage();
@@ -31,7 +29,7 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
   return (
     <section className="w-full">
       {/* Section label */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-8">
         <span
           style={{
             fontFamily: "var(--font-jetbrains-mono), monospace",
@@ -59,69 +57,87 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-16 mt-16 overflow-hidden">
-        {categories.map((category, catIndex) => {
-          // Duplicate skills to create seamless loop
-          const infiniteSkills = [...category.skills, ...category.skills, ...category.skills];
-          const isEven = catIndex % 2 === 0;
+      {/* Categories Grid */}
+      <div className="space-y-8">
+        {categories.map((category, catIndex) => (
+          <motion.div
+            key={catIndex}
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-30px" }}
+            transition={{
+              duration: 0.4,
+              delay: catIndex * 0.08,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            className="space-y-3"
+          >
+            {/* Category header */}
+            <h3
+              style={{
+                fontFamily: "var(--font-inter), system-ui, sans-serif",
+                fontWeight: 500,
+                fontSize: "1rem",
+                letterSpacing: "-0.01em",
+                color: "var(--text-secondary)",
+              }}
+            >
+              {category.title}
+            </h3>
 
-          return (
-            <div key={catIndex} className="relative flex flex-col group">
-              {/* Category Title overlaying the marquee or above it */}
-              <h3
-                className="mb-6 px-4 md:px-8 flex items-center gap-4 z-10"
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.85rem",
-                  color: "var(--text-muted)",
-                  letterSpacing: "0.05em",
-                  fontWeight: 400,
-                  textTransform: "uppercase",
-                }}
-              >
-                <div className="w-12 h-[1px] bg-[var(--border)]" />
-                {category.title}
-              </h3>
-
-              {/* Marquee Wrapper */}
-              <div className="relative w-full overflow-hidden flex items-center pointer-events-none select-none">
-                {/* Left/Right Fades for smooth entry/exit */}
-                <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-[var(--bg-primary)] to-transparent z-10" />
-                <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-[var(--bg-primary)] to-transparent z-10" />
-
-                <motion.div
-                  className="flex gap-8 md:gap-16 items-center px-4"
-                  animate={{
-                    x: isEven ? ["0%", "-33.33%"] : ["-33.33%", "0%"],
+            {/* Chips wrap */}
+            <div className="flex flex-wrap gap-2 md:gap-2.5">
+              {category.skills.map((skill, skillIndex) => (
+                <motion.span
+                  key={skillIndex}
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 25 }}
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "0.8125rem",
+                    color: "var(--text-secondary)",
+                    background: "var(--bg-tertiary)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    padding: "0.4rem 0.8rem",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
+                    userSelect: "none",
+                    cursor: "default",
+                    transition:
+                      "border-color 200ms ease, color 200ms ease, background 200ms ease",
                   }}
-                  transition={{
-                    ease: "linear",
-                    duration: Math.max(10, category.skills.length * 3.5), // Constant speed based on number of items
-                    repeat: Infinity,
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+                    el.style.borderColor = "var(--border-hover)";
+                    el.style.color = "var(--text-primary)";
+                    el.style.background =
+                      "color-mix(in srgb, var(--accent) 8%, var(--bg-tertiary))";
                   }}
-                  style={{ width: "fit-content" }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.borderColor = "var(--border)";
+                    el.style.color = "var(--text-secondary)";
+                    el.style.background = "var(--bg-tertiary)";
+                  }}
                 >
-                  {infiniteSkills.map((skill, skillIndex) => (
-                    <span
-                      key={skillIndex}
-                      className="whitespace-nowrap transition-colors duration-500 group-hover:text-[var(--text-primary)]"
-                      style={{
-                        fontFamily: "var(--font-serif), serif",
-                        fontSize: "clamp(2rem, 6vw, 3rem)",
-                        fontWeight: 400,
-                        color: "var(--text-secondary)",
-                        opacity: 0.6,
-                        letterSpacing: "-0.02em",
-                      }}
-                    >
-                      {skill.name}
-                    </span>
-                  ))}
-                </motion.div>
-              </div>
+                  <span
+                    style={{
+                      width: "5px",
+                      height: "5px",
+                      borderRadius: "50%",
+                      background: "var(--accent)",
+                      opacity: 0.7,
+                    }}
+                  />
+                  {skill.name}
+                </motion.span>
+              ))}
             </div>
-          );
-        })}
+          </motion.div>
+        ))}
       </div>
     </section>
   );

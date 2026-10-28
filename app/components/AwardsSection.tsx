@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 
@@ -50,66 +51,100 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
         />
       </div>
 
-      <div className="flex flex-col mt-12 border-t border-[var(--border)]">
+      {/* Awards List */}
+      <div className="flex flex-col gap-3">
         {awards.map((award, index) => (
-          <div
+          <motion.div
             key={index}
-            className="group relative flex flex-col md:flex-row md:items-center justify-between py-6 md:py-8 border-b border-[var(--border)] hover:bg-[var(--bg-secondary)] transition-colors duration-500 px-4"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20px" }}
+            transition={{
+              duration: 0.35,
+              delay: index * 0.05,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            whileHover={{ y: -2 }}
+            style={{
+              borderRadius: "12px",
+              border: "1px solid var(--border)",
+              background: "var(--bg-secondary)",
+              padding: "1.1rem 1.35rem",
+              transition: "border-color 200ms ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "var(--border-hover)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "var(--border)";
+            }}
           >
-            {/* Left/Date */}
-            <div className="md:w-1/4 mb-4 md:mb-0">
-              <span
-                className="transition-colors duration-300 group-hover:text-[var(--text-primary)]"
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.85rem",
-                  color: "var(--text-secondary)",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase"
-                }}
-              >
-                {award.date || award.year}
-              </span>
-            </div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    style={{
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      fontSize: "0.75rem",
+                      color: "var(--accent)",
+                      background:
+                        "color-mix(in srgb, var(--accent) 10%, transparent)",
+                      border:
+                        "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
+                      padding: "0.15rem 0.5rem",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    {award.date || award.year}
+                  </span>
+                  {award.issuer && (
+                    <span
+                      style={{
+                        fontFamily: "var(--font-inter), system-ui, sans-serif",
+                        fontSize: "0.8125rem",
+                        color: "var(--text-muted)",
+                      }}
+                    >
+                      {award.issuer}
+                    </span>
+                  )}
+                </div>
 
-            {/* Middle/Title */}
-            <div className="md:w-2/4 pr-4">
-              <h3
-                className="transition-colors duration-300 group-hover:text-[var(--accent)]"
-                style={{
-                  fontFamily: "var(--font-serif), serif",
-                  fontWeight: 400,
-                  fontSize: "1.75rem",
-                  color: "var(--text-primary)",
-                  marginBottom: "0.25rem",
-                  lineHeight: 1.2,
-                  letterSpacing: "-0.01em"
-                }}
-              >
-                {award.title}
-              </h3>
-              {award.issuer && (
-                <p
+                <h3
                   style={{
-                    fontFamily: "var(--font-sans), system-ui, sans-serif",
-                    fontSize: "1.05rem",
-                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-inter), system-ui, sans-serif",
+                    fontWeight: 500,
+                    fontSize: "1.0625rem",
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1.4,
                   }}
                 >
-                  {award.issuer}
-                </p>
-              )}
-            </div>
+                  {award.title}
+                </h3>
+              </div>
 
-            {/* Right/Action */}
-            <div className="md:w-1/4 flex justify-end mt-6 md:mt-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+              {/* Award Trophy Icon */}
+              <div className="hidden md:flex text-[var(--text-muted)] flex-shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5 opacity-60"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A4.125 4.125 0 0 0 18 9.75V4.5a.75.75 0 0 0-.75-.75h-10.5a.75.75 0 0 0-.75.75v5.25a4.125 4.125 0 0 0 4.496 4.125Z"
+                  />
                 </svg>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

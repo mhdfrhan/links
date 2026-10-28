@@ -18,21 +18,20 @@ interface ExperienceSectionProps {
 }
 
 /**
- * ExperienceSection — Timeline bersih
- * Vertical line tipis di kiri, dot accent kecil
- * Warna accent soft blue sesuai design prompt
+ * ExperienceSection — Modern iOS-style spring accordion
+ * Clean layout, smooth transitions, mobile-first responsive.
  */
 export function ExperienceSection({
   title,
   sectionNumber = "05.",
   items,
 }: ExperienceSectionProps) {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(0); // First item expanded by default
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
   return (
     <section className="w-full">
       {/* Section label */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6">
         <span
           style={{
             fontFamily: "var(--font-jetbrains-mono), monospace",
@@ -61,125 +60,141 @@ export function ExperienceSection({
       </div>
 
       {/* Accordion List */}
-      <div className="flex flex-col mt-8 border-t border-[var(--border)]">
+      <div className="flex flex-col gap-3">
         {items.map((item, index) => {
           const isExpanded = expandedIndex === index;
           return (
-            <div
+            <motion.div
               key={index}
-              className="group relative flex flex-col border-b border-[var(--border)] transition-colors duration-500 hover:bg-[var(--bg-secondary)]"
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-20px" }}
+              transition={{
+                duration: 0.35,
+                delay: index * 0.05,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
+              style={{
+                borderRadius: "12px",
+                border: `1px solid ${isExpanded ? "var(--border-hover)" : "var(--border)"}`,
+                background: isExpanded
+                  ? "var(--bg-secondary)"
+                  : "color-mix(in srgb, var(--bg-secondary) 50%, transparent)",
+                overflow: "hidden",
+                transition: "border-color 200ms ease, background 200ms ease",
+              }}
             >
               {/* Header (Clickable) */}
               <button
                 onClick={() => setExpandedIndex(isExpanded ? null : index)}
-                className="w-full text-left py-8 md:py-10 px-4 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-12 cursor-pointer focus:outline-none"
+                className="w-full text-left p-4 md:p-5 flex items-center justify-between gap-4 cursor-pointer focus:outline-none"
               >
-                <div className="md:w-1/4 flex-shrink-0">
-                  <span
-                    className="transition-colors duration-300"
+                <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-4 flex-1 min-w-0">
+                  <h3
                     style={{
-                      fontFamily: "var(--font-jetbrains-mono), monospace",
-                      fontSize: "0.85rem",
+                      fontFamily: "var(--font-inter), system-ui, sans-serif",
+                      fontWeight: 500,
+                      fontSize: "1.125rem",
                       color: isExpanded ? "var(--text-primary)" : "var(--text-secondary)",
-                      letterSpacing: "0.05em",
-                      textTransform: "uppercase"
+                      letterSpacing: "-0.01em",
+                      transition: "color 200ms ease",
                     }}
                   >
-                    {item.period}
-                  </span>
-                </div>
-
-                <div className="md:w-3/4 flex items-center justify-between gap-4">
-                  <div>
-                    <h3
-                      className="transition-colors duration-300"
+                    {item.company}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span
                       style={{
-                        fontFamily: "var(--font-serif), serif",
-                        fontWeight: 400,
-                        fontSize: "2rem",
-                        color: isExpanded ? "var(--accent)" : "var(--text-primary)",
-                        marginBottom: "0.25rem",
-                        letterSpacing: "-0.02em",
-                      }}
-                    >
-                      {item.company}
-                    </h3>
-                    <p
-                      style={{
-                        fontFamily: "var(--font-sans), system-ui, sans-serif",
-                        fontSize: "1.1rem",
-                        color: "var(--text-secondary)",
+                        fontFamily: "var(--font-inter), system-ui, sans-serif",
+                        fontSize: "0.875rem",
+                        color: "var(--accent)",
                       }}
                     >
                       {item.title}
-                    </p>
-                  </div>
-
-                  {/* Plus/Minus Icon */}
-                  <div className="relative w-6 h-6 flex items-center justify-center flex-shrink-0 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
-                    <motion.div
-                      animate={{ rotate: isExpanded ? 180 : 0, opacity: isExpanded ? 0 : 1 }}
-                      transition={{ duration: 0.3 }}
-                      className="absolute inset-0 flex items-center justify-center"
+                    </span>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                      &bull;
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-jetbrains-mono), monospace",
+                        fontSize: "0.75rem",
+                        color: "var(--text-muted)",
+                      }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                      </svg>
-                    </motion.div>
-                    <motion.div
-                      animate={{ rotate: isExpanded ? 0 : -180, opacity: isExpanded ? 1 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-                      </svg>
-                    </motion.div>
+                      {item.period}
+                    </span>
                   </div>
                 </div>
+
+                {/* iOS Chevron Icon */}
+                <motion.div
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className="flex-shrink-0 text-[var(--text-muted)]"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+                </motion.div>
               </button>
 
               {/* Accordion Content */}
-              <AnimatePresence>
+              <AnimatePresence initial={false}>
                 {isExpanded && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                    transition={{
+                      height: { type: "spring", stiffness: 350, damping: 30 },
+                      opacity: { duration: 0.2 },
+                    }}
                     className="overflow-hidden"
                   >
-                    <div className="flex flex-col md:flex-row gap-4 md:gap-12 px-4 pb-10 pt-0">
-                      <div className="hidden md:block md:w-1/4 flex-shrink-0" /> {/* Spacer to align with title */}
-                      <div className="md:w-3/4 md:pr-12">
-                        <ul className="flex flex-col gap-5">
-                          {item.points.map((point, pIndex) => (
-                          <motion.li
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: pIndex * 0.1 }}
+                    <div className="px-4 pb-5 pt-1 md:px-5 border-t border-[var(--border)]">
+                      <ul className="flex flex-col gap-2.5 mt-3">
+                        {item.points.map((point, pIndex) => (
+                          <li
                             key={pIndex}
-                            className="flex gap-4 group/point"
+                            className="flex items-start gap-3"
                             style={{
-                              fontFamily: "var(--font-sans), system-ui, sans-serif",
-                              fontSize: "1.05rem",
+                              fontFamily: "var(--font-inter), system-ui, sans-serif",
+                              fontSize: "0.875rem",
                               color: "var(--text-secondary)",
-                              lineHeight: 1.6,
+                              lineHeight: 1.65,
                             }}
                           >
-                            <span className="text-[var(--border)] group-hover/point:text-[var(--accent)] transition-colors mt-2 flex-shrink-0">
-                              <div className="w-1.5 h-1.5 rounded-full bg-current" />
-                            </span>
+                            <span
+                              style={{
+                                width: "5px",
+                                height: "5px",
+                                borderRadius: "50%",
+                                background: "var(--accent)",
+                                marginTop: "9px",
+                                flexShrink: 0,
+                              }}
+                            />
                             <span>{point}</span>
-                          </motion.li>
+                          </li>
                         ))}
                       </ul>
-                      </div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           );
         })}
       </div>

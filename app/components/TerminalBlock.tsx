@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 
@@ -15,24 +15,16 @@ interface TerminalBlockProps {
 /**
  * TerminalBlock — Signature developer element
  * Menampilkan data dari backend sebagai CLI output.
- * Satu-satunya animasi looping yang diizinkan: terminal cursor blink.
+ * Border radius halus (12px), dots melingkar halus, entry animation spring.
  */
 export function TerminalBlock({
   name = "Muhammad Farhan",
   role = "Web Developer",
-  about = "",
   skills = [],
   status = "Open to opportunities",
 }: TerminalBlockProps) {
-  const [isVisible, setIsVisible] = useState(false);
   const { language } = useLanguage();
   const dict = dictionaries[language].terminal;
-
-  useEffect(() => {
-    // Small delay agar fade-in terasa natural
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Ambil beberapa skill dari kategori pertama (Tech Stack)
   const techSkills = skills.find(
@@ -50,22 +42,20 @@ export function TerminalBlock({
         .join("  ")
     : "react/  nextjs/  tailwind/  laravel/  php/  mysql/";
 
-  // Truncate about text untuk JSON format
-  const aboutShort =
-    about.length > 60 ? about.substring(0, 60).trimEnd() + "..." : about;
-
   return (
-    <div
-      className="w-full  overflow-hidden"
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="w-full overflow-hidden"
       style={{
         background: "var(--bg-code)",
         border: "1px solid var(--border)",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-        opacity: isVisible ? 1 : 0,
-        transition: "opacity 400ms ease-out",
+        borderRadius: "12px",
       }}
     >
-      {/* Title bar dengan 3 dots */}
+      {/* Title bar dengan 3 window dots */}
       <div
         className="flex items-center gap-2 px-4 py-3"
         style={{
@@ -74,38 +64,38 @@ export function TerminalBlock({
         }}
       >
         {/* Window control dots */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <span
-            className="block "
+            className="block rounded-full"
             style={{
               width: "10px",
               height: "10px",
               background: "#ff5f57",
-              opacity: 0.8,
+              opacity: 0.85,
             }}
           />
           <span
-            className="block "
+            className="block rounded-full"
             style={{
               width: "10px",
               height: "10px",
               background: "#febc2e",
-              opacity: 0.8,
+              opacity: 0.85,
             }}
           />
           <span
-            className="block "
+            className="block rounded-full"
             style={{
               width: "10px",
               height: "10px",
               background: "#28c840",
-              opacity: 0.8,
+              opacity: 0.85,
             }}
           />
         </div>
         {/* Terminal title */}
         <span
-          className="flex-1 text-center"
+          className="flex-1 text-center pr-10"
           style={{
             fontFamily: "var(--font-jetbrains-mono), monospace",
             fontSize: "0.75rem",
@@ -113,12 +103,12 @@ export function TerminalBlock({
             letterSpacing: "0.02em",
           }}
         >
-          {dictionaries[language].terminal.terminalTitle}
+          {dict.terminalTitle}
         </span>
       </div>
 
       {/* Terminal body */}
-      <div className="px-5 py-5 space-y-1.5">
+      <div className="px-4 py-4 md:px-5 md:py-5 space-y-1.5 overflow-x-auto text-[0.8rem] md:text-[0.8125rem]">
         {/* Command: whoami */}
         <TerminalLine prompt="$" command="whoami" />
         <TerminalOutput>
@@ -180,11 +170,9 @@ export function TerminalBlock({
           <span className="terminal-cursor" />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
-
-/* ---- Sub-components ---- */
 
 function TerminalLine({
   prompt,
@@ -198,7 +186,6 @@ function TerminalLine({
       <span
         style={{
           fontFamily: "var(--font-jetbrains-mono), monospace",
-          fontSize: "0.8125rem",
           color: "var(--green)",
           flexShrink: 0,
         }}
@@ -208,7 +195,6 @@ function TerminalLine({
       <span
         style={{
           fontFamily: "var(--font-jetbrains-mono), monospace",
-          fontSize: "0.8125rem",
           color: "var(--text-primary)",
         }}
       >
@@ -221,10 +207,9 @@ function TerminalLine({
 function TerminalOutput({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="pl-4"
+      className="pl-3 md:pl-4"
       style={{
         fontFamily: "var(--font-jetbrains-mono), monospace",
-        fontSize: "0.8125rem",
         color: "var(--text-secondary)",
         lineHeight: 1.6,
       }}

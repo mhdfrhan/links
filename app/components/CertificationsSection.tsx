@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 
@@ -52,91 +53,137 @@ export function CertificationsSection({
         />
       </div>
 
-      <div className="flex flex-col mt-12 border-t border-[var(--border)]">
+      {/* Certifications List */}
+      <div className="flex flex-col gap-3">
         {certifications.map((cert, index) => (
-          <div
+          <motion.div
             key={index}
-            className="group relative flex flex-col md:flex-row md:items-center justify-between py-6 md:py-8 border-b border-[var(--border)] hover:bg-[var(--bg-secondary)] transition-colors duration-500 px-4"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20px" }}
+            transition={{
+              duration: 0.35,
+              delay: index * 0.05,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            whileHover={{ y: -2 }}
+            style={{
+              borderRadius: "12px",
+              border: "1px solid var(--border)",
+              background: "var(--bg-secondary)",
+              padding: "1.1rem 1.35rem",
+              transition: "border-color 200ms ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "var(--border-hover)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "var(--border)";
+            }}
           >
-            {/* Left/Date */}
-            <div className="md:w-1/4 mb-4 md:mb-0">
-              <span
-                className="transition-colors duration-300 group-hover:text-[var(--text-primary)]"
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "0.85rem",
-                  color: "var(--text-secondary)",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase"
-                }}
-              >
-                {cert.date}
-              </span>
-            </div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    style={{
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      fontSize: "0.75rem",
+                      color: "var(--accent)",
+                      background:
+                        "color-mix(in srgb, var(--accent) 10%, transparent)",
+                      border:
+                        "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
+                      padding: "0.15rem 0.5rem",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    {cert.date}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-inter), system-ui, sans-serif",
+                      fontSize: "0.8125rem",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    {cert.issuer}
+                  </span>
+                </div>
 
-            {/* Middle/Title */}
-            <div className="md:w-2/4 pr-4">
-              <h3
-                className="transition-colors duration-300 group-hover:text-[var(--accent)]"
-                style={{
-                  fontFamily: "var(--font-serif), serif",
-                  fontWeight: 400,
-                  fontSize: "1.75rem",
-                  color: "var(--text-primary)",
-                  marginBottom: "0.25rem",
-                  lineHeight: 1.2,
-                  letterSpacing: "-0.01em"
-                }}
-              >
-                {cert.title}
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-sans), system-ui, sans-serif",
-                  fontSize: "1.05rem",
-                  color: "var(--text-secondary)",
-                }}
-              >
-                {cert.issuer}
-              </p>
-              {cert.validUntil && (
-                <p
-                  className="mt-2"
+                <h3
                   style={{
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    fontSize: "0.75rem",
-                    color: "var(--text-muted)",
-                    textTransform: "uppercase"
+                    fontFamily: "var(--font-inter), system-ui, sans-serif",
+                    fontWeight: 500,
+                    fontSize: "1.0625rem",
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1.4,
                   }}
                 >
-                  Valid until {cert.validUntil}
-                </p>
-              )}
-            </div>
+                  {cert.title}
+                </h3>
 
-            {/* Right/Action */}
-            <div className="md:w-1/4 flex justify-end mt-6 md:mt-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {cert.verifyUrl ? (
-                <a
-                  href={cert.verifyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
-                >
-                  <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "0.85rem", textTransform: "uppercase" }}>View</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform duration-300">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                  </svg>
-                </a>
-              ) : (
-                <div className="text-[var(--text-muted)]">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                  </svg>
+                {cert.validUntil && (
+                  <p
+                    style={{
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      fontSize: "0.7rem",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    Valid until {cert.validUntil}
+                  </p>
+                )}
+              </div>
+
+              {/* Verify Link */}
+              {cert.verifyUrl && (
+                <div className="flex-shrink-0 pt-2 md:pt-0">
+                  <motion.a
+                    href={cert.verifyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      fontSize: "0.75rem",
+                      color: "var(--accent)",
+                      background:
+                        "color-mix(in srgb, var(--accent) 8%, transparent)",
+                      border:
+                        "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
+                      padding: "0.35rem 0.75rem",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      transition: "background 150ms ease, border-color 150ms ease",
+                    }}
+                  >
+                    <span>Verify</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-3.5 h-3.5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                      />
+                    </svg>
+                  </motion.a>
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

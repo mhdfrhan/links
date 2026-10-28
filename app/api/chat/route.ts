@@ -408,14 +408,19 @@ export async function POST(req: NextRequest) {
       { role: "user", content: message },
     ];
 
-    // Call NVIDIA API dengan model openai/gpt-oss-20b
-    const completion = await openai.chat.completions.create({
-      model: "openai/gpt-oss-20b",
+    // Call NVIDIA API dengan model nvidia/nemotron-3.5-super-vl-120b-a12b
+    const completion = await (openai.chat.completions.create as any)({
+      model: "nvidia/nemotron-3.5-super-vl-120b-a12b",
       messages,
       temperature: 1,
-      top_p: 1,
-      max_tokens: 4096,
+      top_p: 0.95,
+      max_tokens: 16384,
       stream: true,
+      extra_body: {
+        chat_template_kwargs: {
+          enable_thinking: true,
+        },
+      },
     });
 
     // Build streaming response
@@ -426,6 +431,7 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           for await (const chunk of completion) {
+            if (!chunk.choices || chunk.choices.length === 0) continue;
             const delta = chunk.choices[0]?.delta as any;
             // Skip reasoning_content (internal AI thinking) — only send final answer
             const text = delta?.content || "";

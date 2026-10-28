@@ -11,7 +11,7 @@ function renderMarkdown(text: string): string {
     // Code blocks
     .replace(/```[\s\S]*?```/g, (m) => {
       const code = m.replace(/```(\w+)?\n?/, "").replace(/```$/, "");
-      return `<pre style="background:var(--bg-tertiary);padding:8px 12px;overflow-x:auto;font-size:0.75rem;border-radius:4px;margin:6px 0;"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
+      return `<pre style="background:var(--bg-tertiary);padding:8px 12px;overflow-x:auto;font-size:0.75rem;border-radius:8px;margin:6px 0;border:1px solid var(--border)"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
     })
     // Bold
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -37,7 +37,7 @@ interface Message {
   content: string;
 }
 
-/* ─── Icon helpers (inline SVG, no heroicons dep) ─── */
+/* ─── Icon helpers ─── */
 const IconChat = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -52,6 +52,7 @@ const IconChat = () => (
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
+
 const IconClose = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -66,6 +67,7 @@ const IconClose = () => (
     <path d="M18 6 6 18M6 6l12 12" />
   </svg>
 );
+
 const IconMinus = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -80,6 +82,7 @@ const IconMinus = () => (
     <path d="M5 12h14" />
   </svg>
 );
+
 const IconExpand = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -94,6 +97,7 @@ const IconExpand = () => (
     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
   </svg>
 );
+
 const IconCompress = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -108,6 +112,7 @@ const IconCompress = () => (
     <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
   </svg>
 );
+
 const IconSend = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -127,17 +132,17 @@ const IconSend = () => (
 /* ─── Typing dots ─── */
 function TypingDots() {
   return (
-    <div className="flex items-center gap-1 py-1 px-0.5">
+    <div className="flex items-center gap-1.5 py-1 px-1">
       {[0, 1, 2].map((i) => (
         <span
           key={i}
           style={{
-            width: 6,
-            height: 6,
-            borderRadius: 0,
-            background: "var(--text-muted)",
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: "var(--accent)",
             display: "inline-block",
-            animation: `chatDotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+            animation: `chatDotBounce 1.2s ease-in-out ${i * 0.18}s infinite`,
           }}
         />
       ))}
@@ -158,34 +163,33 @@ function MessageBubble({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 450, damping: 30 }}
       style={{
         display: "flex",
         justifyContent: isUser ? "flex-end" : "flex-start",
         gap: "8px",
       }}
     >
-      {/* Bot avatar dot */}
+      {/* Bot avatar */}
       {!isUser && (
         <div
           style={{
             width: 28,
             height: 28,
-            borderRadius: 0,
+            borderRadius: "8px",
             flexShrink: 0,
             marginTop: 2,
-            background: "var(--bg-tertiary)",
-            border: "1px solid var(--border)",
+            background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: "var(--accent)",
             fontSize: "10px",
             fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontWeight: 700,
-            letterSpacing: "-0.05em",
+            fontWeight: 600,
           }}
         >
           AC
@@ -194,23 +198,23 @@ function MessageBubble({
 
       <div
         style={{
-          maxWidth: "78%",
-          padding: isEmpty ? "8px 14px" : "9px 14px",
-          borderRadius: 0,
+          maxWidth: "82%",
+          padding: isEmpty ? "8px 14px" : "10px 14px",
+          borderRadius: isUser ? "14px 14px 3px 14px" : "14px 14px 14px 3px",
           fontSize: "0.8125rem",
           lineHeight: 1.6,
           wordBreak: "break-word",
           overflowWrap: "break-word",
+          boxShadow: isUser ? "0 2px 8px -2px rgba(108,158,245,0.25)" : "none",
           ...(isUser
             ? {
                 background: "var(--accent)",
-                color: "#fff",
+                color: "#ffffff",
                 whiteSpace: "pre-wrap",
               }
             : {
-                background: "color-mix(in srgb, var(--bg-tertiary) 70%, transparent)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
+                background: "var(--bg-tertiary)",
+                border: "1px solid var(--border)",
                 color: "var(--text-primary)",
               }),
         }}
@@ -270,7 +274,7 @@ export function ChatWidget() {
     }
   }, [messages, isOpen, isMinimized]);
 
-  // Focus input when panel opens (desktop only to prevent mobile keyboard popup)
+  // Focus input when panel opens
   useEffect(() => {
     if (isOpen && !isMinimized) {
       if (window.innerWidth > 768) {
@@ -365,7 +369,7 @@ export function ChatWidget() {
                 ),
               );
             } catch {
-              /* partial chunk, ignore */
+              /* partial chunk */
             }
           }
         }
@@ -399,10 +403,7 @@ export function ChatWidget() {
     setIsMinimized(false);
   };
 
-  /* ── Panel sizing — Framer Motion layout handles smooth transitions ── */
   const getPanelStyle = (): React.CSSProperties => {
-    // Fullscreen: cover entire viewport — use explicit coordinates (not inset shorthand)
-    // so Framer Motion layout can FLIP-animate from panel position → fullscreen
     if (isFullscreen)
       return {
         position: "fixed",
@@ -416,41 +417,38 @@ export function ChatWidget() {
         zIndex: 200,
       };
 
-    // Minimized: pill at very bottom-right corner (same level as FAB)
     if (isMinimized)
       return {
         position: "fixed",
-        bottom: 28,
-        right: 24,
+        bottom: 24,
+        right: 20,
         top: "auto",
         left: "auto",
-        width: "min(260px, calc(100vw - 48px))",
+        width: "min(280px, calc(100vw - 32px))",
         height: 52,
-        borderRadius: 0,
+        borderRadius: "14px",
         zIndex: 200,
       };
 
-    // Normal open: float above FAB
     return {
       position: "fixed",
-      bottom: 96,
-      right: 24,
+      bottom: 86,
+      right: 20,
       top: "auto",
       left: "auto",
-      width: "min(380px, calc(100vw - 48px))",
-      height: "min(560px, calc(100dvh - 120px))",
-      borderRadius: 0,
+      width: "min(390px, calc(100vw - 32px))",
+      height: "min(580px, calc(100dvh - 110px))",
+      borderRadius: "16px",
       zIndex: 200,
     };
   };
 
   return (
     <>
-      {/* Keyframe injection */}
       <style>{`
         @keyframes chatDotBounce {
-          0%, 80%, 100% { transform: translateY(0); opacity: .5 }
-          40% { transform: translateY(-6px); opacity: 1 }
+          0%, 80%, 100% { transform: translateY(0); opacity: .45 }
+          40% { transform: translateY(-5px); opacity: 1 }
         }
         .chat-scroll::-webkit-scrollbar { width: 4px; }
         .chat-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -459,7 +457,6 @@ export function ChatWidget() {
         }
         .chat-scroll { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
         .chat-input::placeholder { color: var(--text-muted); }
-        .chat-input:focus { outline: none; border-color: var(--accent); }
       `}</style>
 
       {/* ── FAB ── */}
@@ -470,33 +467,20 @@ export function ChatWidget() {
             initial={{ scale: 0, opacity: 0, y: 12 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0, opacity: 0, y: 12 }}
-            transition={{ type: "spring", stiffness: 400, damping: 24 }}
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.93 }}
+            transition={{ type: "spring", stiffness: 420, damping: 25 }}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.94 }}
             onClick={openChat}
-            className="fixed z-[200] bottom-5 right-5 md:bottom-7 md:right-6 p-3 md:p-[14px] flex items-center justify-center border-none cursor-pointer"
+            className="fixed z-[200] bottom-5 right-5 md:bottom-7 md:right-6 p-3.5 flex items-center justify-center border border-[var(--border)] cursor-pointer"
             style={{
-              borderRadius: 0,
+              borderRadius: "14px",
               background: "var(--accent)",
               color: "#fff",
-              boxShadow:
-                "0 4px 20px -2px color-mix(in srgb, var(--accent) 50%, transparent)",
+              boxShadow: "0 4px 16px -2px color-mix(in srgb, var(--accent) 40%, transparent)",
             }}
             aria-label="Buka Asisten Chat"
           >
             <IconChat />
-            {/* Ping animation */}
-            <span
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: 0,
-                background: "var(--accent)",
-                opacity: 0.35,
-                animation: "ping 2.5s cubic-bezier(0,0,0.2,1) infinite",
-              }}
-            />
-            <style>{`@keyframes ping { 0%{transform:scale(1);opacity:.35} 80%,100%{transform:scale(1.7);opacity:0} }`}</style>
           </motion.button>
         )}
       </AnimatePresence>
@@ -505,7 +489,6 @@ export function ChatWidget() {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Fullscreen backdrop blur */}
             {isFullscreen && (
               <motion.div
                 key="backdrop"
@@ -516,7 +499,8 @@ export function ChatWidget() {
                   position: "fixed",
                   inset: 0,
                   zIndex: 199,
-                  backdropFilter: "blur(2px)",
+                  backdropFilter: "blur(4px)",
+                  background: "rgba(0,0,0,0.4)",
                 }}
               />
             )}
@@ -524,31 +508,30 @@ export function ChatWidget() {
             <motion.div
               key="panel"
               layout
-              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              initial={{ opacity: 0, scale: 0.95, y: 14 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 16 }}
+              exit={{ opacity: 0, scale: 0.95, y: 14 }}
               transition={{
                 layout: {
                   type: "spring",
-                  stiffness: 300,
-                  damping: 28,
+                  stiffness: 350,
+                  damping: 30,
                   mass: 0.8,
                 },
-                opacity: { duration: 0.18 },
-                scale: { duration: 0.18 },
-                y: { duration: 0.18 },
+                opacity: { duration: 0.2 },
+                scale: { duration: 0.2 },
+                y: { duration: 0.2 },
               }}
               style={{
                 ...getPanelStyle(),
-                background: "color-mix(in srgb, var(--bg-primary) 85%, transparent)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
-                boxShadow:
-                  "0 25px 50px -12px rgba(0,0,0,0.4), 0 0 40px rgba(237, 93, 49, 0.05)",
+                background: "color-mix(in srgb, var(--bg-secondary) 94%, transparent)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid var(--border)",
+                boxShadow: "0 16px 40px -10px rgba(0,0,0,0.3)",
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
-                // No CSS transition here — layout prop handles everything
               }}
             >
               {/* ── Header ── */}
@@ -557,9 +540,9 @@ export function ChatWidget() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "16px 20px",
-                  background: "transparent",
-                  borderBottom: "1px solid color-mix(in srgb, var(--border) 30%, transparent)",
+                  padding: "14px 16px",
+                  background: "var(--bg-primary)",
+                  borderBottom: "1px solid var(--border)",
                   flexShrink: 0,
                   userSelect: "none",
                 }}
@@ -569,13 +552,11 @@ export function ChatWidget() {
                   <div style={{ position: "relative" }}>
                     <div
                       style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: 0,
-                        background:
-                          "color-mix(in srgb, var(--accent) 12%, transparent)",
-                        border:
-                          "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
+                        width: 32,
+                        height: 32,
+                        borderRadius: "10px",
+                        background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+                        border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -588,13 +569,13 @@ export function ChatWidget() {
                     <span
                       style={{
                         position: "absolute",
-                        bottom: 1,
-                        right: 1,
-                        width: 9,
-                        height: 9,
-                        borderRadius: 0,
-                        background: "#22c55e",
-                        border: "2px solid var(--bg-tertiary)",
+                        bottom: -1,
+                        right: -1,
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        background: "var(--green)",
+                        border: "2px solid var(--bg-primary)",
                       }}
                     />
                   </div>
@@ -602,7 +583,7 @@ export function ChatWidget() {
                     <div
                       style={{
                         fontSize: "0.8125rem",
-                        fontWeight: 600,
+                        fontWeight: 500,
                         color: "var(--text-primary)",
                         lineHeight: 1.3,
                       }}
@@ -613,7 +594,7 @@ export function ChatWidget() {
                       style={{
                         fontSize: "0.6875rem",
                         fontFamily: "var(--font-jetbrains-mono), monospace",
-                        color: "#22c55e",
+                        color: "var(--green)",
                         letterSpacing: "0.02em",
                       }}
                     >
@@ -623,15 +604,13 @@ export function ChatWidget() {
                 </div>
 
                 {/* Right: controls */}
-                <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  {/* Minimize */}
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <HeaderBtn
                     onClick={() => setIsMinimized((v) => !v)}
                     aria-label={isMinimized ? "Restore" : "Minimize"}
                   >
                     <IconMinus />
                   </HeaderBtn>
-                  {/* Fullscreen */}
                   <HeaderBtn
                     onClick={() => {
                       setIsFullscreen((v) => !v);
@@ -641,14 +620,13 @@ export function ChatWidget() {
                   >
                     {isFullscreen ? <IconCompress /> : <IconExpand />}
                   </HeaderBtn>
-                  {/* Close */}
                   <HeaderBtn onClick={closeChat} aria-label="Close" danger>
                     <IconClose />
                   </HeaderBtn>
                 </div>
               </div>
 
-              {/* ── Body (hidden when minimized) ── */}
+              {/* ── Body ── */}
               {!isMinimized && (
                 <>
                   {/* Messages */}
@@ -661,7 +639,7 @@ export function ChatWidget() {
                       padding: "16px 14px",
                       display: "flex",
                       flexDirection: "column",
-                      gap: 10,
+                      gap: 12,
                     }}
                   >
                     {messages.map((msg) => (
@@ -674,7 +652,7 @@ export function ChatWidget() {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Suggested chips (first 2 messages only) */}
+                  {/* Suggested chips */}
                   {messages.length <= 2 && !isLoading && (
                     <div
                       style={{
@@ -689,41 +667,36 @@ export function ChatWidget() {
                         dict.suggestedQ2,
                         dict.suggestedQ3,
                       ].map((q: string, i: number) => (
-                        <button
+                        <motion.button
                           key={i}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                           onClick={() => handleSend(q)}
                           style={{
                             fontSize: "0.6875rem",
                             fontFamily: "var(--font-jetbrains-mono), monospace",
-                            color: "var(--accent)",
-                            background:
-                              "color-mix(in srgb, var(--accent) 8%, transparent)",
-                            border:
-                              "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
-                            borderRadius: 0,
+                            color: "var(--text-secondary)",
+                            background: "var(--bg-tertiary)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "999px",
                             padding: "4px 10px",
                             cursor: "pointer",
                             whiteSpace: "nowrap",
-                            transition:
-                              "background 150ms ease, border-color 150ms ease",
+                            transition: "border-color 150ms ease, color 150ms ease",
                           }}
                           onMouseEnter={(e) => {
                             const el = e.currentTarget;
-                            el.style.background =
-                              "color-mix(in srgb, var(--accent) 15%, transparent)";
-                            el.style.borderColor =
-                              "color-mix(in srgb, var(--accent) 45%, transparent)";
+                            el.style.borderColor = "var(--border-hover)";
+                            el.style.color = "var(--text-primary)";
                           }}
                           onMouseLeave={(e) => {
                             const el = e.currentTarget;
-                            el.style.background =
-                              "color-mix(in srgb, var(--accent) 8%, transparent)";
-                            el.style.borderColor =
-                              "color-mix(in srgb, var(--accent) 25%, transparent)";
+                            el.style.borderColor = "var(--border)";
+                            el.style.color = "var(--text-secondary)";
                           }}
                         >
                           {q}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   )}
@@ -734,6 +707,7 @@ export function ChatWidget() {
                       padding: "10px 14px 12px",
                       borderTop: "1px solid var(--border)",
                       flexShrink: 0,
+                      background: "var(--bg-primary)",
                     }}
                   >
                     <div
@@ -741,16 +715,15 @@ export function ChatWidget() {
                         display: "flex",
                         alignItems: "center",
                         gap: 8,
-                        background: "color-mix(in srgb, var(--bg-secondary) 60%, transparent)",
-                        backdropFilter: "blur(8px)",
-                        border: "1px solid color-mix(in srgb, var(--border) 60%, transparent)",
-                        borderRadius: 0,
-                        padding: "6px 6px 6px 16px",
-                        transition: "all 200ms ease",
+                        background: "var(--bg-secondary)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "10px",
+                        padding: "6px 6px 6px 14px",
+                        transition: "border-color 150ms ease",
                       }}
                       onFocusCapture={(e) => {
                         const el = e.currentTarget as HTMLElement;
-                        el.style.borderColor = "var(--border-hover)";
+                        el.style.borderColor = "var(--accent)";
                       }}
                       onBlurCapture={(e) => {
                         const el = e.currentTarget as HTMLElement;
@@ -774,43 +747,35 @@ export function ChatWidget() {
                           color: "var(--text-primary)",
                           outline: "none",
                           minWidth: 0,
-                          opacity: isLoading ? 0.5 : 1,
+                          opacity: isLoading ? 0.6 : 1,
                         }}
                       />
-                      <button
+                      <motion.button
+                        whileHover={{ scale: !input.trim() || isLoading ? 1 : 1.05 }}
+                        whileTap={{ scale: !input.trim() || isLoading ? 1 : 0.95 }}
                         onClick={() => handleSend(input)}
                         disabled={!input.trim() || isLoading}
                         style={{
                           width: 32,
                           height: 32,
-                          borderRadius: 0,
+                          borderRadius: "8px",
                           flexShrink: 0,
                           background:
                             !input.trim() || isLoading
-                              ? "var(--border)"
+                              ? "var(--bg-tertiary)"
                               : "var(--accent)",
-                          color: "#fff",
+                          color: !input.trim() || isLoading ? "var(--text-muted)" : "#fff",
                           border: "none",
                           cursor:
                             !input.trim() || isLoading ? "default" : "pointer",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          transition:
-                            "background 200ms ease, transform 100ms ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!(!input.trim() || isLoading))
-                            (e.currentTarget as HTMLElement).style.transform =
-                              "scale(1.08)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLElement).style.transform =
-                            "scale(1)";
+                          transition: "background 150ms ease",
                         }}
                       >
                         <IconSend />
-                      </button>
+                      </motion.button>
                     </div>
                     <div
                       style={{
@@ -835,7 +800,7 @@ export function ChatWidget() {
   );
 }
 
-/* ── Small header button ── */
+/* ── Header button ── */
 function HeaderBtn({
   children,
   onClick,
@@ -848,13 +813,15 @@ function HeaderBtn({
   [key: string]: any;
 }) {
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       onClick={onClick}
       {...rest}
       style={{
         width: 28,
         height: 28,
-        borderRadius: 6,
+        borderRadius: "7px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -870,7 +837,7 @@ function HeaderBtn({
           el.style.background = "color-mix(in srgb, #ef4444 12%, transparent)";
           el.style.color = "#ef4444";
         } else {
-          el.style.background = "var(--border)";
+          el.style.background = "var(--bg-tertiary)";
           el.style.color = "var(--text-primary)";
         }
       }}
@@ -881,6 +848,6 @@ function HeaderBtn({
       }}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }

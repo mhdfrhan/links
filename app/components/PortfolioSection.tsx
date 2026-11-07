@@ -51,15 +51,21 @@ export function PortfolioSection({
   const dict = dictionaries[language].projects;
   const sectionRef = useRef<HTMLElement>(null);
 
-  // Lock body scroll when modal open
+  // Lock body & Lenis scroll when modal open
   useEffect(() => {
     if (selectedProject) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.classList.add("lenis-stopped");
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.documentElement.classList.remove("lenis-stopped");
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.documentElement.classList.remove("lenis-stopped");
     };
   }, [selectedProject]);
 
@@ -306,7 +312,182 @@ function ProjectCard({
   );
 }
 
-/* ---- Sleek Glass Modal ---- */
+/* ---- Smart Textarea Formatter (Paragraphs, Section Headers, Bullet Lists & Numbered Lists) ---- */
+type ParsedBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; text: string }
+  | { type: "ul"; items: string[] }
+  | { type: "ol"; items: Array<{ num: string; text: string }> };
+
+function parseProjectDescription(raw: string): ParsedBlock[] {
+  if (!raw) return [];
+
+  // 1. Normalize line endings and break inline bullets (•, ●, ▪, ◦) onto new lines
+  let normalized = raw
+    .replace(/\r\n/g, "\n")
+    .replace(/\s*[•●▪◦]\s+/g, "\n• ");
+
+  // 2. Break inline numbered items (e.g. "1. Foo 2. Bar" after start/newline/punctuation)
+  normalized = normalized.replace(
+    /(^|\n|[.!?:;])\s+(\d{1,2}[.)])\s+(?=[A-ZÀ-Ža-z0-9])/g,
+    "$1\n$2 ",
+  );
+
+  // 3. Break inline dash bullets when preceded by newline or colon (e.g. "Fitur: - Item A - Item B")
+  normalized = normalized.replace(/(^|\n|:)\s+-\s+/g, "$1\n- ");
+
+  // 4. Separate trailing short section headings before a list (e.g. "...berantakan. Fitur Utama:\n•")
+  normalized = normalized.replace(
+    /([.!?])\s+([A-ZÀ-Ž][A-Za-zÀ-ž0-9\s&/()-]{2,42}:)\s*(?=\n|$)/g,
+    "$1\n$2",
+  );
+
+  const lines = normalized
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  const blocks: ParsedBlock[] = [];
+
+  for (const line of lines) {
+    // Bullet item: starts with •, -, or *
+    const bulletMatch = line.match(/^(?:[•●▪◦]|[-*])\s+(.+)$/);
+    if (bulletMatch) {
+      const itemText = bulletMatch[1].trim();
+      const prev = blocks[blocks.length - 1];
+      if (prev && prev.type === "ul") {
+        prev.items.push(itemText);
+      } else {
+        blocks.push({ type: "ul", items: [itemText] });
+      }
+      continue;
+    }
+
+    // Numbered item: starts with 1. or 1)
+    const numMatch = line.match(/^(\d{1,2})[.)]\s+(.+)$/);
+    if (numMatch) {
+      const num = numMatch[1];
+      const itemText = numMatch[2].trim();
+      const prev = blocks[blocks.length - 1];
+      if (prev && prev.type === "ol") {
+        prev.items.push({ num, text: itemText });
+      } else {
+        blocks.push({ type: "ol", items: [{ num, text: itemText }] });
+      }
+      continue;
+    }
+
+    // Short heading line ending with ":" (e.g. "Fitur Utama:", "Key Features:")
+    if (line.endsWith(":") && line.length <= 55) {
+      blocks.push({ type: "heading", text: line });
+      continue;
+    }
+
+    blocks.push({ type: "paragraph", text: line });
+  }
+
+  return blocks;
+}
+
+function renderFormattedItemText(text: string) {
+  const colonIdx = text.indexOf(":");
+  if (colonIdx > 0 && colonIdx <= 48) {
+    const label = text.slice(0, colonIdx);
+    const rest = text.slice(colonIdx + 1).trim();
+    if (rest.length > 0) {
+      return (
+        <>
+          <strong
+            className="font-semibold"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {label}:
+          </strong>{" "}
+          <span>{rest}</span>
+        </>
+      );
+    }
+  }
+  return <span>{text}</span>;
+}
+
+function FormattedProjectDescription({ text }: { text: string }) {
+  const blocks = parseProjectDescription(text);
+
+  return (
+    <div className="space-y-4">
+      {blocks.map((block, idx) => {
+        if (block.type === "heading") {
+          return (
+            <h4
+              key={idx}
+              className="pt-2 font-mono text-xs uppercase tracking-wider font-semibold"
+              style={{ color: "var(--accent)" }}
+            >
+              {block.text}
+            </h4>
+          );
+        }
+
+        if (block.type === "ul") {
+          return (
+            <ul key={idx} className="space-y-2.5 pl-1">
+              {block.items.map((item, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 text-[0.9375rem] leading-relaxed"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 mt-2 flex-shrink-0 inline-block"
+                    style={{ background: "var(--accent)" }}
+                  />
+                  <div className="flex-1">{renderFormattedItemText(item)}</div>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
+        if (block.type === "ol") {
+          return (
+            <ol key={idx} className="space-y-2.5 pl-1">
+              {block.items.map((item, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 text-[0.9375rem] leading-relaxed"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  <span
+                    className="font-mono text-xs font-semibold tabular-nums mt-0.5 flex-shrink-0"
+                    style={{ color: "var(--accent)", minWidth: "1.5rem" }}
+                  >
+                    {item.num.padStart(2, "0")}.
+                  </span>
+                  <div className="flex-1">
+                    {renderFormattedItemText(item.text)}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          );
+        }
+
+        return (
+          <p
+            key={idx}
+            className="text-[0.95rem] leading-relaxed"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {block.text}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---- Sleek Editorial Modal (Top Image + Bottom Content & Scroll Lock) ---- */
 function ProjectModal({
   project,
   onClose,
@@ -314,7 +495,7 @@ function ProjectModal({
 }: {
   project: Project;
   onClose: () => void;
-  categories?: any[];
+  categories?: Array<{ id: string; name: string }>;
 }) {
   const [mounted, setMounted] = useState(false);
   const { language } = useLanguage();
@@ -322,145 +503,202 @@ function ProjectModal({
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   if (!mounted) return null;
 
+  const categoryName = project.categoryId
+    ? categories.find((c) => c.id === project.categoryId)?.name
+    : undefined;
+
   return createPortal(
     <motion.div
+      data-lenis-prevent
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-12"
-      style={{ background: "rgba(11, 17, 32, 0.85)", backdropFilter: "blur(16px)" }}
+      transition={{ duration: 0.25 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10"
+      style={{
+        background: "rgba(9, 9, 11, 0.82)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
       onClick={onClose}
+      onWheel={(e) => e.stopPropagation()}
     >
       <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.98 }}
+        data-lenis-prevent
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 15, scale: 0.98 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full max-w-5xl max-h-[85vh] overflow-y-auto flex flex-col md:flex-row hide-scrollbar"
+        exit={{ opacity: 0, y: 16, scale: 0.98 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-3xl max-h-[88dvh] flex flex-col overflow-hidden"
         style={{
           background: "var(--bg-secondary)",
           border: "1px solid var(--border)",
-          boxShadow: "0 30px 60px -15px rgba(0,0,0,0.6)",
+          boxShadow: "0 24px 60px -15px rgba(0, 0, 0, 0.65)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button with Accent Hover */}
+        {/* Pinned Top-Right Close Button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-6 right-6 z-20 flex items-center justify-center border border-[var(--border)] bg-[var(--bg-primary)]/80 backdrop-blur-md text-[var(--text-primary)] hover:text-white hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all duration-300 w-10 h-10 cursor-pointer"
+          aria-label="Close modal"
+          className="absolute top-4 right-4 z-30 flex items-center justify-center border border-[var(--border)] bg-[var(--bg-primary)]/85 backdrop-blur-md text-[var(--text-primary)] hover:text-white hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all duration-300 w-10 h-10 cursor-pointer"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18 18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
-        {/* Left Side: Image Cover */}
-        <div className="w-full md:w-1/2 relative min-h-[300px] md:min-h-full">
-          <Image
-            src={project.imageUrl}
-            alt={project.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[var(--bg-secondary)] opacity-0 md:opacity-100" />
-        </div>
-
-        {/* Right Side: Content */}
-        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col">
-          {/* Category */}
-          {project.categoryId && categories.find((c) => c.id === project.categoryId) && (
-            <span
-              className="mb-4 inline-block font-mono text-[0.75rem] tracking-wider uppercase font-semibold"
-              style={{ color: "var(--accent)" }}
-            >
-              {categories.find((c) => c.id === project.categoryId)?.name}
-            </span>
-          )}
-
-          <h2
+        {/* Scrollable Modal Container (Image on Top, Content Below) */}
+        <div
+          data-lenis-prevent
+          className="modal-scroll flex-1 overflow-y-auto flex flex-col"
+        >
+          {/* Top Full-Width Project Image */}
+          <div
+            className="relative w-full flex-shrink-0 overflow-hidden"
             style={{
-              fontFamily: "var(--font-serif), serif",
-              fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
-              color: "var(--text-primary)",
-              lineHeight: 1.15,
-              marginBottom: "1.5rem",
-              fontWeight: 400,
+              aspectRatio: "16/9",
+              background: "var(--bg-tertiary)",
+              borderBottom: "1px solid var(--border)",
             }}
           >
-            {project.title}
-          </h2>
+            <Image
+              src={project.imageUrl}
+              alt={project.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 768px"
+              priority
+            />
+          </div>
 
-          <p
-            className="text-[0.95rem] leading-relaxed mb-8"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            {project.fullDescription || project.description}
-          </p>
-
-          <div className="mt-auto space-y-8">
-            {/* Tech Stack */}
+          {/* Bottom Content Area: Category -> Title -> Formatted Description -> Tech Stack -> Action */}
+          <div className="p-6 sm:p-8 md:p-10 flex flex-col gap-6">
             <div>
-              <h4 className="text-[0.75rem] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-primary)" }}>
-                {dict.techLabel}
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {project.techStack.map((tech, i) => (
-                  <span
-                    key={i}
-                    className="px-2.5 py-1 text-xs font-mono"
-                    style={{
-                      background: "var(--bg-tertiary)",
-                      color: "var(--text-secondary)",
-                      border: "1px solid var(--border)",
-                    }}
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
+              {categoryName && (
+                <span
+                  className="mb-2.5 inline-block font-mono text-[0.75rem] tracking-wider uppercase font-semibold"
+                  style={{ color: "var(--accent)" }}
+                >
+                  // {categoryName}
+                </span>
+              )}
 
-            {/* View Button (Editorial Style) */}
-            {project.link && (
-              <a
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center justify-center gap-3 w-full py-4 font-mono text-[0.8rem] uppercase tracking-wider transition-all duration-300 border border-[var(--accent)]"
+              <h2
                 style={{
-                  background: "var(--accent)",
-                  color: "#fff",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "var(--accent)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "var(--accent)";
-                  e.currentTarget.style.color = "#fff";
+                  fontFamily: "var(--font-serif), serif",
+                  fontSize: "clamp(1.65rem, 3.2vw, 2.35rem)",
+                  color: "var(--text-primary)",
+                  lineHeight: 1.18,
+                  fontWeight: 400,
                 }}
               >
-                {dict.viewProject}
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 group-hover:translate-x-1 transition-transform">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                </svg>
-              </a>
-            )}
+                {project.title}
+              </h2>
+            </div>
+
+            {/* Formatted Description (Supports bullets, numbered lists & paragraphs) */}
+            <FormattedProjectDescription
+              text={project.fullDescription || project.description}
+            />
+
+            {/* Tech Stack & Action Footer */}
+            <div
+              className="pt-6 mt-2 space-y-6"
+              style={{ borderTop: "1px solid var(--border)" }}
+            >
+              <div>
+                <h4
+                  className="text-[0.75rem] font-mono uppercase tracking-widest mb-3"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {dict.techLabel}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {project.techStack.map((tech, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1.5 text-xs font-mono"
+                      style={{
+                        background: "var(--bg-primary)",
+                        color: "var(--text-secondary)",
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {project.link && (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-center gap-3 w-full py-4 font-mono text-[0.8rem] uppercase tracking-wider transition-all duration-300 border border-[var(--accent)] no-underline"
+                  style={{
+                    background: "var(--accent)",
+                    color: "#fff",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "var(--accent)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "var(--accent)";
+                    e.currentTarget.style.color = "#fff";
+                  }}
+                >
+                  <span>{dict.viewProject}</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
+                    />
+                  </svg>
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
       <style>{`
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .modal-scroll::-webkit-scrollbar { width: 5px; }
+        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+        .modal-scroll { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
       `}</style>
     </motion.div>,
-    document.body
+    document.body,
   );
 }

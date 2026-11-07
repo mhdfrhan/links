@@ -6,8 +6,11 @@ import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
 import { SocialLink as ISocialLink, getPlatformPrefix } from "./SocialLinks";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface CvEntry {
   url: string;
@@ -99,30 +102,47 @@ export function ProfileHeader({
     return () => clearInterval(interval);
   }, [taglineWords]);
 
-  // GSAP Animations
+  // GSAP Entrance + Smooth Hero Banner Parallax on Scroll
   useGSAP(
     () => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1 } });
-      
+
       tl.fromTo(
         ".hero-text",
         { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, stagger: 0.1 }
-      )
-      .fromTo(
-        ".hero-image",
-        { opacity: 0, scale: 0.95 },
-        { opacity: 1, scale: 1, duration: 1.2 },
-        "-=0.6"
-      )
-      .fromTo(
-        ".hero-meta",
-        { opacity: 0, y: 20 },
         { opacity: 1, y: 0, stagger: 0.1 },
-        "-=0.8"
+      )
+        .fromTo(
+          ".hero-image",
+          { opacity: 0, scale: 0.96 },
+          { opacity: 1, scale: 1, duration: 1.2 },
+          "-=0.6",
+        )
+        .fromTo(
+          ".hero-meta",
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, stagger: 0.1 },
+          "-=0.8",
+        );
+
+      // Smooth Parallax Window Effect on Scroll
+      gsap.fromTo(
+        ".hero-parallax-layer",
+        { yPercent: -12, scale: 1.1 },
+        {
+          yPercent: 12,
+          scale: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".hero-image",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        },
       );
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (
@@ -158,23 +178,25 @@ export function ProfileHeader({
         </span>
       </h1>
 
-      {/* Full Width Image (Breaking out of container) */}
+      {/* Full Width Image Banner with Smooth Scroll Parallax */}
       <div className="w-screen relative left-1/2 -translate-x-1/2 mb-12 overflow-hidden hero-image">
-        <div 
-          className="relative w-full"
+        <div
+          className="relative w-full overflow-hidden"
           style={{
             aspectRatio: "21/9",
             background: "var(--bg-tertiary)",
           }}
         >
-          <Image
-            src={avatarUrl}
-            alt={`Photo of ${name}`}
-            fill
-            sizes="100vw"
-            className="object-cover"
-            priority
-          />
+          <div className="hero-parallax-layer absolute inset-x-0 -top-[16%] h-[132%] will-change-transform">
+            <Image
+              src={avatarUrl}
+              alt={`Photo of ${name}`}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+          </div>
         </div>
       </div>
 

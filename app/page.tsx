@@ -14,6 +14,7 @@ import { EducationSection } from "./components/EducationSection";
 import { AwardsSection } from "./components/AwardsSection";
 import { CertificationsSection } from "./components/CertificationsSection";
 import { Footer } from "./components/Footer";
+import { SoftwareAgencyCta } from "./components/SoftwareAgencyCta";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { LanguageToggle } from "./components/LanguageToggle";
 import { ChatWidget } from "./components/ChatWidget";
@@ -545,6 +546,11 @@ export default function Home() {
             }))}
           />
         </section>
+
+        <SectionDivider />
+
+        {/* ===== SOFTWARE DEVELOPMENT AGENCY CTA (handigital.biz.id) ===== */}
+        <SoftwareAgencyCta />
 
         {/* ===== FOOTER / CONTACT ===== */}
         <section id="contact">

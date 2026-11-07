@@ -200,25 +200,37 @@ export function ProfileHeader({
         </div>
       </div>
 
-      {/* Asymmetrical Bottom Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-12">
-        
-        {/* Left: Meta / Links */}
-        <div className="hero-meta flex flex-col gap-6 md:w-1/3">
-          <p
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: "0.75rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              color: "var(--accent)",
-              fontWeight: 600,
-            }}
-          >
-            {dict.hero.availability || "Available for work"}
-          </p>
+      {/* Aligned Editorial Bottom Section under Banner */}
+      <div className="hero-meta flex flex-col gap-6 pt-2">
+        {/* Top Row: Availability badge on left, Social Links on right */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[var(--border)]/60">
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2 w-2">
+              <span
+                className="animate-ping absolute inline-flex h-full w-full opacity-75"
+                style={{ backgroundColor: "var(--green)" }}
+              />
+              <span
+                className="relative inline-flex h-2 w-2"
+                style={{ backgroundColor: "var(--green)" }}
+              />
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: "0.75rem",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "var(--text-secondary)",
+                fontWeight: 600,
+              }}
+            >
+              {dict.hero.availability || "Available for work"}
+            </span>
+          </div>
 
-          <div className="flex flex-col gap-3">
+          {/* Social Links Row */}
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             {socialLinks && socialLinks.length > 0 ? (
               [...socialLinks]
                 .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
@@ -237,62 +249,59 @@ export function ProfileHeader({
               </>
             )}
           </div>
+        </div>
 
-          {cvData && (cvData.id || cvData.en) && (
-            <div className="pt-4">
+        {/* Bottom Row: Action buttons (Download CV & Scroll to Projects) */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+          <div className="flex flex-wrap items-center gap-3">
+            {cvData && (cvData.id || cvData.en) && (
               <CvDownloadButton cvData={cvData} />
-            </div>
-          )}
-        </div>
+            )}
+            <a
+              href="#projects"
+              className="px-5 py-2.5 flex items-center gap-2 text-sm font-semibold transition-all duration-300 border no-underline group"
+              style={{
+                background: "transparent",
+                borderColor: "var(--border)",
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-sans), system-ui, sans-serif",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "var(--accent)";
+                e.currentTarget.style.color = "var(--accent)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.color = "var(--text-primary)";
+              }}
+            >
+              <span>{language === "id" ? "Lihat Projek" : "Explore Projects"}</span>
+              <span className="font-mono text-xs transition-transform duration-300 group-hover:translate-y-0.5" style={{ color: "var(--accent)" }}>↓</span>
+            </a>
+          </div>
 
-        {/* Right: Bio */}
-        <div className="hero-meta flex flex-col md:w-1/2 gap-6 items-end text-right">
-          <p
-            style={{
-              fontFamily: "var(--font-sans), system-ui, sans-serif",
-              fontSize: "1.125rem",
-              lineHeight: 1.8,
-              color: "var(--text-secondary)",
-              maxWidth: "500px"
-            }}
+          <span
+            className="font-mono text-xs text-[var(--text-muted)] tracking-wider"
           >
-            {formatExperienceText(about || "Fullstack web developer dengan pengalaman 4 tahun mengerjakan berbagai project web dari skala lokal hingga nasional.")}
-          </p>
+            // PEKANBARU, ID
+          </span>
         </div>
-
       </div>
     </section>
   );
 }
 
-/* ---- Simple Social Link ---- */
+/* ---- Simple Social Link with Accent Arrow ---- */
 function SocialLink({ href, label }: { href: string; label: string }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      style={{
-        fontFamily: "var(--font-sans), system-ui, sans-serif",
-        fontSize: "0.9375rem",
-        color: "var(--text-primary)",
-        textDecoration: "none",
-        borderBottom: "1px solid var(--border)",
-        paddingBottom: "2px",
-        display: "inline-block",
-        width: "fit-content",
-        transition: "border-color 0.2s ease, color 0.2s ease"
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)";
-        (e.currentTarget as HTMLElement).style.color = "var(--accent)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-        (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
-      }}
+      className="group inline-flex items-center gap-1.5 font-mono text-xs sm:text-[0.8125rem] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors no-underline"
     >
-      {label}
+      <span>{label}</span>
+      <span className="text-[10px] text-[var(--accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
     </a>
   );
 }

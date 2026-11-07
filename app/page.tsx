@@ -183,10 +183,11 @@ export default function Home() {
 
           <span
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontSize: "0.65rem",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontSize: "0.7rem",
+              fontWeight: 600,
               color: "var(--text-muted)",
-              letterSpacing: "0.15em",
+              letterSpacing: "0.1em",
               textTransform: "uppercase",
             }}
           >
@@ -305,8 +306,9 @@ export default function Home() {
                 </span>
                 <span
                   style={{
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    fontSize: "0.65rem",
+                    fontFamily: "var(--font-plus-jakarta), sans-serif",
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
                     color: "var(--text-muted)",
                     letterSpacing: "0.03em",
                   }}
@@ -379,8 +381,8 @@ export default function Home() {
 
               <div className="px-4 py-2 flex items-center justify-between">
                 <span
-                  className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider"
-                  style={{ color: "var(--text-muted)" }}
+                  className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold"
+                  style={{ color: "var(--text-muted)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
                 >
                   {dict.misc.languageLabel}
                 </span>

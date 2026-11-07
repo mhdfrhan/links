@@ -62,7 +62,7 @@ export function EducationSection({ items }: EducationSectionProps) {
       <div className="mb-12 md:mb-16">
         <span
           style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
             fontSize: "0.875rem",
             color: "var(--accent)",
             letterSpacing: "0.05em",
@@ -121,17 +121,18 @@ export function EducationSection({ items }: EducationSectionProps) {
               {/* Left: Index & Period (3 cols) */}
               <div className="lg:col-span-3 flex lg:flex-col items-center lg:items-start justify-between gap-2">
                 <span
-                  className="font-mono text-xs font-semibold tabular-nums"
-                  style={{ color: "var(--accent)" }}
+                  className="text-xs font-semibold tabular-nums"
+                  style={{ color: "var(--accent)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
                 >
                   /{String(index + 1).padStart(2, "0")}
                 </span>
                 <span
-                  className="font-mono text-xs tabular-nums px-3 py-1"
+                  className="text-xs font-medium tabular-nums px-3 py-1"
                   style={{
                     color: "var(--text-muted)",
                     background: "var(--bg-primary)",
                     border: "1px solid var(--border)",
+                    fontFamily: "var(--font-plus-jakarta), sans-serif",
                   }}
                 >
                   {item.period}
@@ -191,14 +192,14 @@ export function EducationSection({ items }: EducationSectionProps) {
                     }}
                   >
                     <span
-                      className="font-mono text-[10px] uppercase tracking-widest mb-1"
-                      style={{ color: "var(--text-muted)" }}
+                      className="text-[10px] font-semibold uppercase tracking-widest mb-1"
+                      style={{ color: "var(--text-muted)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
                     >
                       {language === "id" ? "CAPAIAN AKADEMIK" : "ACADEMIC SCORE"}
                     </span>
                     <span
-                      className="font-mono text-base sm:text-lg font-semibold tabular-nums"
-                      style={{ color: "var(--accent)" }}
+                      className="text-base sm:text-lg font-bold tabular-nums"
+                      style={{ color: "var(--accent)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
                     >
                       {item.score}
                     </span>

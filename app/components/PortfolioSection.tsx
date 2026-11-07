@@ -140,7 +140,7 @@ export function PortfolioSection({
         <div>
           <span
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.875rem",
               color: "var(--accent)",
               letterSpacing: "0.05em",
@@ -278,10 +278,10 @@ function ProjectCard({
       {/* Content Area Below Image */}
       <div className="pt-5 flex flex-col flex-1">
         <div className="flex justify-between items-center mb-2.5">
-          <span className="font-mono text-[0.75rem] uppercase tracking-wider text-[var(--accent)] font-semibold">
+          <span className="text-[0.75rem] uppercase tracking-wider text-[var(--accent)] font-semibold">
             {project.categoryId ? categories.find(c => c.id === project.categoryId)?.name || "Project" : "Project"}
           </span>
-          <span className="font-mono text-[0.75rem] text-[var(--text-muted)]">
+          <span className="text-[0.75rem] text-[var(--text-muted)] font-medium">
             /{String(index + 1).padStart(2, "0")}
           </span>
         </div>
@@ -298,12 +298,12 @@ function ProjectCard({
         </p>
 
         <div className="mt-auto pt-3 border-t border-[var(--border)]/40 flex justify-between items-center">
-          <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-[0.7rem] text-[var(--text-muted)]">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[0.75rem] text-[var(--text-muted)] font-medium">
             {project.techStack.slice(0, 3).map(tech => (
               <span key={tech}>#{tech}</span>
             ))}
           </div>
-          <span className="font-mono text-[0.75rem] text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors flex items-center gap-1">
+          <span className="text-[0.75rem] font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors flex items-center gap-1">
             details ↗
           </span>
         </div>
@@ -421,7 +421,7 @@ function FormattedProjectDescription({ text }: { text: string }) {
           return (
             <h4
               key={idx}
-              className="pt-2 font-mono text-xs uppercase tracking-wider font-semibold"
+              className="pt-2 text-xs uppercase tracking-wider font-semibold"
               style={{ color: "var(--accent)" }}
             >
               {block.text}
@@ -459,7 +459,7 @@ function FormattedProjectDescription({ text }: { text: string }) {
                   style={{ color: "var(--text-secondary)" }}
                 >
                   <span
-                    className="font-mono text-xs font-semibold tabular-nums mt-0.5 flex-shrink-0"
+                    className="text-xs font-semibold tabular-nums mt-0.5 flex-shrink-0"
                     style={{ color: "var(--accent)", minWidth: "1.5rem" }}
                   >
                     {item.num.padStart(2, "0")}.
@@ -598,7 +598,7 @@ function ProjectModal({
             <div>
               {categoryName && (
                 <span
-                  className="mb-2.5 inline-block font-mono text-[0.75rem] tracking-wider uppercase font-semibold"
+                  className="mb-2.5 inline-block text-[0.75rem] tracking-wider uppercase font-semibold"
                   style={{ color: "var(--accent)" }}
                 >
                   // {categoryName}
@@ -630,7 +630,7 @@ function ProjectModal({
             >
               <div>
                 <h4
-                  className="text-[0.75rem] font-mono uppercase tracking-widest mb-3"
+                  className="text-[0.75rem] uppercase tracking-widest mb-3 font-semibold"
                   style={{ color: "var(--text-primary)" }}
                 >
                   {dict.techLabel}
@@ -639,7 +639,7 @@ function ProjectModal({
                   {project.techStack.map((tech, i) => (
                     <span
                       key={i}
-                      className="px-3 py-1.5 text-xs font-mono"
+                      className="px-3 py-1.5 text-xs font-medium"
                       style={{
                         background: "var(--bg-primary)",
                         color: "var(--text-secondary)",
@@ -657,7 +657,7 @@ function ProjectModal({
                   href={project.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center justify-center gap-3 w-full py-4 font-mono text-[0.8rem] uppercase tracking-wider transition-all duration-300 border border-[var(--accent)] no-underline"
+                  className="group flex items-center justify-center gap-3 w-full py-4 text-[0.8125rem] font-semibold uppercase tracking-wider transition-all duration-300 border border-[var(--accent)] no-underline"
                   style={{
                     background: "var(--accent)",
                     color: "#fff",

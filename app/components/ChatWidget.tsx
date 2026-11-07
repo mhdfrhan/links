@@ -25,7 +25,7 @@ function renderMarkdown(text: string): string {
   return text
     .replace(/```[\s\S]*?```/g, (m) => {
       const code = m.replace(/```(\w+)?\n?/, "").replace(/```$/, "");
-      return `<pre style="background:var(--bg-code);padding:10px 14px;overflow-x:auto;font-size:0.75rem;border-radius:0;margin:8px 0;border:1px solid var(--border);font-family:var(--font-jetbrains-mono),monospace"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
+      return `<pre style="background:var(--bg-code);padding:10px 14px;overflow-x:auto;font-size:0.75rem;border-radius:0;margin:8px 0;border:1px solid var(--border);font-family:var(--font-plus-jakarta),sans-serif"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
     })
     .replace(
       /\*\*(.+?)\*\*/g,
@@ -141,7 +141,7 @@ function MessageBubble({
           <span
             className="animate-pulse"
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.75rem",
               color: "var(--text-secondary)",
               letterSpacing: "0.02em",
@@ -482,7 +482,7 @@ export function ChatWidget() {
                 {dict.assistantName}
               </span>
               <span
-                className="text-[10px] font-mono mt-1 flex items-center gap-1 leading-none"
+                className="text-[10px] font-medium mt-1 flex items-center gap-1 leading-none"
                 style={{ color: "var(--green)" }}
               >
                 <span
@@ -601,7 +601,7 @@ export function ChatWidget() {
                     <div
                       style={{
                         fontSize: "0.6875rem",
-                        fontFamily: "var(--font-jetbrains-mono), monospace",
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
                         color: isLoading ? "var(--accent)" : "var(--green)",
                         letterSpacing: "0.02em",
                       }}
@@ -723,7 +723,8 @@ export function ChatWidget() {
                             style={{
                               fontSize: "0.71875rem",
                               fontFamily:
-                                "var(--font-jetbrains-mono), monospace",
+                                "var(--font-plus-jakarta), sans-serif",
+                              fontWeight: 500,
                               color: "var(--text-secondary)",
                               background: "var(--bg-tertiary)",
                               border: "1px solid var(--border)",

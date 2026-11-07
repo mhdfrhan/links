@@ -77,12 +77,12 @@ export function AboutSection({ text }: AboutSectionProps) {
           >
             <span
               style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontWeight: 600,
                 fontSize: "0.75rem",
                 color: "var(--accent)",
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
-                fontWeight: 500,
                 display: "block",
                 marginBottom: "0.35rem",
               }}

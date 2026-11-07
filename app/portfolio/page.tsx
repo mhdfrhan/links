@@ -63,7 +63,8 @@ export default function PortfolioPage() {
           />
           <span
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontWeight: 500,
               fontSize: "0.7rem",
               color: "var(--text-muted)",
               letterSpacing: "0.03em",

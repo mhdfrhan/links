@@ -78,7 +78,7 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
         <div>
           <span
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.875rem",
               color: "var(--accent)",
               letterSpacing: "0.05em",
@@ -191,7 +191,7 @@ function FilterTab({
       )}
       <span className="relative z-10">{label}</span>
       <span
-        className="relative z-10 font-mono text-[10px] tabular-nums"
+        className="relative z-10 text-[11px] font-semibold tabular-nums"
         style={{
           color: active ? "rgba(255,255,255,0.85)" : "var(--text-muted)",
         }}
@@ -250,8 +250,8 @@ function SkillCategoryCard({
       <div className="relative z-10 flex items-baseline justify-between gap-4 pb-5 border-b border-[var(--border)]/60">
         <div className="flex items-baseline gap-3.5">
           <span
-            className="font-mono text-xs tabular-nums"
-            style={{ color: "var(--accent)", fontWeight: 600 }}
+            className="text-xs font-semibold tabular-nums"
+            style={{ color: "var(--accent)" }}
           >
             /{String(index + 1).padStart(2, "0")}
           </span>
@@ -270,7 +270,7 @@ function SkillCategoryCard({
         </div>
 
         <span
-          className="font-mono text-[11px] uppercase tracking-wider tabular-nums"
+          className="text-[11px] font-semibold uppercase tracking-wider tabular-nums"
           style={{ color: "var(--text-muted)" }}
         >
           {category.skills.length} STACK
@@ -287,10 +287,10 @@ function SkillCategoryCard({
             transition={{ type: "spring", stiffness: 480, damping: 24 }}
             className="group/chip relative inline-flex items-center gap-2.5 px-3.5 py-2 select-none cursor-default transition-colors duration-200"
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.8125rem",
+              fontWeight: 500,
               color: "var(--text-secondary)",
-              background: "var(--bg-primary)",
               border: "1px solid var(--border)",
             }}
             onMouseEnter={(e) => {

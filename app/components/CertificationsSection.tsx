@@ -66,7 +66,7 @@ export function CertificationsSection({
         <div>
           <span
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.875rem",
               color: "var(--accent)",
               letterSpacing: "0.05em",
@@ -93,11 +93,12 @@ export function CertificationsSection({
         </div>
 
         <span
-          className="font-mono text-xs uppercase tracking-wider tabular-nums px-3 py-1.5 self-start sm:self-auto"
+          className="text-xs font-semibold uppercase tracking-wider tabular-nums px-3 py-1.5 self-start sm:self-auto"
           style={{
             color: "var(--text-muted)",
             background: "var(--bg-secondary)",
             border: "1px solid var(--border)",
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
           }}
         >
           /{String(certifications.length).padStart(2, "0")} CREDENTIALS
@@ -169,26 +170,27 @@ function CredentialCard({
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2.5">
             <span
-              className="font-mono text-xs font-semibold tabular-nums"
-              style={{ color: "var(--accent)" }}
+              className="text-xs font-semibold tabular-nums"
+              style={{ color: "var(--accent)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
             >
               /{String(index + 1).padStart(2, "0")}
             </span>
             <span
-              className="font-mono text-xs tabular-nums px-2.5 py-0.5"
+              className="text-xs font-medium tabular-nums px-2.5 py-0.5"
               style={{
                 color: "var(--accent)",
                 background:
                   "color-mix(in srgb, var(--accent) 10%, transparent)",
                 border:
                   "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
               }}
             >
               {cert.date}
             </span>
             <span
-              className="font-mono text-xs uppercase tracking-wider"
-              style={{ color: "var(--text-muted)" }}
+              className="text-xs uppercase tracking-wider font-medium"
+              style={{ color: "var(--text-muted)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
             >
               {cert.issuer}
             </span>
@@ -222,8 +224,8 @@ function CredentialCard({
             style={{ background: "var(--green)" }}
           />
           <span
-            className="font-mono text-[11px] uppercase tracking-wider tabular-nums"
-            style={{ color: "var(--text-muted)" }}
+            className="text-[11px] font-semibold uppercase tracking-wider tabular-nums"
+            style={{ color: "var(--text-muted)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
           >
             {cert.validUntil ? `VALID UNTIL ${cert.validUntil}` : "VERIFIED CREDENTIAL"}
           </span>
@@ -234,8 +236,8 @@ function CredentialCard({
             href={cert.verifyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="group/btn inline-flex items-center gap-2.5 text-xs font-mono uppercase tracking-wider no-underline"
-            style={{ color: "var(--text-primary)" }}
+            className="group/btn inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wider no-underline"
+            style={{ color: "var(--text-primary)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
           >
             <span className="group-hover/btn:text-[var(--accent)] transition-colors">
               {verifyLabel}

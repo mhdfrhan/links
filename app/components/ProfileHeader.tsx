@@ -217,7 +217,7 @@ export function ProfileHeader({
             </span>
             <span
               style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
                 fontSize: "0.75rem",
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
@@ -276,12 +276,13 @@ export function ProfileHeader({
               }}
             >
               <span>{language === "id" ? "Lihat Projek" : "Explore Projects"}</span>
-              <span className="font-mono text-xs transition-transform duration-300 group-hover:translate-y-0.5" style={{ color: "var(--accent)" }}>↓</span>
+              <span className="text-xs transition-transform duration-300 group-hover:translate-y-0.5 font-semibold" style={{ color: "var(--accent)" }}>↓</span>
             </a>
           </div>
 
           <span
-            className="font-mono text-xs text-[var(--text-muted)] tracking-wider"
+            className="text-xs text-[var(--text-muted)] tracking-wider font-medium"
+            style={{ fontFamily: "var(--font-plus-jakarta), sans-serif" }}
           >
             // PEKANBARU, ID
           </span>
@@ -298,7 +299,8 @@ function SocialLink({ href, label }: { href: string; label: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex items-center gap-1.5 font-mono text-xs sm:text-[0.8125rem] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors no-underline"
+      className="group inline-flex items-center gap-1.5 text-xs sm:text-[0.8125rem] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors no-underline"
+      style={{ fontFamily: "var(--font-plus-jakarta), sans-serif" }}
     >
       <span>{label}</span>
       <span className="text-[10px] text-[var(--accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
@@ -387,7 +389,7 @@ function CvDownloadButton({ cvData }: { cvData: { id?: CvEntry; en?: CvEntry } }
                 }}
               >
                 <span className="font-medium group-hover/item:text-accent transition-colors">Indonesia</span>
-                <span style={{color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-jetbrains-mono), monospace"}}>{formatSize(cvData.id.fileSize)}</span>
+                <span style={{color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-plus-jakarta), sans-serif"}}>{formatSize(cvData.id.fileSize)}</span>
               </a>
             )}
             {cvData.en && (
@@ -406,7 +408,7 @@ function CvDownloadButton({ cvData }: { cvData: { id?: CvEntry; en?: CvEntry } }
                 }}
               >
                 <span className="font-medium group-hover/item:text-accent transition-colors">English</span>
-                <span style={{color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-jetbrains-mono), monospace"}}>{formatSize(cvData.en.fileSize)}</span>
+                <span style={{color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-plus-jakarta), sans-serif"}}>{formatSize(cvData.en.fileSize)}</span>
               </a>
             )}
           </motion.div>

@@ -64,7 +64,7 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
         <div>
           <span
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.875rem",
               color: "var(--accent)",
               letterSpacing: "0.05em",
@@ -91,11 +91,12 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
         </div>
 
         <span
-          className="font-mono text-xs uppercase tracking-wider tabular-nums px-3 py-1.5 self-start sm:self-auto"
+          className="text-xs font-semibold uppercase tracking-wider tabular-nums px-3 py-1.5 self-start sm:self-auto"
           style={{
             color: "var(--text-muted)",
             background: "var(--bg-secondary)",
             border: "1px solid var(--border)",
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
           }}
         >
           /{String(awards.length).padStart(2, "0")} HONORS
@@ -137,8 +138,8 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
               {/* Left: Index + Award Title */}
               <div className="flex items-baseline gap-4 sm:gap-6">
                 <span
-                  className="font-mono text-xs font-semibold tabular-nums flex-shrink-0"
-                  style={{ color: "var(--accent)" }}
+                  className="text-xs font-semibold tabular-nums flex-shrink-0"
+                  style={{ color: "var(--accent)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
                 >
                   /{String(index + 1).padStart(2, "0")}
                 </span>
@@ -173,16 +174,16 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
                 )}
 
                 <span
-                  className="font-mono text-xs tabular-nums px-2.5 py-1"
+                  className="text-xs font-semibold tabular-nums px-2.5 py-1"
                   style={{
                     color: "var(--accent)",
                     background:
                       "color-mix(in srgb, var(--accent) 10%, transparent)",
                     border:
                       "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
+                    fontFamily: "var(--font-plus-jakarta), sans-serif",
                   }}
                 >
-                  {award.date || award.year}
                 </span>
 
                 <div className="hidden sm:flex w-9 h-9 items-center justify-center border border-[var(--border)] text-[var(--text-muted)] transition-all duration-300 group-hover:bg-[var(--accent)] group-hover:border-[var(--accent)] group-hover:text-white">

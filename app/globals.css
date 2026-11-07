@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 /* ============================================================
    DESIGN TOKENS — Portfolio Redesign 2026 (Minimalist/Editorial)
@@ -6,9 +6,9 @@
    ============================================================ */
 
 :root {
-  /* Fonts */
+  /* Fonts — Plus Jakarta Sans as primary sans across UI (no mono font) */
   --font-plus-jakarta: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-jetbrains-mono: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-playfair: 'Playfair Display', Georgia, serif;
 
   /* Backgrounds: Dark Mode - Dark Gray / Zinc */
@@ -108,7 +108,7 @@ html.light {
 
   /* Fonts */
   --font-sans: var(--font-plus-jakarta);
-  --font-mono: var(--font-jetbrains-mono);
+  --font-mono: var(--font-plus-jakarta);
   --font-serif: var(--font-playfair);
 }
 

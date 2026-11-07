@@ -47,7 +47,7 @@ export function RunningText() {
               key={i} 
               className="flex items-center"
               style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
                 fontSize: "1rem",
                 fontWeight: 700,
                 color: "#fff",
@@ -79,7 +79,7 @@ export function RunningText() {
               key={i} 
               className="flex items-center"
               style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
                 fontSize: "1rem",
                 fontWeight: 700,
                 color: "#fff",

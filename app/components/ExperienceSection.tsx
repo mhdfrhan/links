@@ -87,7 +87,7 @@ export function ExperienceSection({
         <div className="w-full lg:w-4/12 lg:sticky lg:top-28">
           <span
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.875rem",
               color: "var(--accent)",
               letterSpacing: "0.05em",
@@ -126,8 +126,8 @@ export function ExperienceSection({
               style={{ background: "var(--accent)" }}
             />
             <span
-              className="font-mono text-[11px] uppercase tracking-wider tabular-nums"
-              style={{ color: "var(--text-muted)" }}
+              className="text-[11px] font-semibold uppercase tracking-wider tabular-nums"
+              style={{ color: "var(--text-muted)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
             >
               /{String(items.length).padStart(2, "0")} RECORDS
             </span>
@@ -251,8 +251,8 @@ export function ExperienceSection({
                               style={{ color: "var(--text-secondary)" }}
                             >
                               <span
-                                className="font-mono text-xs mt-0.5 flex-shrink-0 select-none"
-                                style={{ color: "var(--accent)" }}
+                                className="text-xs font-semibold mt-0.5 flex-shrink-0 select-none"
+                                style={{ color: "var(--accent)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
                               >
                                 //
                               </span>
@@ -291,17 +291,18 @@ function ExperienceRowHeader({
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span
-            className="font-mono text-xs font-semibold tabular-nums"
-            style={{ color: "var(--accent)" }}
+            className="text-xs font-semibold tabular-nums"
+            style={{ color: "var(--accent)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
           >
             /{String(index + 1).padStart(2, "0")}
           </span>
           <span
-            className="font-mono text-xs tabular-nums px-2.5 py-0.5"
+            className="text-xs font-medium tabular-nums px-2.5 py-0.5"
             style={{
               color: "var(--text-muted)",
               background: "var(--bg-primary)",
               border: "1px solid var(--border)",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
             }}
           >
             {item.period}

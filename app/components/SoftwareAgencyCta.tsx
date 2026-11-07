@@ -123,8 +123,8 @@ export function SoftwareAgencyCta() {
         >
           <div className="flex items-center gap-3">
             <span
-              className="font-mono text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "var(--accent)" }}
+              className="text-xs font-semibold uppercase tracking-wider"
+              style={{ color: "var(--accent)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
             >
               // {language === "id" ? "LAYANAN PEMBUATAN SOFTWARE" : "SOFTWARE DEVELOPMENT AGENCY"}
             </span>
@@ -142,8 +142,8 @@ export function SoftwareAgencyCta() {
               style={{ background: "var(--green)" }}
             />
             <span
-              className="font-mono text-[11px] tracking-wider"
-              style={{ color: "var(--text-secondary)" }}
+              className="text-[11px] font-semibold tracking-wider"
+              style={{ color: "var(--text-secondary)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
             >
               handigital.biz.id
             </span>
@@ -187,11 +187,12 @@ export function SoftwareAgencyCta() {
               {services.map((service) => (
                 <span
                   key={service}
-                  className="font-mono text-xs px-3 py-1.5 inline-flex items-center gap-2"
+                  className="text-xs font-medium px-3 py-1.5 inline-flex items-center gap-2"
                   style={{
                     background: "var(--bg-primary)",
                     border: "1px solid var(--border)",
                     color: "var(--text-secondary)",
+                    fontFamily: "var(--font-plus-jakarta), sans-serif",
                   }}
                 >
                   <span
@@ -207,11 +208,12 @@ export function SoftwareAgencyCta() {
           {/* Right Column: Action CTA Block (4 cols) */}
           <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end justify-end gap-4">
             <div
-              className="w-full lg:w-auto px-6 py-4 flex items-center justify-between lg:justify-center gap-4 font-mono text-xs uppercase tracking-wider font-semibold transition-all duration-300"
+              className="w-full lg:w-auto px-6 py-4 flex items-center justify-between lg:justify-center gap-4 text-xs uppercase tracking-wider font-semibold transition-all duration-300"
               style={{
                 background: "var(--accent)",
                 color: "#ffffff",
                 border: "1px solid var(--accent)",
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
               }}
             >
               <span>
@@ -236,8 +238,8 @@ export function SoftwareAgencyCta() {
             </div>
 
             <span
-              className="font-mono text-[11px] uppercase tracking-wider text-left lg:text-right"
-              style={{ color: "var(--text-muted)" }}
+              className="text-[11px] font-medium uppercase tracking-wider text-left lg:text-right"
+              style={{ color: "var(--text-muted)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
             >
               {language === "id"
                 ? "Konsultasi Gratis • Pengerjaan Terstruktur"

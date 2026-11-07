@@ -97,7 +97,7 @@ export function TerminalBlock({
         <span
           className="flex-1 text-center pr-10"
           style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
             fontSize: "0.75rem",
             color: "var(--text-muted)",
             letterSpacing: "0.02em",
@@ -160,8 +160,9 @@ export function TerminalBlock({
         <div className="pt-1">
           <span
             style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.8125rem",
+              fontWeight: 600,
               color: "var(--green)",
             }}
           >
@@ -185,8 +186,9 @@ function TerminalLine({
     <div className="flex items-center gap-2">
       <span
         style={{
-          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontFamily: "var(--font-plus-jakarta), sans-serif",
           color: "var(--green)",
+          fontWeight: 600,
           flexShrink: 0,
         }}
       >
@@ -194,8 +196,9 @@ function TerminalLine({
       </span>
       <span
         style={{
-          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontFamily: "var(--font-plus-jakarta), sans-serif",
           color: "var(--text-primary)",
+          fontWeight: 500,
         }}
       >
         {command}
@@ -209,7 +212,7 @@ function TerminalOutput({ children }: { children: React.ReactNode }) {
     <div
       className="pl-3 md:pl-4"
       style={{
-        fontFamily: "var(--font-jetbrains-mono), monospace",
+        fontFamily: "var(--font-plus-jakarta), sans-serif",
         color: "var(--text-secondary)",
         lineHeight: 1.6,
       }}

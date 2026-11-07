@@ -139,7 +139,7 @@ export function Footer({
       <div className="py-8 mt-8 flex flex-col sm:flex-row items-center justify-between border-t border-[var(--border)]/20 pt-6">
         <p
           style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
             fontSize: "0.75rem",
             color: "var(--text-muted)",
             letterSpacing: "0.02em",
@@ -153,8 +153,9 @@ export function Footer({
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className="group flex items-center gap-2"
           style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
             fontSize: "0.75rem",
+            fontWeight: 500,
             color: "var(--text-secondary)",
             background: "transparent",
             border: "none",
@@ -204,8 +205,9 @@ function FooterSocialLink({
       style={{
         color: "var(--text-secondary)",
         transition: "color 150ms ease",
-        fontFamily: "var(--font-jetbrains-mono), monospace",
-        fontSize: "0.875rem",
+        fontFamily: "var(--font-plus-jakarta), sans-serif",
+        fontSize: "0.8125rem",
+        fontWeight: 500,
         textTransform: "uppercase",
         letterSpacing: "0.05em",
       }}

@@ -1,11 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
-
 /* ============================================================
    DESIGN TOKENS — Portfolio Redesign 2026 (Minimalist/Editorial)
    Filosofi: "Minimalist Editorial"
    ============================================================ */
 
 :root {
+  /* Fonts */
+  --font-plus-jakarta: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-playfair: 'Playfair Display', Georgia, serif;
+
   /* Backgrounds: Dark Mode - Dark Gray / Zinc */
   --bg-primary: #09090b;   /* zinc-950 */
   --bg-secondary: #18181b; /* zinc-900 */

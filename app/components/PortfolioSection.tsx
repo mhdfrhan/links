@@ -288,7 +288,7 @@ function ProjectCard({
 
         <h3
           className="font-sans text-xl md:text-2xl text-[var(--text-primary)] mb-2.5 group-hover:text-[var(--accent)] transition-colors duration-300"
-          style={{ fontWeight: 600, fontStyle: "normal", lineHeight: 1.25 }}
+          style={{ fontWeight: 700, fontStyle: "normal", lineHeight: 1.25 }}
         >
           {project.title}
         </h3>

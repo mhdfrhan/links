@@ -91,7 +91,8 @@ export function AboutSection({ text }: AboutSectionProps) {
             </span>
             <h2
               style={{
-                fontWeight: 500,
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontWeight: 700,
                 fontSize: "clamp(1.5rem, 3vw, 2rem)",
                 letterSpacing: "-0.02em",
                 color: "var(--text-primary)",

@@ -71,7 +71,7 @@ export function CertificationsSection({
               color: "var(--accent)",
               letterSpacing: "0.05em",
               textTransform: "uppercase",
-              fontWeight: 600,
+              fontWeight: 700,
               display: "block",
               marginBottom: "0.5rem",
             }}
@@ -202,7 +202,7 @@ function CredentialCard({
           className="transition-colors duration-300 group-hover:text-[var(--accent)]"
           style={{
             fontFamily: "var(--font-plus-jakarta), sans-serif",
-            fontWeight: 600,
+            fontWeight: 700,
             fontSize: "clamp(1.25rem, 2.2vw, 1.55rem)",
             color: "var(--text-primary)",
             letterSpacing: "-0.015em",

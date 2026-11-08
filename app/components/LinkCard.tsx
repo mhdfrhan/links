@@ -86,7 +86,7 @@ export function LinkCard({
 
         {/* Content */}
         <div className="relative flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors duration-300">
+          <h3 className="font-bold text-foreground group-hover:text-accent transition-colors duration-300">
             {label}
           </h3>
           {description && (

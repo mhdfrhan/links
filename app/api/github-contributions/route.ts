@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
         query($login: String!) {
           user(login: $login) {
             contributionsCollection {
+              restrictedContributionsCount
               contributionCalendar {
                 totalContributions
                 weeks {
@@ -44,7 +45,8 @@ export async function GET(req: NextRequest) {
 
       if (response.ok) {
         const json = await response.json()
-        const calendar = json?.data?.user?.contributionsCollection?.contributionCalendar
+        const coll = json?.data?.user?.contributionsCollection
+        const calendar = coll?.contributionCalendar
         if (calendar) {
           const days: ContributionDay[] = []
           for (const week of calendar.weeks) {
@@ -52,9 +54,11 @@ export async function GET(req: NextRequest) {
               days.push({ date: d.date, count: d.contributionCount })
             }
           }
+          const restricted = coll?.restrictedContributionsCount || 0
           return NextResponse.json({
             source: "github-graphql",
             total: calendar.totalContributions,
+            restrictedContributions: restricted,
             data: days,
           })
         }

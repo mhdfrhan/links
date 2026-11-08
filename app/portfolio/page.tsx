@@ -160,8 +160,8 @@ export default function PortfolioPage() {
         <div style={{ marginBottom: "4rem" }}>
           <h1
             style={{
-              fontFamily: "var(--font-serif), serif",
-              fontWeight: 400,
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontWeight: 700,
               fontSize: "clamp(3rem, 6vw, 5rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",

@@ -78,8 +78,8 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
           </span>
           <h2
             style={{
-              fontFamily: "var(--font-serif), serif",
-              fontWeight: 400,
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontWeight: 700,
               fontSize: "clamp(2rem, 4vw, 3rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
@@ -147,8 +147,8 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
                 <h3
                   className="transition-all duration-300 group-hover:translate-x-2 group-hover:text-[var(--accent)]"
                   style={{
-                    fontFamily: "var(--font-serif), serif",
-                    fontWeight: 400,
+                    fontFamily: "var(--font-plus-jakarta), sans-serif",
+                    fontWeight: 700,
                     fontSize: "clamp(1.2rem, 2.2vw, 1.55rem)",
                     color: "var(--text-primary)",
                     letterSpacing: "-0.015em",

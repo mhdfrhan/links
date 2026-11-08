@@ -76,8 +76,8 @@ export function EducationSection({ items }: EducationSectionProps) {
         </span>
         <h2
           style={{
-            fontFamily: "var(--font-serif), serif",
-            fontWeight: 400,
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
+            fontWeight: 700,
             fontSize: "clamp(2rem, 4vw, 3rem)",
             letterSpacing: "-0.02em",
             color: "var(--text-primary)",
@@ -108,7 +108,7 @@ export function EducationSection({ items }: EducationSectionProps) {
             {/* Subtle Background Index Watermark */}
             <span
               aria-hidden="true"
-              className="pointer-events-none select-none absolute -bottom-6 right-4 font-serif leading-none opacity-[0.04] group-hover:opacity-[0.08] transition-opacity duration-500"
+              className="pointer-events-none select-none absolute -bottom-6 right-4 font-sans font-bold leading-none opacity-[0.04] group-hover:opacity-[0.08] transition-opacity duration-500"
               style={{
                 fontSize: "clamp(5rem, 12vw, 9rem)",
                 color: "var(--text-primary)",
@@ -144,8 +144,8 @@ export function EducationSection({ items }: EducationSectionProps) {
                 <h3
                   className="transition-colors duration-300 group-hover:text-[var(--accent)]"
                   style={{
-                    fontFamily: "var(--font-serif), serif",
-                    fontWeight: 400,
+                    fontFamily: "var(--font-plus-jakarta), sans-serif",
+                    fontWeight: 700,
                     fontSize: "clamp(1.4rem, 2.5vw, 1.9rem)",
                     color: "var(--text-primary)",
                     letterSpacing: "-0.015em",

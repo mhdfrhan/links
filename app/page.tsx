@@ -143,9 +143,9 @@ export default function Home() {
           {/* Typographic Logo */}
           <div
             style={{
-              fontFamily: "var(--font-serif), serif",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "3rem",
-              fontWeight: 400,
+              fontWeight: 700,
               color: "var(--text-primary)",
               letterSpacing: "-0.04em",
               position: "relative",

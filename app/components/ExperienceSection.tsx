@@ -102,8 +102,8 @@ export function ExperienceSection({
 
           <h2
             style={{
-              fontFamily: "var(--font-serif), serif",
-              fontWeight: 400,
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontWeight: 700,
               fontSize: "clamp(2rem, 3.6vw, 2.75rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
@@ -346,8 +346,8 @@ function ExperienceRowHeader({
         <h3
           className="transition-colors duration-200 group-hover:text-[var(--accent)]"
           style={{
-            fontFamily: "var(--font-serif), serif",
-            fontWeight: 400,
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
+            fontWeight: 600,
             fontSize: "clamp(1.25rem, 2.2vw, 1.6rem)",
             color: "var(--text-primary)",
             letterSpacing: "-0.015em",

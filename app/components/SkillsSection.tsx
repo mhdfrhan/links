@@ -92,8 +92,8 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
           </span>
           <h2
             style={{
-              fontFamily: "var(--font-serif), serif",
-              fontWeight: 400,
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontWeight: 700,
               fontSize: "clamp(2rem, 4vw, 3rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
@@ -257,8 +257,8 @@ function SkillCategoryCard({
           </span>
           <h3
             style={{
-              fontFamily: "var(--font-serif), serif",
-              fontWeight: 400,
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontWeight: 700,
               fontSize: "clamp(1.35rem, 2.2vw, 1.65rem)",
               color: "var(--text-primary)",
               letterSpacing: "-0.015em",

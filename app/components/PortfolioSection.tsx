@@ -154,8 +154,8 @@ export function PortfolioSection({
           </span>
           <h2
             style={{
-              fontFamily: "var(--font-serif), serif",
-              fontWeight: 400,
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontWeight: 700,
               fontSize: "clamp(2rem, 4vw, 3rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
@@ -287,8 +287,8 @@ function ProjectCard({
         </div>
 
         <h3
-          className="font-serif text-xl md:text-2xl text-[var(--text-primary)] mb-2.5 group-hover:text-[var(--accent)] transition-colors duration-300"
-          style={{ fontWeight: 400, fontStyle: "normal", lineHeight: 1.25 }}
+          className="font-sans text-xl md:text-2xl text-[var(--text-primary)] mb-2.5 group-hover:text-[var(--accent)] transition-colors duration-300"
+          style={{ fontWeight: 600, fontStyle: "normal", lineHeight: 1.25 }}
         >
           {project.title}
         </h3>
@@ -607,11 +607,11 @@ function ProjectModal({
 
               <h2
                 style={{
-                  fontFamily: "var(--font-serif), serif",
+                  fontFamily: "var(--font-plus-jakarta), sans-serif",
                   fontSize: "clamp(1.65rem, 3.2vw, 2.35rem)",
                   color: "var(--text-primary)",
                   lineHeight: 1.18,
-                  fontWeight: 400,
+                  fontWeight: 700,
                 }}
               >
                 {project.title}

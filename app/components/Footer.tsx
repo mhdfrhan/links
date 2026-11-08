@@ -52,11 +52,11 @@ export function Footer({
 
         <h2
           style={{
-            fontWeight: 500,
+            fontWeight: 700,
             fontSize: "clamp(2rem, 5vw, 4rem)",
             letterSpacing: "-0.02em",
             color: "var(--text-primary)",
-            fontFamily: "var(--font-serif), serif",
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
             lineHeight: 1.1,
             marginBottom: "1rem",
             position: "relative",
@@ -155,7 +155,7 @@ export function Footer({
           style={{
             fontFamily: "var(--font-plus-jakarta), sans-serif",
             fontSize: "0.75rem",
-            fontWeight: 500,
+            fontWeight: 700,
             color: "var(--text-secondary)",
             background: "transparent",
             border: "none",

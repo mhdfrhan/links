@@ -107,7 +107,7 @@ export function SoftwareAgencyCta() {
         {/* Background Architectural Watermark */}
         <span
           aria-hidden="true"
-          className="pointer-events-none select-none absolute -bottom-8 right-6 font-serif leading-none opacity-[0.035] group-hover:opacity-[0.07] transition-opacity duration-500"
+          className="pointer-events-none select-none absolute -bottom-8 right-6 font-sans font-bold leading-none opacity-[0.035] group-hover:opacity-[0.07] transition-opacity duration-500"
           style={{
             fontSize: "clamp(4.5rem, 11vw, 8.5rem)",
             color: "var(--text-primary)",
@@ -157,8 +157,8 @@ export function SoftwareAgencyCta() {
             <h2
               className="transition-colors duration-300 group-hover:text-[var(--accent)]"
               style={{
-                fontFamily: "var(--font-serif), serif",
-                fontWeight: 400,
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontWeight: 700,
                 fontSize: "clamp(1.85rem, 3.6vw, 2.75rem)",
                 letterSpacing: "-0.02em",
                 color: "var(--text-primary)",

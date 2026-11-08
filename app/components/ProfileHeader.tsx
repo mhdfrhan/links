@@ -151,7 +151,8 @@ export function ProfileHeader({
       <h1 
         className="hero-text"
         style={{
-          fontFamily: "var(--font-serif), serif",
+          fontFamily: "var(--font-plus-jakarta), sans-serif",
+          fontWeight: 700,
           fontSize: "clamp(2rem, 8vw, 4.5rem)",
           lineHeight: 1.1,
           color: "var(--text-primary)",

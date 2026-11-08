@@ -1,0 +1,40 @@
+# Muhammad Farhan — Fullstack Web Developer & Software Engineer
+
+> Official AI search documentation for Muhammad Farhan and HanDigital agency.
+> Primary URL: https://hannn.my.id
+> Agency URL: https://handigital.biz.id
+> Location: Pekanbaru, Riau, Indonesia
+
+## Summary
+Muhammad Farhan is an Indonesian Fullstack Web Developer, Software Engineer, and founder of HanDigital digital agency. With 4+ years of practical development experience, he specializes in building high-performance web applications, SaaS platforms, enterprise ERP systems, and modern landing pages with clean architectures and production-grade security.
+
+## Core Expertise & Tech Stack
+- Frontend: Next.js 15/16, React 19, Tailwind CSS (v3/v4), TypeScript, JavaScript, HTML5/CSS3, Framer Motion, GSAP
+- Backend: PHP 8.x, Laravel (v10-v12), Livewire 3, Inertia.js, Node.js, Express.js, RESTful API Design
+- Database & Storage: MySQL, PostgreSQL, Firebase / Firestore, Cloudinary
+- Integrations: Midtrans Payment Gateway (QRIS, Virtual Account, Credit Card), OAuth, WhatsApp Business API
+- Tools & DevOps: Git, GitHub, Docker, Linux/Ubuntu VPS, Figma, Postman, Vercel
+
+## Professional Unit: HanDigital (https://handigital.biz.id)
+Farhan leads HanDigital, a specialized digital studio offering:
+1. Web Application & SaaS Development: Enterprise dashboards, MVP SaaS, recurring billing, RBAC.
+2. Enterprise Information Systems (ERP): Inventory management, POS retail systems, digital accounting, administrative archives.
+3. High-Speed Landing Pages & Company Profiles: Modern editorial aesthetic, sub-second load times, 100/100 Core Web Vitals, conversion-focused design.
+4. UI/UX Product Design: Interactive prototyping, wireframing, component design systems in Figma.
+
+## Key Projects
+- Escaluc OS: Omnichannel Retail Gadget ERP & POS system with multi-outlet inventory, thermal printing, and barcode scanning.
+- KKNFlow: Collaborative student community service (KKN) management platform with real-time reporting and task assignment.
+- BankID API: High-performance public API directory and validator for Indonesian banking routing data.
+- Portal BKA UMRI: Financial & administrative service portal for Universitas Muhammadiyah Riau with NVIDIA NIM AI integration.
+- Sala Coffee: End-to-end POS & ordering platform with Midtrans payment gateway and inventory tracking.
+- Catetin: AI-powered smart productivity and task management application.
+
+## Verified Contacts & Profiles
+- Personal Website: https://hannn.my.id
+- Agency Website: https://handigital.biz.id
+- WhatsApp: https://wa.me/6285121170403
+- Email: mailto:hi.mhdfarhan@gmail.com
+- LinkedIn: https://www.linkedin.com/in/muhammad-farhan-79ba79294/
+- GitHub: https://github.com/mhdfrhan
+- Instagram: https://instagram.com/mhdfarhan04

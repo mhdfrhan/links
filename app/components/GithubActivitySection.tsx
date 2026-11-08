@@ -19,7 +19,6 @@ export function GithubActivitySection({
   const [isLoading, setIsLoading] = React.useState(!initialData)
   const [dataSource, setDataSource] = React.useState<string>("dummy")
   const [totalCount, setTotalCount] = React.useState<number>(0)
-  const [paletteMode, setPaletteMode] = React.useState<"github" | "ember">("github")
 
   const isId = language === "id"
   const sectionTitle = isId ? "Aktivitas GitHub" : "GitHub Activity"
@@ -130,42 +129,6 @@ export function GithubActivitySection({
           >
             {sectionSub}
           </p>
-
-          {/* Palette selector pills */}
-          <div
-            className="inline-flex items-center gap-1 p-1"
-            style={{
-              background: "var(--bg-secondary)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setPaletteMode("github")}
-              className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors duration-200"
-              style={{
-                background: paletteMode === "github" ? "var(--bg-tertiary)" : "transparent",
-                color: paletteMode === "github" ? "var(--text-primary)" : "var(--text-muted)",
-                fontFamily: "var(--font-plus-jakarta), sans-serif",
-              }}
-            >
-              <span className="inline-block w-2 h-2 rounded-full mr-1.5 bg-[#26a641]" />
-              GitHub
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaletteMode("ember")}
-              className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors duration-200"
-              style={{
-                background: paletteMode === "ember" ? "var(--bg-tertiary)" : "transparent",
-                color: paletteMode === "ember" ? "var(--text-primary)" : "var(--text-muted)",
-                fontFamily: "var(--font-plus-jakarta), sans-serif",
-              }}
-            >
-              <span className="inline-block w-2 h-2 rounded-full mr-1.5 bg-[#ed5d31]" />
-              Orange
-            </button>
-          </div>
         </div>
       </div>
 
@@ -192,7 +155,7 @@ export function GithubActivitySection({
         <div className="relative z-10 p-4 sm:p-7">
           <ContributionSkyline
             data={data}
-            palette={paletteMode}
+            palette="ember"
             defaultView="3d"
             heightScale={1.15}
             orbit={true}

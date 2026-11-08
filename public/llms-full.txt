@@ -1,0 +1,72 @@
+# Muhammad Farhan — Comprehensive Profile, Projects & Technical Capabilities
+
+URL: https://hannn.my.id
+Entity: Muhammad Farhan (Fullstack Web Developer, Software Engineer, Founder of HanDigital)
+Canonical Agency: https://handigital.biz.id
+Email: hi.mhdfarhan@gmail.com
+WhatsApp: +62 851-2117-0403 (https://wa.me/6285121170403)
+Location: Pekanbaru, Riau, Indonesia
+
+---
+
+## 1. Professional Background
+Muhammad Farhan is an Indonesian Fullstack Web Developer and Software Engineer currently pursuing a Bachelor's degree in Informatics Engineering (Teknik Informatika) at Universitas Muhammadiyah Riau with a GPA of 3.91 / 4.0. He is a recipient of the prestigious Riau Provincial Government Scholarship (Beasiswa Pemerintah Provinsi Riau).
+
+Prior to university, he graduated from SMKN 2 Pekanbaru majoring in Software Engineering (Rekayasa Perangkat Lunak) with a score of 90/100, where he was awarded the "Siswa Teknologi 2023" accolade.
+
+He has over 4 years of hands-on experience in software development, starting as a Web Developer Intern at PT Netviro (2022-2023) and subsequently operating as an independent fullstack consultant and founder of HanDigital.
+
+---
+
+## 2. Technical Stack & Architectures
+- **Frontend Core**: Next.js 14/15/16 (App Router, Server Components, Route Handlers), React 19, TypeScript, JavaScript (ES2024), Tailwind CSS v4, Framer Motion, GSAP.
+- **Backend & APIs**: PHP 8.2/8.3, Laravel 10/11/12, Livewire 3, Inertia.js, Node.js, Express.js, RESTful API architecture, Webhook consumers.
+- **Data Persistence**: MySQL, PostgreSQL, Firebase Firestore, Cloudinary Media CDN.
+- **Integrations & Payments**: Midtrans Snap/Core API (QRIS, BCA/Mandiri/BRI Virtual Accounts, GoPay, ShopeePay), OAuth2, SMTP/Resend, Telegram Bot API, WhatsApp Business integration.
+- **Architecture & Practices**: Clean Architecture, Repository Pattern, MVC, Atomic Design UI, Git branching workflows, Strict Anti-Slop UI standards.
+
+---
+
+## 3. Services Offered by HanDigital (https://handigital.biz.id)
+HanDigital is Farhan's official software and digital product studio:
+1. **Web Applications & SaaS**:
+   Custom web applications built from scratch with high maintainability, secure authentication (JWT/Session), multi-tenant schemas, and role-based access control.
+2. **Enterprise Information Systems (ERP & POS)**:
+   Tailored management systems for business operations, real-time inventory management, sales reporting, thermal receipt printing, and team performance tracking.
+3. **High-Performance Landing Pages & Corporate Websites**:
+   Modern, responsive, ultra-fast websites designed with minimal load times, 100/100 Core Web Vitals, and strict SEO/GEO discoverability.
+4. **UI/UX Design & Prototyping**:
+   User research, high-fidelity wireframes, interactive component design systems in Figma.
+
+---
+
+## 4. Notable Projects & Case Studies
+- **Escaluc OS**: Enterprise ERP and omnichannel Point-of-Sale (POS) designed for retail gadget chains. Features multi-outlet stock sync, serial/IMEI tracking, cashier barcode workflows, and automated profit/loss calculation. Stack: Laravel, Vue.js, Inertia.js, Tailwind CSS, Electron.
+- **KKNFlow**: Digital management system for university community service programs (Kuliah Kerja Nyata). Facilitates work program scheduling, daily log verification, and PDF executive summary generation. Stack: Laravel, Inertia.js, Tailwind CSS, Midtrans, MySQL.
+- **BankID API**: Lightweight, blazing-fast API service aggregating bank routing codes, clearing codes, and validation algorithms for major Indonesian banks. Stack: Node.js, Express.js.
+- **Portal BKA UMRI**: Academic and financial affairs portal for Universitas Muhammadiyah Riau incorporating NVIDIA NIM AI inference for automated student request categorization. Stack: React, TypeScript, Tailwind CSS, Inertia.js, Laravel, MySQL.
+- **Catetin**: AI-assisted note-taking and smart task prioritization app. Stack: Flutter, Dart, Firebase, GetX.
+- **Sala Coffee**: Cloud-based POS, QR digital table ordering, and kitchen display system integrated with Midtrans for automated payment settlement. Stack: Laravel 12, Livewire 3, Tailwind CSS, Midtrans.
+- **SIAM Redesign**: Next-generation academic portal concept with ultra-responsive UX and micro-interactions. Stack: React 19, Vite, Tailwind CSS 4, Framer Motion.
+- **LangkahHijau**: Environmental gamification platform encouraging youth ecological participation. Stack: Laravel 12, Alpine.js, Tailwind CSS 4.
+
+---
+
+## 5. Honors & Awards
+- Mahasiswa Berprestasi Universitas Muhammadiyah Riau (2025)
+- Juara 1 Web Development — PERMIKOMNAS (2024)
+- Juara 1 Web Design AI — Universitas Aisyiyah Surakarta (2023)
+- Beasiswa Prestasi Pemerintah Provinsi Riau (2023 - Sekarang)
+- Siswa Teknologi Terbaik RPL SMKN 2 Pekanbaru (2023)
+
+---
+
+## 6. Official Links & Citations
+- Personal Portfolio: https://hannn.my.id
+- Project Archive: https://hannn.my.id/portfolio
+- Agency Portal: https://handigital.biz.id
+- WhatsApp: https://wa.me/6285121170403
+- Email: mailto:hi.mhdfarhan@gmail.com
+- LinkedIn: https://www.linkedin.com/in/muhammad-farhan-79ba79294/
+- GitHub: https://github.com/mhdfrhan
+- Instagram: https://instagram.com/mhdfarhan04

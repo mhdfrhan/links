@@ -24,8 +24,8 @@ export function GithubActivitySection({
   const isId = language === "id"
   const sectionTitle = isId ? "Aktivitas GitHub" : "GitHub Activity"
   const sectionSub = isId
-    ? "Visualisasi kontribusi dan commit interaktif dalam format 2D heat map dan 3D isometric skyline."
-    : "Interactive contribution visualizer rendered as a 2D heat map and 3D isometric skyline."
+    ? "Visualisasi aktivitas commit dan kontribusi kode interaktif dalam tampilan 2D heat map dan 3D."
+    : "Interactive 2D heat map and 3D visualizer for commits and code contributions."
 
   // Fetch real GitHub data asynchronously
   React.useEffect(() => {
@@ -187,17 +187,6 @@ export function GithubActivitySection({
           style={{ background: "var(--accent)" }}
         />
 
-        {/* Subtle Background Watermark */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none select-none absolute -bottom-6 right-4 font-sans font-bold leading-none opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-500"
-          style={{
-            fontSize: "clamp(5rem, 12vw, 9rem)",
-            color: "var(--text-primary)",
-          }}
-        >
-          SKYLINE
-        </span>
 
         {/* Skyline Interactive Component */}
         <div className="relative z-10 p-4 sm:p-7">

@@ -13,6 +13,7 @@ import { ExperienceSection } from "./components/ExperienceSection";
 import { EducationSection } from "./components/EducationSection";
 import { AwardsSection } from "./components/AwardsSection";
 import { CertificationsSection } from "./components/CertificationsSection";
+import { GithubActivitySection } from "./components/GithubActivitySection";
 import { Footer } from "./components/Footer";
 import { SoftwareAgencyCta } from "./components/SoftwareAgencyCta";
 import { ThemeToggle } from "./components/ThemeToggle";
@@ -435,6 +436,13 @@ export default function Home() {
               name: l(c, "name"),
             }))}
           />
+        </section>
+
+        <SectionDivider />
+
+        {/* ===== GITHUB ACTIVITY SECTION ===== */}
+        <section style={{ paddingBottom: "2rem" }}>
+          <GithubActivitySection />
         </section>
 
         <SectionDivider />

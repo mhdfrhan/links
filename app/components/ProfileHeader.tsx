@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 import { useGSAP } from "@gsap/react";
@@ -8,7 +9,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
 import { SocialLink as ISocialLink, getPlatformPrefix } from "./SocialLinks";
-import { HeroBanner3D } from "./HeroBanner3D";
 import { smoothScrollTo } from "@/lib/utils/smoothScroll";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -126,6 +126,23 @@ export function ProfileHeader({
           "-=0.8",
         );
 
+      // Smooth Parallax Window Effect on Scroll
+      gsap.fromTo(
+        ".hero-parallax-layer",
+        { yPercent: -12, scale: 1.1 },
+        {
+          yPercent: 12,
+          scale: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".hero-image",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        },
+      );
+
     },
     { scope: containerRef },
   );
@@ -164,8 +181,27 @@ export function ProfileHeader({
         </span>
       </h1>
 
-      {/* 3D Cinematic Viewport Banner (Awwwards / Framer / 21st.dev style) */}
-      <HeroBanner3D avatarUrl={avatarUrl} name={name} />
+      {/* Full Width Image Banner with Smooth Scroll Parallax */}
+      <div className="w-screen relative left-1/2 -translate-x-1/2 mb-12 overflow-hidden hero-image">
+        <div
+          className="relative w-full overflow-hidden"
+          style={{
+            aspectRatio: "21/9",
+            background: "var(--bg-tertiary)",
+          }}
+        >
+          <div className="hero-parallax-layer absolute inset-x-0 -top-[16%] h-[132%] will-change-transform">
+            <Image
+              src={avatarUrl}
+              alt={`Photo of ${name}`}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Aligned Editorial Bottom Section under Banner */}
       <div className="hero-meta flex flex-col gap-6 pt-2">

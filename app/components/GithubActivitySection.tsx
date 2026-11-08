@@ -33,7 +33,9 @@ export function GithubActivitySection({
 
     async function fetchContributions() {
       try {
-        const res = await fetch(`/api/github-contributions?username=${username}`)
+        const res = await fetch(`/api/github-contributions?username=${username}`, {
+          cache: "no-store",
+        })
         if (!res.ok) return
         const result = await res.json()
         if (active && result?.data && Array.isArray(result.data) && result.data.length > 0) {

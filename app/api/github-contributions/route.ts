@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 60
+
 interface ContributionDay {
   date: string
   count: number
@@ -40,7 +43,7 @@ export async function GET(req: NextRequest) {
           "User-Agent": "portfolio-skyline",
         },
         body: JSON.stringify({ query, variables: { login: username } }),
-        next: { revalidate: 3600 }, // Cache 1 jam
+        next: { revalidate: 60 }, // Cache 60 detik (fresh)
       })
 
       if (response.ok) {

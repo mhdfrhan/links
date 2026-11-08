@@ -20,41 +20,159 @@ import {
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 
-// Markdown-to-HTML renderer for assistant messages (sharp architectural code blocks)
+// Markdown-to-HTML renderer for assistant messages with rich formatting:
+// - Clickable, styled links (markdown [label](url), autolinked URLs, and emails)
+// - Bold (**text**) & Italic (*text*)
+// - Soft light-orange highlighted keywords/code (`code` and ==highlight==)
+// - Ordered (1.) and Unordered (-) lists, headings, and blockquotes
 function renderMarkdown(text: string): string {
-  return text
-    .replace(/```[\s\S]*?```/g, (m) => {
-      const code = m.replace(/```(\w+)?\n?/, "").replace(/```$/, "");
-      return `<pre style="background:var(--bg-code);padding:10px 14px;overflow-x:auto;font-size:0.75rem;border-radius:0;margin:8px 0;border:1px solid var(--border);font-family:var(--font-plus-jakarta),sans-serif"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
-    })
-    .replace(
-      /\*\*(.+?)\*\*/g,
-      "<strong style='font-weight:600;color:var(--text-primary)'>$1</strong>",
-    )
-    .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(
-      /^###\s+(.+)$/gm,
-      "<h3 style='font-size:0.875rem;font-weight:600;margin:10px 0 4px;color:var(--text-primary)'>$1</h3>",
-    )
-    .replace(
-      /^##\s+(.+)$/gm,
-      "<h2 style='font-size:0.9375rem;font-weight:700;margin:12px 0 4px;color:var(--text-primary)'>$1</h2>",
-    )
-    .replace(
-      /^---$/gm,
-      "<hr style='border:none;border-top:1px solid var(--border);margin:10px 0;'/>",
-    )
-    .replace(
-      /^[\-\*]\s+(.+)$/gm,
-      "<li style='margin:3px 0;padding-left:4px;'>$1</li>",
-    )
-    .replace(
-      /(<li[^>]*>.*<\/li>\n?)+/g,
-      (m) =>
-        `<ul style='padding-left:18px;margin:6px 0;list-style:disc;'>${m}</ul>`,
-    )
-    .replace(/(?<!>)\n(?!<)/g, "<br/>");
+  if (!text) return "";
+
+  // 1. Code blocks (```code```)
+  const codeBlocks: string[] = [];
+  let html = text.replace(/```([\s\S]*?)```/g, (_, code) => {
+    const escaped = code
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    const placeholder = `%%CODEBLOCK${codeBlocks.length}%%`;
+    codeBlocks.push(
+      `<pre style="background:var(--bg-code);padding:10px 14px;overflow-x:auto;font-size:0.75rem;border-radius:4px;margin:8px 0;border:1px solid var(--border);font-family:var(--font-plus-jakarta),sans-serif"><code>${escaped}</code></pre>`
+    );
+    return placeholder;
+  });
+
+  // 2. Inline code (`code`) -> Light orange highlight badge
+  const inlineCodes: string[] = [];
+  html = html.replace(/`([^`\n]+)`/g, (_, code) => {
+    const escaped = code
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    const placeholder = `%%INLINECODE${inlineCodes.length}%%`;
+    inlineCodes.push(
+      `<code style="background:rgba(237,93,49,0.13);color:var(--accent);padding:2px 7px;border-radius:4px;font-size:0.84em;font-weight:600;border:1px solid rgba(237,93,49,0.25);font-family:inherit;display:inline-block;margin:1px 2px;">${escaped}</code>`
+    );
+    return placeholder;
+  });
+
+  // 3. Highlight: ==text== -> Light orange highlight pill
+  const highlights: string[] = [];
+  html = html.replace(/==([^=\n]+)==/g, (_, hl) => {
+    const placeholder = `%%HIGHLIGHT${highlights.length}%%`;
+    highlights.push(
+      `<mark style="background:rgba(237,93,49,0.18);color:var(--accent);padding:2px 7px;border-radius:4px;font-weight:600;display:inline-block;margin:1px 2px;">${hl}</mark>`
+    );
+    return placeholder;
+  });
+
+  // 4. Links placeholder collector
+  const links: string[] = [];
+
+  // 4a. Markdown links: [label](url)
+  html = html.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s\)]+|mailto:[^\s\)]+)\)/g,
+    (_, label, url) => {
+      const placeholder = `%%LINK${links.length}%%`;
+      links.push(
+        `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;word-break:break-word;display:inline-flex;align-items:center;gap:3px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${label}<span style="font-size:0.75em;opacity:0.85">↗</span></a>`
+      );
+      return placeholder;
+    }
+  );
+
+  // 4b. Raw URLs: https://... or http://... (strip trailing punctuation like . , ; : ? ) )
+  html = html.replace(
+    /(^|[\s(>])(https?:\/\/[^\s<)]+?)([\.,;:!?)]?)(?=[\s<)]|$)/g,
+    (_, prefix, url, punct) => {
+      const placeholder = `%%LINK${links.length}%%`;
+      links.push(
+        `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;word-break:break-all;display:inline-flex;align-items:center;gap:3px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${url}<span style="font-size:0.75em;opacity:0.85">↗</span></a>`
+      );
+      return `${prefix}${placeholder}${punct}`;
+    }
+  );
+
+  // 4c. Raw emails: user@domain.tld
+  html = html.replace(
+    /(^|[\s(>])([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})([\.,;:!?)]?)(?=[\s<)]|$)/g,
+    (_, prefix, email, punct) => {
+      const placeholder = `%%LINK${links.length}%%`;
+      links.push(
+        `<a href="mailto:${email}" style="color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${email}</a>`
+      );
+      return `${prefix}${placeholder}${punct}`;
+    }
+  );
+
+  // 5. Bold: **text**
+  html = html.replace(
+    /\*\*(.+?)\*\*/g,
+    "<strong style='font-weight:700;color:var(--text-primary);'>$1</strong>"
+  );
+
+  // 6. Italic: *text* (excluding already matched asterisks)
+  html = html.replace(
+    /(?<!\*)\*([^*\n]+?)\*(?!\*)/g,
+    "<em style='font-style:italic;color:var(--text-secondary);'>$1</em>"
+  );
+
+  // 7. Blockquotes: > text
+  html = html.replace(
+    /^>\s+(.+)$/gm,
+    "<blockquote style='border-left:3px solid var(--accent);background:rgba(237,93,49,0.08);padding:6px 12px;margin:8px 0;border-radius:0 4px 4px 0;font-style:italic;color:var(--text-secondary);'>$1</blockquote>"
+  );
+
+  // 8. Headings: ### and ##
+  html = html.replace(
+    /^###\s+(.+)$/gm,
+    "<h3 style='font-size:0.9rem;font-weight:700;margin:10px 0 4px;color:var(--text-primary);'>$1</h3>"
+  );
+  html = html.replace(
+    /^##\s+(.+)$/gm,
+    "<h2 style='font-size:1rem;font-weight:700;margin:12px 0 4px;color:var(--text-primary);'>$1</h2>"
+  );
+
+  // 9. Horizontal rule: ---
+  html = html.replace(
+    /^---$/gm,
+    "<hr style='border:none;border-top:1px solid var(--border);margin:10px 0;'/>"
+  );
+
+  // 10. Ordered lists: 1. Item
+  html = html.replace(
+    /^(\d+)\.\s+(.+)$/gm,
+    "<oli style='margin:3px 0;padding-left:4px;'>$2</oli>"
+  );
+
+  // 11. Unordered lists: - Item or * Item
+  html = html.replace(
+    /^[\-\*]\s+(.+)$/gm,
+    "<uli style='margin:3px 0;padding-left:4px;'>$1</uli>"
+  );
+
+  // Wrap contiguous <uli> in <ul> and <oli> in <ol>
+  html = html.replace(
+    /(<uli[^>]*>.*<\/uli>\n?)+/g,
+    (m) => `<ul style='padding-left:20px;margin:6px 0;list-style:disc;'>${m.replace(/<\/?uli/g, '<li')}</ul>`
+  );
+  html = html.replace(
+    /(<oli[^>]*>.*<\/oli>\n?)+/g,
+    (m) => `<ol style='padding-left:20px;margin:6px 0;list-style:decimal;'>${m.replace(/<\/?oli/g, '<li')}</ol>`
+  );
+
+  // 12. Restore placeholders
+  html = html.replace(/%%LINK(\d+)%%/g, (_, i) => links[Number(i)] || "");
+  html = html.replace(/%%HIGHLIGHT(\d+)%%/g, (_, i) => highlights[Number(i)] || "");
+  html = html.replace(/%%INLINECODE(\d+)%%/g, (_, i) => inlineCodes[Number(i)] || "");
+  html = html.replace(/%%CODEBLOCK(\d+)%%/g, (_, i) => codeBlocks[Number(i)] || "");
+
+  // 13. Convert newlines to <br/>
+  html = html.replace(/(?<!>)\n(?!<)/g, "<br/>");
+
+  return html;
 }
+
 
 interface Message {
   id: string;

@@ -23,7 +23,7 @@ import { dictionaries } from "@/lib/i18n/dictionaries";
 // Markdown-to-HTML renderer for assistant messages with rich formatting:
 // - Clickable, styled links (markdown [label](url), autolinked URLs, and emails)
 // - Bold (**text**) & Italic (*text*)
-// - Soft light-orange highlighted keywords/code (`code` and ==highlight==)
+// - Subtle, elegant light-orange highlights (not heavy chunky badges)
 // - Ordered (1.) and Unordered (-) lists, headings, and blockquotes
 function renderMarkdown(text: string): string {
   if (!text) return "";
@@ -42,7 +42,7 @@ function renderMarkdown(text: string): string {
     return placeholder;
   });
 
-  // 2. Inline code (`code`) -> Light orange highlight badge
+  // 2. Inline code (`code`) -> Subtle, clean inline accent text (no bulky boxes)
   const inlineCodes: string[] = [];
   html = html.replace(/`([^`\n]+)`/g, (_, code) => {
     const escaped = code
@@ -51,17 +51,17 @@ function renderMarkdown(text: string): string {
       .replace(/>/g, "&gt;");
     const placeholder = `%%INLINECODE${inlineCodes.length}%%`;
     inlineCodes.push(
-      `<code style="background:rgba(237,93,49,0.13);color:var(--accent);padding:2px 7px;border-radius:4px;font-size:0.84em;font-weight:600;border:1px solid rgba(237,93,49,0.25);font-family:inherit;display:inline-block;margin:1px 2px;">${escaped}</code>`
+      `<code style="background:color-mix(in srgb, var(--accent) 10%, transparent);color:var(--accent);padding:1px 5px;border-radius:3px;font-size:0.875em;font-weight:600;font-family:inherit;">${escaped}</code>`
     );
     return placeholder;
   });
 
-  // 3. Highlight: ==text== -> Light orange highlight pill
+  // 3. Highlight: ==text== -> Subtle highlight
   const highlights: string[] = [];
   html = html.replace(/==([^=\n]+)==/g, (_, hl) => {
     const placeholder = `%%HIGHLIGHT${highlights.length}%%`;
     highlights.push(
-      `<mark style="background:rgba(237,93,49,0.18);color:var(--accent);padding:2px 7px;border-radius:4px;font-weight:600;display:inline-block;margin:1px 2px;">${hl}</mark>`
+      `<mark style="background:color-mix(in srgb, var(--accent) 14%, transparent);color:var(--accent);padding:1px 5px;border-radius:3px;font-weight:600;">${hl}</mark>`
     );
     return placeholder;
   });
@@ -71,11 +71,12 @@ function renderMarkdown(text: string): string {
 
   // 4a. Markdown links: [label](url)
   html = html.replace(
-    /\[([^\]]+)\]\((https?:\/\/[^\s\)]+|mailto:[^\s\)]+)\)/g,
+    /\s*\[([^\]]+)\]\((https?:\/\/[^\s\)]+|mailto:[^\s\)]+)\)/g,
     (_, label, url) => {
       const placeholder = `%%LINK${links.length}%%`;
+      const cleanLabel = label.replace(/\s*↗$/, "");
       links.push(
-        `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;word-break:break-word;display:inline-flex;align-items:center;gap:3px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${label}<span style="font-size:0.75em;opacity:0.85">↗</span></a>`
+        ` <a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none;border-bottom:1px solid color-mix(in srgb, var(--accent) 40%, transparent);display:inline-flex;align-items:center;gap:2px;transition:all 0.2s;" onmouseover="this.style.borderBottomColor='var(--accent)'" onmouseout="this.style.borderBottomColor='color-mix(in srgb, var(--accent) 40%, transparent)'">${cleanLabel}<span style="font-size:0.75em;opacity:0.8">↗</span></a>`
       );
       return placeholder;
     }
@@ -87,7 +88,7 @@ function renderMarkdown(text: string): string {
     (_, prefix, url, punct) => {
       const placeholder = `%%LINK${links.length}%%`;
       links.push(
-        `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;word-break:break-all;display:inline-flex;align-items:center;gap:3px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${url}<span style="font-size:0.75em;opacity:0.85">↗</span></a>`
+        `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none;border-bottom:1px solid color-mix(in srgb, var(--accent) 40%, transparent);word-break:break-all;display:inline-flex;align-items:center;gap:2px;transition:all 0.2s;" onmouseover="this.style.borderBottomColor='var(--accent)'" onmouseout="this.style.borderBottomColor='color-mix(in srgb, var(--accent) 40%, transparent)'">${url}<span style="font-size:0.75em;opacity:0.8">↗</span></a>`
       );
       return `${prefix}${placeholder}${punct}`;
     }
@@ -99,7 +100,7 @@ function renderMarkdown(text: string): string {
     (_, prefix, email, punct) => {
       const placeholder = `%%LINK${links.length}%%`;
       links.push(
-        `<a href="mailto:${email}" style="color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${email}</a>`
+        `<a href="mailto:${email}" style="color:var(--accent);font-weight:600;text-decoration:none;border-bottom:1px solid color-mix(in srgb, var(--accent) 40%, transparent);">${email}</a>`
       );
       return `${prefix}${placeholder}${punct}`;
     }
@@ -111,7 +112,7 @@ function renderMarkdown(text: string): string {
     "<strong style='font-weight:700;color:var(--text-primary);'>$1</strong>"
   );
 
-  // 6. Italic: *text* (excluding already matched asterisks)
+  // 6. Italic: *text*
   html = html.replace(
     /(?<!\*)\*([^*\n]+?)\*(?!\*)/g,
     "<em style='font-style:italic;color:var(--text-secondary);'>$1</em>"
@@ -120,7 +121,7 @@ function renderMarkdown(text: string): string {
   // 7. Blockquotes: > text
   html = html.replace(
     /^>\s+(.+)$/gm,
-    "<blockquote style='border-left:3px solid var(--accent);background:rgba(237,93,49,0.08);padding:6px 12px;margin:8px 0;border-radius:0 4px 4px 0;font-style:italic;color:var(--text-secondary);'>$1</blockquote>"
+    "<blockquote style='border-left:3px solid var(--accent);background:color-mix(in srgb, var(--accent) 6%, transparent);padding:6px 12px;margin:8px 0;border-radius:0 4px 4px 0;font-style:italic;color:var(--text-secondary);'>$1</blockquote>"
   );
 
   // 8. Headings: ### and ##
@@ -142,23 +143,23 @@ function renderMarkdown(text: string): string {
   // 10. Ordered lists: 1. Item
   html = html.replace(
     /^(\d+)\.\s+(.+)$/gm,
-    "<oli style='margin:3px 0;padding-left:4px;'>$2</oli>"
+    "<oli style='margin:4px 0;padding-left:4px;'>$2</oli>"
   );
 
   // 11. Unordered lists: - Item or * Item
   html = html.replace(
     /^[\-\*]\s+(.+)$/gm,
-    "<uli style='margin:3px 0;padding-left:4px;'>$1</uli>"
+    "<uli style='margin:4px 0;padding-left:4px;'>$1</uli>"
   );
 
-  // Wrap contiguous <uli> in <ul> and <oli> in <ol>
+  // Wrap contiguous or newline-separated list items into a single <ul> / <ol> without extra empty bullets
   html = html.replace(
-    /(<uli[^>]*>.*<\/uli>\n?)+/g,
-    (m) => `<ul style='padding-left:20px;margin:6px 0;list-style:disc;'>${m.replace(/<\/?uli/g, '<li')}</ul>`
+    /(<uli[^>]*>[\s\S]*?<\/uli>[\s\n]*)+/g,
+    (m) => `<ul style='padding-left:20px;margin:8px 0;list-style:disc;'>${m.replace(/<uli/g, '<li').replace(/<\/uli>/g, '</li>')}</ul>`
   );
   html = html.replace(
-    /(<oli[^>]*>.*<\/oli>\n?)+/g,
-    (m) => `<ol style='padding-left:20px;margin:6px 0;list-style:decimal;'>${m.replace(/<\/?oli/g, '<li')}</ol>`
+    /(<oli[^>]*>[\s\S]*?<\/oli>[\s\n]*)+/g,
+    (m) => `<ol style='padding-left:20px;margin:8px 0;list-style:decimal;'>${m.replace(/<oli/g, '<li').replace(/<\/oli>/g, '</li>')}</ol>`
   );
 
   // 12. Restore placeholders
@@ -167,7 +168,7 @@ function renderMarkdown(text: string): string {
   html = html.replace(/%%INLINECODE(\d+)%%/g, (_, i) => inlineCodes[Number(i)] || "");
   html = html.replace(/%%CODEBLOCK(\d+)%%/g, (_, i) => codeBlocks[Number(i)] || "");
 
-  // 13. Convert newlines to <br/>
+  // 13. Convert remaining newlines (between paragraphs) to <br/>
   html = html.replace(/(?<!>)\n(?!<)/g, "<br/>");
 
   return html;

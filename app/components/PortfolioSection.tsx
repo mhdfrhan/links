@@ -156,7 +156,7 @@ export function PortfolioSection({
             style={{
               fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontWeight: 700,
-              fontSize: "clamp(2rem, 4vw, 3rem)",
+              fontSize: "clamp(1.5rem, 2.8vw, 2rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
               lineHeight: 1.1,
@@ -608,7 +608,7 @@ function ProjectModal({
               <h2
                 style={{
                   fontFamily: "var(--font-plus-jakarta), sans-serif",
-                  fontSize: "clamp(1.65rem, 3.2vw, 2.35rem)",
+                  fontSize: "clamp(1.35rem, 2.2vw, 1.65rem)",
                   color: "var(--text-primary)",
                   lineHeight: 1.18,
                   fontWeight: 700,

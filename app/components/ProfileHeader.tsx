@@ -153,7 +153,7 @@ export function ProfileHeader({
         style={{
           fontFamily: "var(--font-plus-jakarta), sans-serif",
           fontWeight: 700,
-          fontSize: "clamp(2rem, 8vw, 4.5rem)",
+          fontSize: "clamp(1.75rem, 4.2vw, 3rem)",
           lineHeight: 1.1,
           color: "var(--text-primary)",
           letterSpacing: "-0.02em",

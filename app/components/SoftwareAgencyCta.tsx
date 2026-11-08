@@ -159,7 +159,7 @@ export function SoftwareAgencyCta() {
               style={{
                 fontFamily: "var(--font-plus-jakarta), sans-serif",
                 fontWeight: 700,
-                fontSize: "clamp(1.85rem, 3.6vw, 2.75rem)",
+                fontSize: "clamp(1.4rem, 2.5vw, 1.85rem)",
                 letterSpacing: "-0.02em",
                 color: "var(--text-primary)",
                 lineHeight: 1.14,

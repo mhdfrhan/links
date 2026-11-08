@@ -181,7 +181,6 @@ export default function ProfilePage() {
               showToast("success", "Foto profil berhasil diupload!");
             }}
             aspectRatio={21/9}
-            outputSize={1200}
             folder="portfolio/profile"
           />
         </div>

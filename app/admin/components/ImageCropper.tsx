@@ -7,22 +7,23 @@ import { uploadToCloudinary } from "@/lib/cloudinary/config";
 interface ImageCropperProps {
   onCropComplete: (url: string, publicId: string) => void;
   currentImageUrl?: string;
-  aspectRatio?: number; // width/height, e.g., 1 for square
-  outputSize?: number; // px, e.g., 400
+  aspectRatio?: number; // width/height, e.g., 21/9
+  outputSize?: number; // optional max size, omit for full original resolution
   folder?: string;
 }
 
 export function ImageCropper({
   onCropComplete,
   currentImageUrl,
-  aspectRatio = 1,
-  outputSize = 400,
+  aspectRatio = 21 / 9,
+  outputSize,
   folder = "portfolio/profile",
 }: ImageCropperProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0, width: 200, height: 200 });
   const [isDragging, setIsDragging] = useState(false);
@@ -36,6 +37,7 @@ export function ImageCropper({
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith("image/")) return;
+    setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setImageSrc(url);
   };
@@ -59,7 +61,7 @@ export function ImageCropper({
       displayH,
     });
 
-    const initialWidth = Math.min(displayW, displayH * aspectRatio) * 0.7;
+    const initialWidth = Math.min(displayW, displayH * aspectRatio) * 0.9;
     const initialHeight = initialWidth / aspectRatio;
     setCrop({
       x: (displayW - initialWidth) / 2,
@@ -97,7 +99,7 @@ export function ImageCropper({
 
   const handleZoom = (val: number) => {
     setZoom(val);
-    const newWidth = Math.min(imgDimensions.displayW, imgDimensions.displayH * aspectRatio) * 0.7 * val;
+    const newWidth = Math.min(imgDimensions.displayW, imgDimensions.displayH * aspectRatio) * 0.9 * val;
     let finalW = Math.min(newWidth, imgDimensions.displayW);
     let finalH = finalW / aspectRatio;
     if (finalH > imgDimensions.displayH) {
@@ -113,6 +115,24 @@ export function ImageCropper({
     }));
   };
 
+  // Upload file asli langsung tanpa crop dan tanpa kompresi canvas (Full HD/4K)
+  const handleUploadOriginal = async () => {
+    if (!selectedFile) return;
+    setUploading(true);
+
+    try {
+      const result = await uploadToCloudinary(selectedFile, { folder });
+      onCropComplete(result.secure_url, result.public_id);
+      setImageSrc(null);
+      setSelectedFile(null);
+    } catch (err) {
+      console.error("Direct original upload error:", err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Crop dengan resolusi asli (tanpa downscale paksa)
   const handleCropAndUpload = async () => {
     if (!imageSrc || !imgRef.current) return;
     setUploading(true);
@@ -131,11 +151,13 @@ export function ImageCropper({
       const response = await fetch(imageSrc);
       const blob = await response.blob();
 
-      const croppedBlob = await cropImage(blob, realCrop, { width: outputSize, height: Math.round(outputSize / aspectRatio) });
+      // Gunakan resolusi asli dari area crop (realCrop.width & realCrop.height)
+      const croppedBlob = await cropImage(blob, realCrop, outputSize ? { width: outputSize, height: Math.round(outputSize / aspectRatio) } : undefined, 1.0);
       const result = await uploadToCloudinary(croppedBlob, { folder });
 
       onCropComplete(result.secure_url, result.public_id);
       setImageSrc(null);
+      setSelectedFile(null);
     } catch (err) {
       console.error("Crop & upload error:", err);
     } finally {
@@ -149,7 +171,7 @@ export function ImageCropper({
 
       {/* Current photo + change button */}
       <div className="flex items-center gap-4">
-        <div className={`overflow-hidden border-2 border-border bg-muted flex items-center justify-center ${aspectRatio > 1 ? "w-32 h-14 " : "w-20 h-20 "}`}>
+        <div className={`overflow-hidden border-2 border-border bg-muted flex items-center justify-center ${aspectRatio > 1 ? "w-36 h-16 " : "w-20 h-20 "}`}>
           {currentImageUrl ? (
             <img src={currentImageUrl} alt="Profile" className="w-full h-full object-cover" />
           ) : (
@@ -158,13 +180,16 @@ export function ImageCropper({
             </svg>
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="px-4 py-2.5  text-sm font-medium bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all"
-        >
-          {currentImageUrl ? "Ganti Foto" : "Upload Foto"}
-        </button>
+        <div className="flex flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 text-sm font-medium bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all w-fit"
+          >
+            {currentImageUrl ? "Ganti Foto" : "Pilih Foto"}
+          </button>
+          <span className="text-xs text-muted-foreground">Mendukung format gambar HD/4K tanpa kompresi paksa.</span>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -176,10 +201,15 @@ export function ImageCropper({
 
       {/* Crop interface */}
       {imageSrc && (
-        <div className="space-y-4 p-4  bg-muted/30 border border-border">
-          <p className="text-sm text-muted-foreground">Atur area crop untuk foto profil:</p>
+        <div className="space-y-4 p-4 bg-muted/30 border border-border">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">Pilih Cara Upload:</p>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              Resolusi Asli: {imgDimensions.w} × {imgDimensions.h}px
+            </span>
+          </div>
 
-          <div ref={containerRef} className="relative flex items-center justify-center w-full max-w-md overflow-hidden  bg-black/20" style={{ height: 320 }}>
+          <div ref={containerRef} className="relative flex items-center justify-center w-full max-w-md overflow-hidden bg-black/20" style={{ height: 320 }}>
             <div 
               className="relative" 
               style={{ 
@@ -202,7 +232,7 @@ export function ImageCropper({
               {/* Overlay strictly within image bounds */}
               <div className="absolute inset-0 overflow-hidden">
                 <div
-                  className={`absolute border-2 border-white cursor-move shadow-lg ${aspectRatio === 1 ? "" : ""}`}
+                  className="absolute border-2 border-white cursor-move shadow-lg"
                   style={{
                     left: crop.x,
                     top: crop.y,
@@ -221,7 +251,7 @@ export function ImageCropper({
           {/* Zoom slider */}
           <div>
             <div className="flex justify-between text-xs mb-1">
-              <span className="text-muted-foreground">Zoom</span>
+              <span className="text-muted-foreground">Atur Area Crop</span>
               <span className="font-medium text-foreground">{(zoom * 100).toFixed(0)}%</span>
             </div>
             <input
@@ -235,19 +265,33 @@ export function ImageCropper({
             />
           </div>
 
-          <div className="flex gap-3">
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
             <button
-              onClick={() => setImageSrc(null)}
-              className="flex-1 py-2.5  text-sm font-medium text-muted-foreground hover:bg-muted/50 border border-border"
+              type="button"
+              onClick={() => {
+                setImageSrc(null);
+                setSelectedFile(null);
+              }}
+              className="py-2.5 px-4 text-sm font-medium text-muted-foreground hover:bg-muted/50 border border-border"
             >
               Batal
             </button>
             <button
+              type="button"
+              onClick={handleUploadOriginal}
+              disabled={uploading}
+              className="flex-1 py-2.5 px-4 text-sm font-semibold border border-accent text-accent hover:bg-accent/10 disabled:opacity-70 transition-all"
+            >
+              {uploading ? "Mengupload..." : "Upload File Asli (100% HD/4K)"}
+            </button>
+            <button
+              type="button"
               onClick={handleCropAndUpload}
               disabled={uploading}
-              className="flex-1 py-2.5  text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-70 transition-all"
+              className="flex-1 py-2.5 px-4 text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-70 transition-all"
             >
-              {uploading ? "Mengupload..." : "Crop & Upload"}
+              {uploading ? "Mengupload..." : "Crop & Upload (HD Asli)"}
             </button>
           </div>
         </div>

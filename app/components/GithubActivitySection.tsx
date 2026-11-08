@@ -85,7 +85,7 @@ export function GithubActivitySection({
             style={{
               fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontWeight: 700,
-              fontSize: "clamp(2rem, 4vw, 3rem)",
+              fontSize: "clamp(1.5rem, 2.8vw, 2rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
               lineHeight: 1.1,

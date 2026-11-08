@@ -104,7 +104,7 @@ export function ExperienceSection({
             style={{
               fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontWeight: 700,
-              fontSize: "clamp(2rem, 3.6vw, 2.75rem)",
+              fontSize: "clamp(1.5rem, 2.8vw, 2rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
               lineHeight: 1.12,
@@ -348,7 +348,7 @@ function ExperienceRowHeader({
           style={{
             fontFamily: "var(--font-plus-jakarta), sans-serif",
             fontWeight: 700,
-            fontSize: "clamp(1.25rem, 2.2vw, 1.6rem)",
+            fontSize: "clamp(1.1rem, 1.8vw, 1.35rem)",
             color: "var(--text-primary)",
             letterSpacing: "-0.015em",
             lineHeight: 1.25,

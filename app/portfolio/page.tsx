@@ -162,7 +162,7 @@ export default function PortfolioPage() {
             style={{
               fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontWeight: 700,
-              fontSize: "clamp(3rem, 6vw, 5rem)",
+              fontSize: "clamp(1.85rem, 3.5vw, 2.5rem)",
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
               lineHeight: 1.1,

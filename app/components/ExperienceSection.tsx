@@ -82,9 +82,11 @@ export function ExperienceSection({
 
   return (
     <section ref={sectionRef} className="w-full py-10 md:py-16">
-      <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
-        {/* Left Column: Sticky Editorial Header */}
-        <div className="w-full lg:w-4/12 lg:sticky lg:top-28">
+      <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-stretch">
+        {/* Left Column: Stretches to full height of section */}
+        <div className="w-full lg:w-4/12 self-stretch relative">
+          {/* Sticky Inner Header */}
+          <div className="lg:sticky lg:top-28 z-10">
           <span
             style={{
               fontFamily: "var(--font-plus-jakarta), sans-serif",
@@ -131,6 +133,7 @@ export function ExperienceSection({
             >
               /{String(items.length).padStart(2, "0")} RECORDS
             </span>
+          </div>
           </div>
         </div>
 

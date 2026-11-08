@@ -22,6 +22,7 @@ import { ChatWidget } from "./components/ChatWidget";
 import { usePortfolioData } from "../lib/hooks/usePortfolioData";
 import { useLanguage } from "../lib/contexts/LanguageContext";
 import { dictionaries } from "../lib/i18n/dictionaries";
+import { smoothScrollTo } from "@/lib/utils/smoothScroll";
 
 /**
  * Home — Halaman utama portfolio
@@ -41,6 +42,13 @@ export default function Home() {
   useEffect(() => {
     document.title = dict.metadata.title;
   }, [language, dict.metadata.title]);
+
+  // Clean any initial hash from URL to keep address bar pristine
+  useEffect(() => {
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }, []);
 
   const navRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -255,7 +263,11 @@ export default function Home() {
           <div className="flex items-center shrink-0">
             <a
               href="#"
-              className="flex items-center gap-1 group"
+              onClick={(e) => {
+                e.preventDefault();
+                smoothScrollTo(0);
+              }}
+              className="flex items-center gap-1 group cursor-pointer"
               style={{ textDecoration: "none" }}
             >
               <span
@@ -359,8 +371,12 @@ export default function Home() {
                 <a
                   key={label}
                   href={href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="px-4 py-3 text-sm  hover:bg-muted transition-colors flex items-center justify-between group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsMenuOpen(false);
+                    smoothScrollTo(href);
+                  }}
+                  className="px-4 py-3 text-sm hover:bg-muted transition-colors flex items-center justify-between group cursor-pointer"
                   style={{
                     fontFamily: "var(--font-plus-jakarta), sans-serif",
                     fontWeight: 500,
@@ -455,7 +471,7 @@ export default function Home() {
         <SectionDivider />
 
         {/* ===== EXPERIENCE SECTION ===== */}
-        <section style={{ paddingBottom: "2rem" }}>
+        <section id="experience" style={{ paddingBottom: "2rem" }}>
           <ExperienceSection
             title={dict.experience.workTitle}
             sectionNumber="04."
@@ -590,7 +606,11 @@ function NavLink({
   return (
     <a
       href={href}
-      className="px-4 py-2  transition-all duration-300"
+      onClick={(e) => {
+        e.preventDefault();
+        smoothScrollTo(href);
+      }}
+      className="px-4 py-2 transition-all duration-300 cursor-pointer"
       style={{
         fontFamily: "var(--font-plus-jakarta), system-ui, sans-serif",
         fontSize: "0.8125rem",

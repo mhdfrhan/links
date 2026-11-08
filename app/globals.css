@@ -117,10 +117,10 @@ html.light {
    ============================================================ */
 
 html {
-  scroll-behavior: auto;
+  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Theme color transition — aktif saat toggle, bukan hover */
@@ -142,7 +142,7 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   min-height: 100vh;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow-x: clip;
   width: 100%;
 }
 

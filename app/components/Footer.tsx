@@ -2,6 +2,7 @@
 
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
+import { smoothScrollTo } from "@/lib/utils/smoothScroll";
 import { SocialLink as ISocialLink, getPlatformPrefix } from "./SocialLinks";
 
 interface FooterProps {
@@ -150,7 +151,7 @@ export function Footer({
         </p>
 
         <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={() => smoothScrollTo(0)}
           className="group flex items-center gap-2"
           style={{
             fontFamily: "var(--font-plus-jakarta), sans-serif",

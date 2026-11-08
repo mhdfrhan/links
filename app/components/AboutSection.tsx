@@ -65,16 +65,10 @@ export function AboutSection({ text }: AboutSectionProps) {
 
   return (
     <section ref={containerRef} className="w-full py-8 md:py-16">
-      <div className="flex flex-col md:flex-row gap-6 md:gap-16 items-start">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-16 items-stretch">
         {/* Section label */}
-        <div className="md:w-1/4">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-            className="md:sticky md:top-24"
-          >
+        <div className="md:w-1/4 self-stretch relative">
+          <div className="md:sticky md:top-28 z-10">
             <span
               style={{
                 fontFamily: "var(--font-plus-jakarta), sans-serif",
@@ -102,7 +96,7 @@ export function AboutSection({ text }: AboutSectionProps) {
             >
               {dict.title}
             </h2>
-          </motion.div>
+          </div>
         </div>
 
         {/* Paragraph Text - Smooth Scroll Reveal */}

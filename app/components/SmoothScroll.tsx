@@ -14,7 +14,15 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     const lenis = new Lenis({
       autoRaf: false,
       smoothWheel: true,
+      duration: 1.25,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      touchMultiplier: 1.8,
     });
+
+    // Expose lenis globally for smoothScrollTo utility
+    (window as any).__lenis = lenis;
 
     // Update ScrollTrigger on Lenis scroll
     lenis.on("scroll", () => {
@@ -29,8 +37,9 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     gsap.ticker.add(updateLenis);
 
     return () => {
+      delete (window as any).__lenis;
       lenis.destroy();
-      gsap.ticker.remove(updateLenis); // Properly clean up the handler using its reference
+      gsap.ticker.remove(updateLenis);
     };
   }, []);
 

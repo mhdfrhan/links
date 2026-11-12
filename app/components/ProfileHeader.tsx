@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
@@ -81,19 +81,19 @@ export function ProfileHeader({
   const [taglineIndex, setTaglineIndex] = useState(0);
 
   // Generate words to rotate (keeps Firebase database tagline first, then transitions to others)
-  const taglineWords = (() => {
+  const taglineWords = useMemo(() => {
     const list = [cleanTagline];
-    
+
     // Add the user requested taglines
     list.push("UI/UX Designer", "Mobile Developer");
-    
+
     if (language === "id") {
       list.push("Programmer Kreatif");
     } else {
       list.push("Creative Programmer");
     }
     return Array.from(new Set(list));
-  })();
+  }, [cleanTagline, language]);
 
   useEffect(() => {
     if (taglineWords.length <= 1) return;
@@ -101,7 +101,7 @@ export function ProfileHeader({
       setTaglineIndex((prev) => (prev + 1) % taglineWords.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [taglineWords]);
+  }, [taglineWords.length]);
 
   // GSAP Entrance + Smooth Hero Banner Parallax on Scroll
   useGSAP(
@@ -150,32 +150,46 @@ export function ProfileHeader({
   return (
     <section ref={containerRef} className="w-full relative pt-8 md:pt-16 z-10">
       {/* Massive Typography Hero */}
-      <h1 
+      <h1
         className="hero-text"
         style={{
           fontFamily: "var(--font-plus-jakarta), sans-serif",
           fontWeight: 700,
           fontSize: "clamp(2.25rem, 8vw, 4.75rem)",
-          lineHeight: 1.1,
+          lineHeight: 1.08,
           color: "var(--text-primary)",
           letterSpacing: "-0.02em",
-          maxWidth: "1000px",
+          maxWidth: "100%",
           marginBottom: "1.5rem",
-          textWrap: "balance"
         }}
       >
-        {name} <br/>
-        <span className="min-h-[2.2em] md:min-h-0" style={{ color: "var(--accent)", display: "inline-grid", gridTemplateColumns: "1fr", justifyItems: "start", alignItems: "start" }}>
-          <AnimatePresence mode="wait">
+        <span className="block">{name}</span>
+        <span
+          className="block mt-1 min-h-[2.3em] sm:min-h-[1.2em]"
+          style={{
+            color: "var(--accent)",
+            fontSize: "clamp(1.6rem, 5vw, 3.75rem)",
+            lineHeight: 1.15,
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            justifyItems: "start",
+            alignItems: "start",
+          }}
+        >
+          <AnimatePresence initial={false}>
             <motion.span
-              key={taglineIndex}
-              initial={{ y: 15, opacity: 0, filter: "blur(4px)" }}
+              key={taglineIndex % taglineWords.length}
+              initial={{ y: 18, opacity: 0, filter: "blur(5px)" }}
               animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-              exit={{ y: -15, opacity: 0, filter: "blur(4px)" }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              style={{ gridArea: "1/1/2/2", whiteSpace: "normal", wordBreak: "keep-all" }}
+              exit={{ y: -18, opacity: 0, filter: "blur(5px)" }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="sm:whitespace-nowrap"
+              style={{
+                gridArea: "1/1/2/2",
+                wordBreak: "keep-all",
+              }}
             >
-              {taglineWords[taglineIndex]}
+              {taglineWords[taglineIndex % taglineWords.length]}
             </motion.span>
           </AnimatePresence>
         </span>

@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { AboutSection } from "./components/AboutSection";
 import { RunningText } from "./components/RunningText";
@@ -19,6 +16,7 @@ import { SoftwareAgencyCta } from "./components/SoftwareAgencyCta";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { LanguageToggle } from "./components/LanguageToggle";
 import { ChatWidget } from "./components/ChatWidget";
+import { RulerNav, type RulerSection } from "./components/RulerNav";
 import { usePortfolioData } from "../lib/hooks/usePortfolioData";
 import { useLanguage } from "../lib/contexts/LanguageContext";
 import { dictionaries } from "../lib/i18n/dictionaries";
@@ -52,9 +50,18 @@ export default function Home() {
 
   const navRef = useRef<HTMLElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const [navScrolled, setNavScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const rulerSections: RulerSection[] = useMemo(
+    () => [
+      { id: "about", href: "#about", label: dict.nav.about, code: "01" },
+      { id: "projects", href: "#projects", label: dict.nav.projects, code: "02" },
+      { id: "skills", href: "#skills", label: dict.nav.skills, code: "03" },
+      { id: "experience", href: "#experience", label: dict.nav.experience, code: "04" },
+      { id: "contact", href: "#contact", label: dict.nav.contact, code: "05" },
+    ],
+    [dict.nav],
+  );
 
   // Helper untuk mengambil field bahasa
   const l = (item: any, field: string, fallback: string = "") => {
@@ -63,73 +70,6 @@ export default function Home() {
       ? item[`${field}_en`]
       : item[field] || fallback;
   };
-
-  // Close menu on resize to desktop
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 640) setIsMenuOpen(false);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Close menu on click outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMenuOpen &&
-        navRef.current &&
-        !navRef.current.contains(event.target as Node)
-      ) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMenuOpen]);
-
-  // Animasi Mobile Menu
-  useGSAP(
-    () => {
-      if (!mobileMenuRef.current) return;
-
-      if (isMenuOpen) {
-        gsap.fromTo(
-          mobileMenuRef.current,
-          {
-            opacity: 0,
-            y: -10,
-            scale: 0.95,
-            pointerEvents: "none",
-            display: "none",
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            pointerEvents: "auto",
-            display: "block",
-            duration: 0.2,
-            ease: "power2.out",
-          },
-        );
-      } else {
-        gsap.to(mobileMenuRef.current, {
-          opacity: 0,
-          y: -10,
-          scale: 0.95,
-          pointerEvents: "none",
-          duration: 0.15,
-          ease: "power2.in",
-          onComplete: () => {
-            if (mobileMenuRef.current)
-              mobileMenuRef.current.style.display = "none";
-          },
-        });
-      }
-    },
-    { dependencies: [isMenuOpen] },
-  );
 
   // Nav scroll effect + zero-rerender GPU progress line
   useEffect(() => {
@@ -255,22 +195,19 @@ export default function Home() {
       {/* Grain overlay — opacity 0.02, hampir tidak terlihat */}
       <div className="grain-overlay" aria-hidden="true" />
 
-      {/* ==================== NAVBAR ==================== */}
-      <nav
+      {/* ==================== MINIMAL TOP UTILITY BAR ==================== */}
+      <header
         ref={navRef}
         className="fixed top-0 left-0 right-0 z-50 transition-colors duration-200 pointer-events-auto"
         style={{
-          background:
-            navScrolled || isMenuOpen
-              ? "color-mix(in srgb, var(--bg-primary) 90%, transparent)"
-              : "transparent",
-          backdropFilter: navScrolled || isMenuOpen ? "blur(8px)" : "none",
-          WebkitBackdropFilter:
-            navScrolled || isMenuOpen ? "blur(8px)" : "none",
-          borderBottom:
-            navScrolled || isMenuOpen
-              ? "1px solid var(--border)"
-              : "1px solid transparent",
+          background: navScrolled
+            ? "color-mix(in srgb, var(--bg-primary) 90%, transparent)"
+            : "transparent",
+          backdropFilter: navScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: navScrolled ? "blur(8px)" : "none",
+          borderBottom: navScrolled
+            ? "1px solid var(--border)"
+            : "1px solid transparent",
         }}
       >
         <div
@@ -307,27 +244,11 @@ export default function Home() {
             </a>
           </div>
 
-          {/* MIDDLE: Desktop Nav Links */}
-          <div className="hidden md:flex items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 gap-2">
-            {(
-              [
-                [dict.nav.about, "#about"],
-                [dict.nav.projects, "#projects"],
-                [dict.nav.skills, "#skills"],
-                [dict.nav.contact, "#contact"],
-              ] as const
-            ).map(([label, href]) => (
-              <NavLink key={label} href={href}>
-                {label}
-              </NavLink>
-            ))}
-          </div>
-
-          {/* RIGHT: Toggles & Mobile Menu */}
+          {/* RIGHT: Utility Controls */}
           <div className="flex items-center gap-2 shrink-0">
-            <div className="hidden sm:flex items-center gap-2 mr-2">
+            <div className="hidden sm:flex items-center gap-2 mr-1">
               <div
-                className="flex items-center gap-2 px-3 py-1.5  border border-border/50 bg-background/30"
+                className="flex items-center gap-2 px-3 py-1.5 border border-border/50 bg-background/30"
                 title="Available for work"
               >
                 <span
@@ -347,82 +268,10 @@ export default function Home() {
                 </span>
               </div>
               <div className="h-4 w-[1px] bg-border mx-1" />
-              <LanguageToggle />
             </div>
 
-            {/* Common Theme Toggle */}
+            <LanguageToggle />
             <ThemeToggle />
-
-            {/* Mobile Hamburger Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex md:hidden items-center justify-center w-10 h-10  border border-border bg-card hover:bg-muted transition-colors focus:outline-none ml-1"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? (
-                <XMarkIcon className="w-5 h-5 text-foreground" />
-              ) : (
-                <Bars3Icon className="w-5 h-5 text-foreground" />
-              )}
-            </button>
-          </div>
-
-          {/* MOBILE DROPDOWN MENU */}
-          <div
-            ref={mobileMenuRef}
-            className="absolute top-[calc(100%+12px)] right-6 w-[240px] bg-card border border-border shadow-2xl p-2 z-50 hidden md:hidden"
-            style={{
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-            }}
-          >
-            <div className="flex flex-col gap-1">
-              {(
-                [
-                  [dict.nav.about, "#about"],
-                  [dict.nav.projects, "#projects"],
-                  [dict.nav.skills, "#skills"],
-                  [dict.nav.contact, "#contact"],
-                ] as const
-              ).map(([label, href]) => (
-                <a
-                  key={label}
-                  href={href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsMenuOpen(false);
-                    smoothScrollTo(href);
-                  }}
-                  className="px-4 py-3 text-sm hover:bg-muted transition-colors flex items-center justify-between group cursor-pointer"
-                  style={{
-                    fontFamily: "var(--font-plus-jakarta), sans-serif",
-                    fontWeight: 500,
-                    color: "var(--text-muted)",
-                    textDecoration: "none",
-                  }}
-                >
-                  {label}
-                  <span
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px]"
-                    style={{ color: "var(--accent)" }}
-                  >
-                    →
-                  </span>
-                </a>
-              ))}
-
-              <div className="h-[1px] bg-border/50 my-2 mx-2" />
-
-              <div className="px-4 py-2 flex items-center justify-between">
-                <span
-                  className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold"
-                  style={{ color: "var(--text-muted)", fontFamily: "var(--font-plus-jakarta), sans-serif" }}
-                >
-                  {dict.misc.languageLabel}
-                </span>
-                <LanguageToggle />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -440,10 +289,13 @@ export default function Home() {
             }}
           />
         </div>
-      </nav>
+      </header>
+
+      {/* ==================== RIGHT DESIGNER RULER & MOBILE DIAL NAV ==================== */}
+      <RulerNav sections={rulerSections} />
 
       {/* ==================== MAIN CONTENT ==================== */}
-      <main className="max-w-[1080px] mx-auto px-[1.5rem] pt-[150px] sm:pt-24 pb-0">
+      <main className="max-w-[1080px] mx-auto px-[1.5rem] md:pr-16 lg:pr-[168px] min-[1440px]:px-[1.5rem] pt-24 pb-0">
         {/* ===== HERO SECTION ===== */}
         <section id="about" style={{ paddingBottom: "2rem" }}>
           <ProfileHeader
@@ -624,40 +476,6 @@ export default function Home() {
 
       <ChatWidget />
     </div>
-  );
-}
-
-/* ---- Navbar Link (GPU underline micro-interaction) ---- */
-function NavLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      onClick={(e) => {
-        e.preventDefault();
-        smoothScrollTo(href);
-      }}
-      className="group relative px-4 py-2 transition-colors duration-200 cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-      style={{
-        fontFamily: "var(--font-plus-jakarta), system-ui, sans-serif",
-        fontSize: "0.8125rem",
-        fontWeight: 500,
-        textDecoration: "none",
-        fontStyle: "normal",
-      }}
-    >
-      <span>{children}</span>
-      <span
-        aria-hidden="true"
-        className="gpu-sweep-bar absolute left-4 right-4 bottom-1.5 h-[1px]"
-        style={{ background: "var(--accent)" }}
-      />
-    </a>
   );
 }
 

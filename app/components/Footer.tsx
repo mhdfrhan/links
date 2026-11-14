@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
@@ -67,7 +68,7 @@ export function Footer({
           }}
         >
           <span className="w-1.5 h-1.5 inline-block" style={{ background: "var(--accent)" }} />
-          // {language === "id" ? "TERBUKA UNTUK KOLABORASI" : "OPEN FOR COLLABORATION"}
+          {"//"} {language === "id" ? "TERBUKA UNTUK KOLABORASI" : "OPEN FOR COLLABORATION"}
         </span>
 
         <h2
@@ -171,39 +172,52 @@ export function Footer({
           © {currentYear} {name}. {dict.copyright}
         </p>
 
-        <button
-          onClick={() => smoothScrollTo(0)}
-          className="group flex items-center gap-2"
-          style={{
-            fontFamily: "var(--font-plus-jakarta), sans-serif",
-            fontSize: "0.75rem",
-            fontWeight: 700,
-            color: "var(--text-secondary)",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            transition: "color 0.2s ease",
-            padding: "0.5rem 0",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = "var(--accent)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
-          }}
-        >
-          <span>back to top</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-3.5 h-3.5 transform group-hover:-translate-y-0.5 transition-transform duration-200"
+        <div className="flex items-center gap-5">
+          <Link
+            href="/games/race"
+            className="text-xs font-medium tracking-wider text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors no-underline"
+            style={{
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+            }}
+            title={language === "id" ? "Buka Mini Game 3D Balap AI" : "Launch 3D AI Racing Mini Game"}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
-          </svg>
-        </button>
+            {language === "id" ? "mini game 3d ↗" : "3d mini game ↗"}
+          </Link>
+
+          <button
+            onClick={() => smoothScrollTo(0)}
+            className="group flex items-center gap-2"
+            style={{
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              color: "var(--text-secondary)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              transition: "color 0.2s ease",
+              padding: "0.5rem 0",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.color = "var(--accent)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+            }}
+          >
+            <span>back to top</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-3.5 h-3.5 transform group-hover:-translate-y-0.5 transition-transform duration-200"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+            </svg>
+          </button>
+        </div>
       </div>
     </footer>
   );

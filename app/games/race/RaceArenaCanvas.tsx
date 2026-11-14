@@ -28,12 +28,16 @@ import {
   normalizeAngle,
 } from "@/lib/games/raceTrack";
 import {
+  type CameraLookState,
   type ControlInput,
   type RacerState,
+  computeCameraLookFactors,
+  createInitialCameraLookState,
   createInitialRacers,
   resolveCarCollisions,
   sortRaceStandings,
   stepAiDecision,
+  stepCameraLook,
   stepCarPhysics,
 } from "@/lib/games/raceEngine";
 import { F1AudioController } from "@/lib/games/racingAudio";
@@ -809,6 +813,9 @@ function RaceWorld({
     right: false,
     drift: false,
     boost: false,
+    lookLeft: false,
+    lookRight: false,
+    lookBack: false,
   });
 
   useEffect(() => {
@@ -821,6 +828,9 @@ function RaceWorld({
       k.right = false;
       k.drift = false;
       k.boost = false;
+      k.lookLeft = false;
+      k.lookRight = false;
+      k.lookBack = false;
     }
   }, [phase]);
 
@@ -831,8 +841,12 @@ function RaceWorld({
   const camPosRef = useRef(new THREE.Vector3());
   const camTargetRef = useRef(new THREE.Vector3());
   const camHeadingRef = useRef(0);
-  const desiredCamPos = useRef(new THREE.Vector3());
-  const desiredCamTarget = useRef(new THREE.Vector3());
+  const camLookStateRef = useRef<CameraLookState>(createInitialCameraLookState());
+  const camChaseDistRef = useRef(6.2);
+  const camChaseHeightRef = useRef(2.28);
+  const camCornerSwingRef = useRef(0);
+  const camTargetLeadRef = useRef(0);
+  const camAnchorYRef = useRef(0);
 
   // Initialize Web Audio F1 Engine controller & unlock on user interaction
   useEffect(() => {
@@ -872,6 +886,12 @@ function RaceWorld({
     const player = fresh.find((r) => r.isPlayer)!;
     const fwd = forwardFromHeading(player.heading);
     camHeadingRef.current = player.heading;
+    camLookStateRef.current = createInitialCameraLookState();
+    camChaseDistRef.current = 6.2;
+    camChaseHeightRef.current = 2.28;
+    camCornerSwingRef.current = 0;
+    camTargetLeadRef.current = 0;
+    camAnchorYRef.current = player.y;
     camPosRef.current.set(player.x - fwd.x * 6.5, player.y + 2.4, player.z - fwd.z * 6.5);
     camTargetRef.current.set(player.x + fwd.x * 6.8, player.y + 0.88, player.z + fwd.z * 6.8);
     queueMicrotask(() => {
@@ -879,7 +899,7 @@ function RaceWorld({
     });
   }, [runId]);
 
-  // Keyboard controls
+  // Keyboard controls (WASD for driving; Arrow Left/Right/Down for smooth camera look)
   useEffect(() => {
     const k = keyInputRef.current;
 
@@ -887,20 +907,31 @@ function RaceWorld({
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       switch (e.code) {
         case "KeyW":
-        case "ArrowUp":
           k.throttleUp = true;
           break;
         case "KeyS":
-        case "ArrowDown":
           k.throttleDown = true;
           break;
         case "KeyA":
-        case "ArrowLeft":
           k.left = true;
           break;
         case "KeyD":
-        case "ArrowRight":
           k.right = true;
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          k.lookLeft = true;
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          k.lookRight = true;
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          k.lookBack = true;
+          break;
+        case "ArrowUp":
+          e.preventDefault();
           break;
         case "ShiftLeft":
         case "ShiftRight":
@@ -919,20 +950,25 @@ function RaceWorld({
     const onKeyUp = (e: KeyboardEvent) => {
       switch (e.code) {
         case "KeyW":
-        case "ArrowUp":
           k.throttleUp = false;
           break;
         case "KeyS":
-        case "ArrowDown":
           k.throttleDown = false;
           break;
         case "KeyA":
-        case "ArrowLeft":
           k.left = false;
           break;
         case "KeyD":
-        case "ArrowRight":
           k.right = false;
+          break;
+        case "ArrowLeft":
+          k.lookLeft = false;
+          break;
+        case "ArrowRight":
+          k.lookRight = false;
+          break;
+        case "ArrowDown":
+          k.lookBack = false;
           break;
         case "ShiftLeft":
         case "ShiftRight":
@@ -951,6 +987,9 @@ function RaceWorld({
       k.right = false;
       k.drift = false;
       k.boost = false;
+      k.lookLeft = false;
+      k.lookRight = false;
+      k.lookBack = false;
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -1448,10 +1487,24 @@ function RaceWorld({
       muted,
     });
 
-    // Multi-angle configurable camera system with impact shake, G-force lean & visor shock
+    // Multi-angle configurable camera system with impact shake, G-force lean & smooth Arrow-key look
     const camCfg = cameraSettingsRef.current;
     const presetChanged = prevPresetRef.current !== camCfg.preset;
     prevPresetRef.current = camCfg.preset;
+
+    if (curPhase === "idle" || curPhase === "paused") {
+      camLookStateRef.current = createInitialCameraLookState();
+    } else {
+      const k = keyInputRef.current;
+      stepCameraLook(
+        camLookStateRef.current,
+        { left: k.lookLeft, right: k.lookRight, back: k.lookBack },
+        dt
+      );
+    }
+
+    const lookYaw = camLookStateRef.current.yaw;
+    const { forwardWeight, sideFactor, rearFactor, sideSign } = computeCameraLookFactors(lookYaw);
 
     const speedRatio = Math.min(1, player.speed / 45);
     const cam = camRef.current;
@@ -1462,14 +1515,19 @@ function RaceWorld({
 
     if (camCfg.preset === "cockpit" || camCfg.preset === "tcam") {
       const isCockpit = camCfg.preset === "cockpit";
-      const gPullZ = Math.max(-0.04, Math.min(0.06, -player.visualPitch * 0.85));
+      const gPullZ = Math.max(-0.04, Math.min(0.06, -player.visualPitch * 0.85)) * forwardWeight;
+      // Lift & shift cleanly above the airbox / roll hoop as head sweeps toward rear 180 deg
+      const localX = impactJitterX * 0.22 + sideSign * sideFactor * (isCockpit ? 0.085 : 0.05);
       const localY =
         (isCockpit ? 0.90 + camCfg.heightOffset * 0.45 : 1.24 + camCfg.heightOffset * 0.55) +
+        rearFactor * (isCockpit ? 0.62 : 0.34) +
         impactJitterY * 0.35;
       const localZ =
         (isCockpit ? -0.28 - camCfg.distanceOffset * 0.16 : 0.22 - camCfg.distanceOffset * 0.22) +
+        rearFactor * (isCockpit ? 0.85 : 0.30) +
         gPullZ;
-      const apexGlanceX = player.steerAngle * (isCockpit ? 3.8 : 2.2) + impactJitterX * 1.4;
+      const apexGlanceX =
+        player.steerAngle * (isCockpit ? 3.8 : 2.2) * forwardWeight + impactJitterX * 1.4;
 
       camEulerTmp.current.set(player.visualPitch * 0.46, player.heading, 0, "YXZ");
       camQuatTmp.current.setFromEuler(camEulerTmp.current);
@@ -1478,30 +1536,27 @@ function RaceWorld({
       const highSpeedBuzz =
         player.speed > 35 ? (Math.random() - 0.5) * Math.min(0.014, (player.speed - 35) * 0.0008) : 0;
 
-      camLocalPosTmp.current
-        .set(impactJitterX * 0.22, localY + shakeY, localZ)
-        .applyQuaternion(camQuatTmp.current);
-      camLocalTargetTmp.current
-        .set(
-          apexGlanceX + highSpeedBuzz,
-          isCockpit ? 0.56 + camCfg.heightOffset * 0.2 : 0.52 + camCfg.heightOffset * 0.2,
-          -20
-        )
-        .applyQuaternion(camQuatTmp.current);
+      const lookDist = 20;
+      const localLookX = -Math.sin(lookYaw) * lookDist + apexGlanceX + highSpeedBuzz;
+      const localLookZ = -Math.cos(lookYaw) * lookDist;
+      const localLookY =
+        (isCockpit ? 0.56 + camCfg.heightOffset * 0.2 : 0.52 + camCfg.heightOffset * 0.2) +
+        sideFactor * 0.32 +
+        rearFactor * 0.62;
 
-      desiredCamPos.current.set(
+      camLocalPosTmp.current.set(localX, localY + shakeY, localZ).applyQuaternion(camQuatTmp.current);
+      camLocalTargetTmp.current.set(localLookX, localLookY, localLookZ).applyQuaternion(camQuatTmp.current);
+
+      camPosRef.current.set(
         player.x + camLocalPosTmp.current.x + camKnockRef.current.x * 0.32,
         player.y + camLocalPosTmp.current.y + camKnockRef.current.y * 0.3,
         player.z + camLocalPosTmp.current.z + camKnockRef.current.z * 0.32
       );
-      desiredCamTarget.current.set(
+      camTargetRef.current.set(
         player.x + camLocalTargetTmp.current.x,
         player.y + camLocalTargetTmp.current.y,
         player.z + camLocalTargetTmp.current.z
       );
-
-      camPosRef.current.copy(desiredCamPos.current);
-      camTargetRef.current.copy(desiredCamTarget.current);
       camHeadingRef.current = player.heading;
 
       if (cam) {
@@ -1529,44 +1584,67 @@ function RaceWorld({
       camHeadingRef.current = normalizeAngle(
         camHeadingRef.current + camHeadingDiff * Math.min(1, dt * (isWide ? 5.2 : 6.4))
       );
-      const camFwd = forwardFromHeading(camHeadingRef.current);
-      const camRightX = -camFwd.z;
-      const camRightZ = camFwd.x;
 
       const baseDist = isWide ? 9.4 : 6.2;
       const baseHeight = isWide ? 3.45 : 2.28;
-      const chaseDist =
-        baseDist +
-        camCfg.distanceOffset * (isWide ? 1.15 : 1.0) +
-        speedRatio * (isWide ? 0.95 : 0.78) +
-        (player.isBoosting ? 0.8 : 0) +
-        Math.max(0, playerThrottle) * 0.28 -
-        (player.isBraking ? 0.34 : 0);
-      const chaseHeight =
-        baseHeight + camCfg.heightOffset + speedRatio * 0.14 + (player.isBoosting ? 0.12 : 0);
-      const cornerSwing = -player.steerAngle * speedRatio * (isWide ? 1.0 : 1.35);
-      const curbShake = player.onCurb && player.speed > 12 ? (Math.random() - 0.5) * 0.048 : 0;
-
-      desiredCamPos.current.set(
-        player.x - camFwd.x * chaseDist + camRightX * cornerSwing + curbShake + impactJitterX + camKnockRef.current.x,
-        player.y + chaseHeight + curbShake + impactJitterY + camKnockRef.current.y,
-        player.z - camFwd.z * chaseDist + camRightZ * cornerSwing + camKnockRef.current.z
-      );
-      desiredCamTarget.current.set(
-        player.x + camFwd.x * (isWide ? 9.5 : 6.8) + camRightX * (player.steerAngle * speedRatio * 1.1) + impactJitterX * 0.55,
-        player.y + 0.88 + impactJitterY * 0.45,
-        player.z + camFwd.z * (isWide ? 9.5 : 6.8) + camRightZ * (player.steerAngle * speedRatio * 1.1)
-      );
+      const targetChaseDist =
+        (baseDist +
+          camCfg.distanceOffset * (isWide ? 1.15 : 1.0) +
+          speedRatio * (isWide ? 1.85 : 1.55) +
+          (player.isBoosting ? 0.95 : 0) +
+          Math.max(0, playerThrottle) * 0.28 -
+          (player.isBraking ? 0.34 : 0)) *
+        (1 - rearFactor * 0.08);
+      const targetChaseHeight =
+        baseHeight +
+        camCfg.heightOffset +
+        speedRatio * 0.14 +
+        (player.isBoosting ? 0.12 : 0) +
+        rearFactor * 0.34;
+      const targetCornerSwing =
+        -player.steerAngle * speedRatio * (isWide ? 1.0 : 1.35) * forwardWeight;
+      const targetLead = player.steerAngle * speedRatio * 1.1 * forwardWeight;
 
       if (presetChanged || curPhase === "idle" || curPhase === "paused") {
-        camPosRef.current.copy(desiredCamPos.current);
-        camTargetRef.current.copy(desiredCamTarget.current);
+        camChaseDistRef.current = targetChaseDist;
+        camChaseHeightRef.current = targetChaseHeight;
+        camCornerSwingRef.current = targetCornerSwing;
+        camTargetLeadRef.current = targetLead;
+        camAnchorYRef.current = player.y;
       } else {
-        const posAlpha = 1 - Math.exp(-8.8 * dt);
-        const lookAlpha = 1 - Math.exp(-12.0 * dt);
-        camPosRef.current.lerp(desiredCamPos.current, posAlpha);
-        camTargetRef.current.lerp(desiredCamTarget.current, lookAlpha);
+        const paramAlpha = 1 - Math.exp(-9.0 * dt);
+        const yAlpha = 1 - Math.exp(-14.0 * dt);
+        camChaseDistRef.current += (targetChaseDist - camChaseDistRef.current) * paramAlpha;
+        camChaseHeightRef.current += (targetChaseHeight - camChaseHeightRef.current) * paramAlpha;
+        camCornerSwingRef.current += (targetCornerSwing - camCornerSwingRef.current) * paramAlpha;
+        camTargetLeadRef.current += (targetLead - camTargetLeadRef.current) * paramAlpha;
+        camAnchorYRef.current += (player.y - camAnchorYRef.current) * yAlpha;
       }
+
+      const viewHeading = camHeadingRef.current + lookYaw;
+      const camFwd = forwardFromHeading(viewHeading);
+      const camRightX = -camFwd.z;
+      const camRightZ = camFwd.x;
+      const curbShake = player.onCurb && player.speed > 12 ? (Math.random() - 0.5) * 0.048 : 0;
+
+      camPosRef.current.set(
+        player.x -
+          camFwd.x * camChaseDistRef.current +
+          camRightX * camCornerSwingRef.current +
+          curbShake +
+          impactJitterX +
+          camKnockRef.current.x,
+        camAnchorYRef.current + camChaseHeightRef.current + curbShake + impactJitterY + camKnockRef.current.y,
+        player.z -
+          camFwd.z * camChaseDistRef.current +
+          camRightZ * camCornerSwingRef.current +
+          camKnockRef.current.z
+      );
+      camTargetRef.current.set(
+        player.x + camFwd.x * (isWide ? 9.5 : 6.8) + camRightX * camTargetLeadRef.current + impactJitterX * 0.55,
+        camAnchorYRef.current + 0.88 + rearFactor * 0.22 + impactJitterY * 0.45,
+        player.z + camFwd.z * (isWide ? 9.5 : 6.8) + camRightZ * camTargetLeadRef.current
+      );
 
       if (cam) {
         cam.up.set(0, 1, 0);

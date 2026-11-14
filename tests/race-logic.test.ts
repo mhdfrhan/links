@@ -13,12 +13,15 @@ import {
 } from "../lib/games/raceTrack.ts";
 import {
   calculateRaceScore,
+  computeCameraLookFactors,
   computeGearAndRpm,
+  createInitialCameraLookState,
   createInitialRacers,
   formatRaceTime,
   resolveCarCollisions,
   sortRaceStandings,
   stepAiDecision,
+  stepCameraLook,
   stepCarPhysics,
 } from "../lib/games/raceEngine.ts";
 
@@ -277,4 +280,59 @@ test("gearbox hysteresis and empty-nitro lockout prevent 6<->7 flapping and boos
     }
   }
   assert.equal(car.boostExhausted, true);
+});
+
+test("camera look springs smoothly for left, right, back arrows and returns without overshoot", () => {
+  const cam = createInitialCameraLookState();
+  assert.equal(cam.yaw, 0);
+
+  // Hold ArrowLeft -> smooth monotonic rise toward +PI/2 without overshoot
+  let prev = cam.yaw;
+  for (let i = 0; i < 60; i++) {
+    stepCameraLook(cam, { left: true, right: false, back: false }, 1 / 60);
+    assert.ok(cam.yaw >= prev - 1e-6);
+    assert.ok(cam.yaw <= Math.PI * 0.5 + 1e-6);
+    prev = cam.yaw;
+  }
+  assert.ok(Math.abs(cam.yaw - Math.PI * 0.5) < 0.005);
+
+  const sideFactors = computeCameraLookFactors(cam.yaw);
+  assert.ok(sideFactors.sideFactor > 0.99);
+  assert.equal(sideFactors.sideSign, -1);
+
+  // Switch cleanly to ArrowRight -> smooth curve toward -PI/2
+  for (let i = 0; i < 60; i++) {
+    stepCameraLook(cam, { left: false, right: true, back: false }, 1 / 60);
+  }
+  assert.ok(Math.abs(cam.yaw + Math.PI * 0.5) < 0.005);
+  assert.equal(cam.backSign, -1);
+
+  // Transition directly from Right to ArrowDown -> swings along shorter right flank to -PI
+  for (let i = 0; i < 60; i++) {
+    stepCameraLook(cam, { left: false, right: false, back: true }, 1 / 60);
+    assert.ok(cam.yaw <= 0);
+  }
+  assert.ok(Math.abs(cam.yaw + Math.PI) < 0.01);
+
+  const rearFactors = computeCameraLookFactors(cam.yaw);
+  assert.ok(rearFactors.rearFactor > 0.99);
+  assert.ok(rearFactors.forwardWeight < 1e-6);
+
+  // Release -> returns smoothly back to center (0) along same arc without wrapping jump
+  prev = cam.yaw;
+  for (let i = 0; i < 75; i++) {
+    stepCameraLook(cam, { left: false, right: false, back: false }, 1 / 60);
+    assert.ok(cam.yaw >= prev - 1e-6);
+    assert.ok(cam.yaw <= 1e-6);
+    prev = cam.yaw;
+  }
+  assert.equal(cam.yaw, 0);
+
+  // Simultaneous Left + Right cancels cleanly back toward center
+  stepCameraLook(cam, { left: true, right: false, back: false }, 1 / 60);
+  assert.ok(cam.yaw > 0);
+  for (let i = 0; i < 60; i++) {
+    stepCameraLook(cam, { left: true, right: true, back: false }, 1 / 60);
+  }
+  assert.equal(cam.yaw, 0);
 });

@@ -439,115 +439,38 @@ export default function RaceArenaPage() {
             )}
           </div>
 
-          {/* Right: Camera Switch, Pause, Best Score, Restart & Minimap */}
-          <div className="pointer-events-auto flex items-start gap-2">
-            <div className="hidden flex-col items-end gap-1.5 sm:flex">
-              <div className="flex items-center gap-2">
-                {bestTimeMs > 0 && (
-                  <div className="border px-2.5 py-1 text-[11px] font-medium tabular-nums backdrop-blur-md" style={surfaceStyle}>
-                    <span className="mr-1.5" style={{ color: "var(--text-secondary)" }}>
-                      BEST
-                    </span>
-                    <span style={{ color: "var(--accent)" }}>{formatRaceTime(bestTimeMs)}</span>
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={handleCycleCamera}
-                  title={language === "id" ? "Ganti Kamera (C)" : "Cycle Camera (C)"}
-                  className="flex h-8 cursor-pointer items-center gap-1.5 border px-2.5 text-[11px] font-bold tracking-wider uppercase transition-colors hover:border-[var(--accent)] backdrop-blur-md"
-                  style={surfaceStyle}
-                >
-                  <VideoCameraIcon className="h-3.5 w-3.5" style={{ color: "var(--accent)" }} />
-                  <span>{CAMERA_META[cameraSettings.preset].enLabel}</span>
-                  <span style={{ color: "var(--text-muted)" }}>[C]</span>
-                </button>
-                {(phase === "racing" || phase === "countdown" || phase === "paused") && (
-                  <button
-                    type="button"
-                    onClick={handleTogglePause}
-                    title={language === "id" ? "Pause / Pengaturan (Esc)" : "Pause / Settings (Esc)"}
-                    aria-label={language === "id" ? "Pause game" : "Pause game"}
-                    className="flex h-8 w-8 cursor-pointer items-center justify-center border transition-colors hover:border-[var(--accent)] backdrop-blur-md"
-                    style={surfaceStyle}
-                  >
-                    <PauseIcon className="h-4 w-4" />
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={handleRestart}
-                  title={language === "id" ? "Ulangi Balapan (R)" : "Restart Race (R)"}
-                  aria-label={language === "id" ? "Ulangi balapan" : "Restart race"}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center border transition-colors hover:border-[var(--accent)] backdrop-blur-md"
-                  style={surfaceStyle}
-                >
-                  <ArrowPathIcon className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* SVG Live Minimap */}
-              <div className="border p-1.5 backdrop-blur-md" style={surfaceStyle}>
-                <svg width={MINIMAP_SIZE} height={MINIMAP_SIZE} viewBox={`0 0 ${MINIMAP_SIZE} ${MINIMAP_SIZE}`}>
-                  <path
-                    d={MINIMAP_PATH}
-                    fill="none"
-                    stroke="var(--border)"
-                    strokeWidth={6}
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d={MINIMAP_PATH}
-                    fill="none"
-                    stroke="var(--text-muted)"
-                    strokeWidth={1.5}
-                    strokeLinejoin="round"
-                  />
-                  {telemetry.racers.map((r) => {
-                    const pt = mapPointToSvg(r.x, r.z, MINIMAP_SIZE, MINIMAP_SIZE, 12);
-                    return (
-                      <g key={r.id}>
-                        {r.isPlayer && (
-                          <circle
-                            cx={pt.cx}
-                            cy={pt.cy}
-                            r={6}
-                            fill="none"
-                            stroke="#ed5d31"
-                            strokeWidth={1.5}
-                            opacity={0.7}
-                          />
-                        )}
-                        <circle
-                          cx={pt.cx}
-                          cy={pt.cy}
-                          r={r.isPlayer ? 4 : 3}
-                          fill={r.color}
-                        />
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 sm:hidden">
+          {/* Right: Camera Switch, Pause, Best Score, Restart & Compact Live Minimap */}
+          <div className="pointer-events-none flex flex-col items-end gap-1.5">
+            <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2">
+              {bestTimeMs > 0 && (
+                <div className="hidden border px-2.5 py-1 text-[11px] font-medium tabular-nums backdrop-blur-md sm:block" style={surfaceStyle}>
+                  <span className="mr-1.5" style={{ color: "var(--text-secondary)" }}>
+                    BEST
+                  </span>
+                  <span style={{ color: "var(--accent)" }}>{formatRaceTime(bestTimeMs)}</span>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={handleCycleCamera}
+                title={language === "id" ? "Ganti Kamera (C)" : "Cycle Camera (C)"}
                 aria-label={language === "id" ? "Ganti kamera" : "Switch camera"}
-                className="flex h-8 cursor-pointer items-center gap-1 border px-2 text-[10px] font-bold uppercase backdrop-blur-md"
+                className="flex h-8 cursor-pointer items-center gap-1 border px-2 text-[10px] font-bold tracking-wider uppercase transition-colors hover:border-[var(--accent)] backdrop-blur-md sm:gap-1.5 sm:px-2.5 sm:text-[11px]"
                 style={surfaceStyle}
               >
                 <VideoCameraIcon className="h-3.5 w-3.5" style={{ color: "var(--accent)" }} />
                 <span>{CAMERA_META[cameraSettings.preset].enLabel}</span>
+                <span className="hidden sm:inline" style={{ color: "var(--text-muted)" }}>
+                  [C]
+                </span>
               </button>
               {(phase === "racing" || phase === "countdown" || phase === "paused") && (
                 <button
                   type="button"
                   onClick={handleTogglePause}
-                  aria-label={language === "id" ? "Jeda balapan" : "Pause race"}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center border backdrop-blur-md"
+                  title={language === "id" ? "Pause / Pengaturan (Esc)" : "Pause / Settings (Esc)"}
+                  aria-label={language === "id" ? "Pause game" : "Pause game"}
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center border transition-colors hover:border-[var(--accent)] backdrop-blur-md"
                   style={surfaceStyle}
                 >
                   <PauseIcon className="h-4 w-4" />
@@ -556,12 +479,66 @@ export default function RaceArenaPage() {
               <button
                 type="button"
                 onClick={handleRestart}
+                title={language === "id" ? "Ulangi Balapan (R)" : "Restart Race (R)"}
                 aria-label={language === "id" ? "Ulangi balapan" : "Restart race"}
-                className="flex h-8 w-8 cursor-pointer items-center justify-center border backdrop-blur-md"
+                className="flex h-8 w-8 cursor-pointer items-center justify-center border transition-colors hover:border-[var(--accent)] backdrop-blur-md"
                 style={surfaceStyle}
               >
                 <ArrowPathIcon className="h-4 w-4" />
               </button>
+            </div>
+
+            {/* Compact translucent SVG Live Minimap (top-right across mobile & desktop without obstructing view) */}
+            <div
+              className="pointer-events-none border p-1 backdrop-blur-sm sm:p-1.5 sm:backdrop-blur-md"
+              style={{
+                borderColor: "var(--border)",
+                background: "color-mix(in srgb, var(--bg-primary) 58%, transparent)",
+              }}
+            >
+              <svg
+                className="block h-[74px] w-[74px] sm:h-[124px] sm:w-[124px]"
+                viewBox={`0 0 ${MINIMAP_SIZE} ${MINIMAP_SIZE}`}
+              >
+                <path
+                  d={MINIMAP_PATH}
+                  fill="none"
+                  stroke="var(--border)"
+                  strokeWidth={6}
+                  strokeLinejoin="round"
+                />
+                <path
+                  d={MINIMAP_PATH}
+                  fill="none"
+                  stroke="var(--text-muted)"
+                  strokeWidth={1.5}
+                  strokeLinejoin="round"
+                />
+                {telemetry.racers.map((r) => {
+                  const pt = mapPointToSvg(r.x, r.z, MINIMAP_SIZE, MINIMAP_SIZE, 12);
+                  return (
+                    <g key={r.id}>
+                      {r.isPlayer && (
+                        <circle
+                          cx={pt.cx}
+                          cy={pt.cy}
+                          r={6}
+                          fill="none"
+                          stroke="#ed5d31"
+                          strokeWidth={1.5}
+                          opacity={0.75}
+                        />
+                      )}
+                      <circle
+                        cx={pt.cx}
+                        cy={pt.cy}
+                        r={r.isPlayer ? 4 : 3}
+                        fill={r.color}
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
             </div>
           </div>
         </div>
@@ -680,8 +657,13 @@ export default function RaceArenaPage() {
             }}
           >
             <span>
-              <strong style={{ color: "var(--text-primary)" }}>WASD / ARROWS</strong>{" "}
+              <strong style={{ color: "var(--text-primary)" }}>WASD</strong>{" "}
               {language === "id" ? "GAS & BELOK" : "DRIVE"}
+            </span>
+            <span style={{ color: "var(--border)" }}>|</span>
+            <span>
+              <strong style={{ color: "var(--text-primary)" }}>← ↓ →</strong>{" "}
+              {language === "id" ? "TENGOK" : "LOOK"}
             </span>
             <span style={{ color: "var(--border)" }}>|</span>
             <span>
@@ -756,8 +738,8 @@ export default function RaceArenaPage() {
               <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 {phase === "idle"
                   ? language === "id"
-                    ? "Atur posisi kamera di bawah atau tekan C kapan saja untuk berganti ke First-Person Kokpit, T-Cam F1, maupun Chase."
-                    : "Configure camera placement below or press C anytime to switch between First-Person Cockpit, F1 T-Cam, and Chase angles."
+                    ? "Atur posisi kamera di bawah atau tekan C kapan saja untuk berganti sudut pandang. Gunakan panah ← ↓ → untuk menengok kiri, belakang, atau kanan."
+                    : "Configure camera placement below or press C anytime to switch views. Hold ← ↓ → arrows to look left, back, or right."
                   : language === "id"
                   ? "Ubah letak kamera secara langsung lalu lanjutkan balapan tanpa kehilangan posisi."
                   : "Adjust your camera position live and resume cleanly right where you left off."}

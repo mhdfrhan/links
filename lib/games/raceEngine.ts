@@ -947,6 +947,81 @@ export function mapPointToSvg(
   };
 }
 
+export interface CameraLookState {
+  yaw: number;
+  velocity: number;
+  backSign: 1 | -1;
+}
+
+export interface CameraLookInput {
+  left: boolean;
+  right: boolean;
+  back: boolean;
+}
+
+export interface CameraLookFactors {
+  forwardWeight: number;
+  sideFactor: number;
+  rearFactor: number;
+  sideSign: 1 | -1;
+}
+
+export function createInitialCameraLookState(): CameraLookState {
+  return { yaw: 0, velocity: 0, backSign: 1 };
+}
+
+/**
+ * Integrates Arrow-key look direction (left +90 deg, right -90 deg, back +-180 deg)
+ * with an analytical critically damped spring so head turns and orbit sweeps accelerate
+ * and settle smoothly without overshoot or mid-turn direction flips.
+ */
+export function stepCameraLook(
+  state: CameraLookState,
+  input: CameraLookInput,
+  dt: number
+): void {
+  let targetYaw = 0;
+  if (input.back) {
+    targetYaw = state.backSign * Math.PI;
+  } else if (input.left && !input.right) {
+    targetYaw = Math.PI * 0.5;
+    state.backSign = 1;
+  } else if (input.right && !input.left) {
+    targetYaw = -Math.PI * 0.5;
+    state.backSign = -1;
+  } else {
+    state.backSign = state.yaw < -0.04 ? -1 : 1;
+  }
+
+  const safeDt = Math.max(0.0001, Math.min(Number.isFinite(dt) ? dt : 1 / 60, 0.05));
+  const omega = 12.2;
+  const delta = state.yaw - targetYaw;
+  const exp = Math.exp(-omega * safeDt);
+  const temp = (state.velocity + omega * delta) * safeDt;
+  state.velocity = (state.velocity - omega * temp) * exp;
+  state.yaw = targetYaw + (delta + temp) * exp;
+
+  if (Math.abs(state.yaw - targetYaw) < 0.0005 && Math.abs(state.velocity) < 0.002) {
+    state.yaw = targetYaw;
+    state.velocity = 0;
+  }
+}
+
+/**
+ * Computes normalized camera blend weights from current look yaw across all views:
+ * forwardWeight peaks straight ahead, sideFactor peaks at +-90 deg, rearFactor smoothly
+ * clears airbox/rear-wing geometry as look yaw sweeps toward +-180 deg.
+ */
+export function computeCameraLookFactors(lookYaw: number): CameraLookFactors {
+  const absYaw = Math.abs(lookYaw);
+  const forwardWeight = Math.max(0, Math.cos(Math.min(Math.PI * 0.5, absYaw)));
+  const sideFactor = Math.sin(Math.min(Math.PI, absYaw));
+  const rearRaw = Math.max(0, Math.min(1, (absYaw - Math.PI * 0.42) / (Math.PI * 0.58)));
+  const rearFactor = rearRaw * rearRaw * (3 - 2 * rearRaw);
+  const sideSign: 1 | -1 = lookYaw >= 0 ? -1 : 1;
+  return { forwardWeight, sideFactor, rearFactor, sideSign };
+}
+
 /**
  * Simulates a 7-speed F1 sequential gearbox for authentic engine pitch, torque curve, and HUD telemetry.
  */

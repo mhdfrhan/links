@@ -74,6 +74,7 @@ export interface RaceTelemetrySnapshot {
   isBoosting: boolean;
   isDrifting: boolean;
   driftCharge: number;
+  impactIntensity: number;
   countdownLabel: string;
   racers: TelemetryRacerDot[];
 }
@@ -82,7 +83,7 @@ export interface RaceAudioEvents {
   onCountdownStep: (isGo: boolean) => void;
   onBoost: () => void;
   onLap: (isFinalLap: boolean) => void;
-  onBump: () => void;
+  onBump: (intensity?: number, kind?: "wall" | "car") => void;
   onFinishRace: (
     rank: number,
     totalTimeMs: number,
@@ -697,8 +698,11 @@ function StreetCircuitEnvironment({
   );
 }
 
+type ParticleKind = "smoke" | "spark" | "debris";
+
 interface DriftParticle {
   active: boolean;
+  kind: ParticleKind;
   life: number;
   maxLife: number;
   x: number;
@@ -707,10 +711,21 @@ interface DriftParticle {
   vx: number;
   vy: number;
   vz: number;
-  spark: boolean;
+  floorY: number;
+  color: string;
+  size: number;
 }
 
-const PARTICLE_COUNT = 56;
+interface SkidMarkEntry {
+  x: number;
+  y: number;
+  z: number;
+  yaw: number;
+  len: number;
+}
+
+const PARTICLE_COUNT = 180;
+const SKIDMARK_COUNT = 240;
 
 function RaceWorld({
   runId,
@@ -732,9 +747,13 @@ function RaceWorld({
   const audioCtrlRef = useRef<F1AudioController | null>(null);
 
   const particlesRef = useRef<InstancedMeshRef>(null);
+  const skidmarksRef = useRef<InstancedMeshRef>(null);
+  const impactLightRef = useRef<THREE.PointLight>(null);
+
   const particlePool = useRef<DriftParticle[]>(
     Array.from({ length: PARTICLE_COUNT }, () => ({
       active: false,
+      kind: "smoke",
       life: 0,
       maxLife: 0.4,
       x: 0,
@@ -743,10 +762,29 @@ function RaceWorld({
       vx: 0,
       vy: 0,
       vz: 0,
-      spark: false,
+      floorY: 0,
+      color: "#ff9b42",
+      size: 0.16,
     }))
   );
   const particleCursorRef = useRef(0);
+
+  const skidPool = useRef<SkidMarkEntry[]>(
+    Array.from({ length: SKIDMARK_COUNT }, () => ({
+      x: 0,
+      y: -120,
+      z: 0,
+      yaw: 0,
+      len: 1.2,
+    }))
+  );
+  const skidCursorRef = useRef(0);
+  const skidTickRef = useRef(0);
+
+  const impactFlashRef = useRef(0);
+  const camShakeRef = useRef(0);
+  const camKnockRef = useRef(new THREE.Vector3());
+
   const dummyObj = useRef(new THREE.Object3D());
   const tmpColor = useRef(new THREE.Color());
   const camQuatTmp = useRef(new THREE.Quaternion());
@@ -825,6 +863,12 @@ function RaceWorld({
     for (const p of particlePool.current) {
       p.active = false;
     }
+    for (const sm of skidPool.current) {
+      sm.y = -120;
+    }
+    impactFlashRef.current = 0;
+    camShakeRef.current = 0;
+    camKnockRef.current.set(0, 0, 0);
 
     const player = fresh.find((r) => r.isPlayer)!;
     const fwd = forwardFromHeading(player.heading);
@@ -927,21 +971,119 @@ function RaceWorld({
     vx: number,
     vy: number,
     vz: number,
-    spark: boolean
+    kind: ParticleKind,
+    floorY: number,
+    color?: string,
+    size?: number
   ) => {
     const pool = particlePool.current;
     const p = pool[particleCursorRef.current];
     particleCursorRef.current = (particleCursorRef.current + 1) % PARTICLE_COUNT;
     p.active = true;
+    p.kind = kind;
     p.life = 0;
-    p.maxLife = spark ? 0.28 : 0.48;
+    p.maxLife = kind === "spark" ? 0.24 + Math.random() * 0.22 : kind === "debris" ? 0.52 + Math.random() * 0.25 : 0.48 + Math.random() * 0.2;
     p.x = x;
     p.y = y;
     p.z = z;
     p.vx = vx;
     p.vy = vy;
     p.vz = vz;
-    p.spark = spark;
+    p.floorY = floorY;
+    p.color =
+      color ??
+      (kind === "spark"
+        ? Math.random() > 0.35
+          ? "#ffb347"
+          : "#fff3c4"
+        : kind === "debris"
+          ? "#18181b"
+          : isDark
+            ? "#cbd5e1"
+            : "#94a3b8");
+    p.size = size ?? (kind === "spark" ? 0.11 : kind === "debris" ? 0.14 : 0.24);
+  };
+
+  const spawnImpactBurst = (
+    car: RacerState,
+    severity: number,
+    isWallImpact: boolean
+  ) => {
+    const sparkCount = Math.round(10 + severity * 18);
+    const debrisCount = Math.round(severity * 7);
+    const ix = car.lastImpactX;
+    const iz = car.lastImpactZ;
+    const nx = car.lastImpactNx;
+    const nz = car.lastImpactNz;
+
+    for (let s = 0; s < sparkCount; s++) {
+      const spread = (Math.random() - 0.5) * 1.4;
+      const eject = 6 + severity * 14 + Math.random() * 7;
+      spawnParticle(
+        ix + (Math.random() - 0.5) * 0.45,
+        car.y + 0.24 + Math.random() * 0.32,
+        iz + (Math.random() - 0.5) * 0.45,
+        car.vx * 0.42 + nx * eject + nz * spread * 6,
+        2.5 + Math.random() * (4.5 + severity * 5),
+        car.vz * 0.42 + nz * eject - nx * spread * 6,
+        "spark",
+        car.y + 0.04,
+        Math.random() > 0.25 ? "#ff9f2e" : "#ffffff",
+        0.09 + Math.random() * 0.08
+      );
+    }
+
+    for (let d = 0; d < debrisCount; d++) {
+      const throwSpeed = 4 + severity * 9 + Math.random() * 5;
+      spawnParticle(
+        ix + (Math.random() - 0.5) * 0.6,
+        car.y + 0.35 + Math.random() * 0.25,
+        iz + (Math.random() - 0.5) * 0.6,
+        car.vx * 0.35 + nx * throwSpeed + (Math.random() - 0.5) * 7,
+        3.2 + Math.random() * 5.2,
+        car.vz * 0.35 + nz * throwSpeed + (Math.random() - 0.5) * 7,
+        "debris",
+        car.y + 0.05,
+        d % 3 === 0 ? car.color : "#27272a",
+        0.13 + Math.random() * 0.08
+      );
+    }
+
+    const smokeCount = isWallImpact ? 3 + Math.round(severity * 4) : 2 + Math.round(severity * 3);
+    for (let m = 0; m < smokeCount; m++) {
+      spawnParticle(
+        ix + (Math.random() - 0.5) * 0.8,
+        car.y + 0.25,
+        iz + (Math.random() - 0.5) * 0.8,
+        nx * (1.8 + Math.random() * 2.5) + (Math.random() - 0.5) * 2.5,
+        1.1 + Math.random() * 1.8,
+        nz * (1.8 + Math.random() * 2.5) + (Math.random() - 0.5) * 2.5,
+        "smoke",
+        car.y + 0.05,
+        isDark ? "#94a3b8" : "#cbd5e1",
+        0.26 + severity * 0.24
+      );
+    }
+  };
+
+  const stampRearSkidmarks = (car: RacerState) => {
+    const fwd = forwardFromHeading(car.heading);
+    const rightX = -fwd.z;
+    const rightZ = fwd.x;
+    const rearX = car.x - fwd.x * 1.38;
+    const rearZ = car.z - fwd.z * 1.38;
+    const velYaw = car.speed > 4 ? Math.atan2(-car.vx, -car.vz) : car.heading;
+    const segLen = Math.max(0.85, Math.min(2.1, car.speed * 0.042));
+
+    for (const side of [-0.76, 0.76] as const) {
+      const slot = skidPool.current[skidCursorRef.current];
+      skidCursorRef.current = (skidCursorRef.current + 1) % SKIDMARK_COUNT;
+      slot.x = rearX + rightX * side;
+      slot.y = car.y + 0.018;
+      slot.z = rearZ + rightZ * side;
+      slot.yaw = velYaw;
+      slot.len = segLen;
+    }
   };
 
   useFrame((_, delta) => {
@@ -956,6 +1098,10 @@ function RaceWorld({
       countdownTimerRef.current += dt;
       const t = countdownTimerRef.current;
       const stage = t < 0.85 ? 0 : t < 1.7 ? 1 : t < 2.55 ? 2 : 3;
+
+      const k = keyInputRef.current;
+      const mob = mobileControlRef.current;
+      playerThrottle = Math.max(0, Math.min(1, (k.throttleUp ? 1 : 0) + mob.throttle));
 
       if (stage !== lastCountdownStageRef.current) {
         lastCountdownStageRef.current = stage;
@@ -1000,32 +1146,59 @@ function RaceWorld({
       }
 
       if (playerEvents.hitWall) {
-        for (let s = 0; s < 3; s++) {
-          spawnParticle(
-            player.x + (Math.random() - 0.5) * 0.8,
-            player.y + 0.35,
-            player.z + (Math.random() - 0.5) * 0.8,
-            (Math.random() - 0.5) * 12,
-            2 + Math.random() * 5,
-            (Math.random() - 0.5) * 12,
-            true
-          );
-        }
+        const sev = Math.max(0.25, playerEvents.impactSeverity);
+        spawnImpactBurst(player, sev, true);
+        impactFlashRef.current = Math.max(impactFlashRef.current, sev);
+        camShakeRef.current = Math.max(camShakeRef.current, 0.35 + sev * 0.75);
+        camKnockRef.current.set(
+          -player.lastImpactNx * (0.28 + sev * 0.55),
+          0.08 + sev * 0.14,
+          -player.lastImpactNz * (0.28 + sev * 0.55)
+        );
       }
 
-      // Step AI opponents
+      // Step AI opponents (emit sparks/smoke too if they scrape or crash!)
       for (const car of cars) {
         if (car.isPlayer) continue;
         const aiInput = stepAiDecision(car, cars, player.progress);
-        stepCarPhysics(car, aiInput, dt, raceElapsedMsRef.current);
+        const aiEvents = stepCarPhysics(car, aiInput, dt, raceElapsedMsRef.current);
+        if (aiEvents.hitWall && aiEvents.impactSeverity > 0.25) {
+          spawnImpactBurst(car, aiEvents.impactSeverity, true);
+        }
       }
 
-      // Bumper-to-bumper cushioned contact
+      // Multi-zone F1 bodywork contact & collision impulse resolution
+      const prevPlayerIntensity = player.impactIntensity;
       const bumped = resolveCarCollisions(cars);
       const nowMs = performance.now();
-      if ((bumped || playerEvents.hitWall) && nowMs - lastBumpSoundAtRef.current > 180) {
+
+      if (bumped) {
+        for (const car of cars) {
+          if (car.impactIntensity > 0.2) {
+            spawnImpactBurst(car, car.impactIntensity, false);
+          }
+        }
+      }
+
+      const newPlayerCarHit = bumped && player.impactIntensity > Math.max(0.22, prevPlayerIntensity);
+      if (newPlayerCarHit) {
+        const sev = player.impactIntensity;
+        impactFlashRef.current = Math.max(impactFlashRef.current, sev * 0.9);
+        camShakeRef.current = Math.max(camShakeRef.current, 0.3 + sev * 0.65);
+        camKnockRef.current.set(
+          -player.lastImpactNx * (0.25 + sev * 0.5),
+          0.06 + sev * 0.1,
+          -player.lastImpactNz * (0.25 + sev * 0.5)
+        );
+      }
+
+      if ((playerEvents.hitWall || newPlayerCarHit) && nowMs - lastBumpSoundAtRef.current > 160) {
         lastBumpSoundAtRef.current = nowMs;
-        audioEvents.onBump();
+        if (playerEvents.hitWall) {
+          audioEvents.onBump(Math.max(0.25, playerEvents.impactSeverity), "wall");
+        } else {
+          audioEvents.onBump(player.impactIntensity, "car");
+        }
       }
 
       // Finish check
@@ -1061,25 +1234,104 @@ function RaceWorld({
       }
     }
 
-    // Spawn drift smoke particles behind active cars (frozen during idle/pause)
+    // Continuous wall-grind metallic spark stream, tire drift smoke & asphalt skidmarks
     if (curPhase === "racing" || curPhase === "finished") {
+      skidTickRef.current = (skidTickRef.current + 1) % 2;
       for (const car of cars) {
-        if (car.isDrifting && Math.random() < 0.65) {
-          const fwd = forwardFromHeading(car.heading);
-          spawnParticle(
-            car.x - fwd.x * 1.6 + (Math.random() - 0.5) * 1.1,
-            car.y + 0.16,
-            car.z - fwd.z * 1.6 + (Math.random() - 0.5) * 1.1,
-            (Math.random() - 0.5) * 2.2,
-            0.9 + Math.random() * 1.2,
-            (Math.random() - 0.5) * 2.2,
-            false
-          );
+        // Continuous barrier scrape sparks along rail contact flank
+        if (car.isScrapingWall && car.speed > 5) {
+          const sparkQty = car.speed > 20 ? 3 : 1;
+          for (let k = 0; k < sparkQty; k++) {
+            spawnParticle(
+              car.lastImpactX + (Math.random() - 0.5) * 0.3,
+              car.y + 0.18 + Math.random() * 0.25,
+              car.lastImpactZ + (Math.random() - 0.5) * 0.3,
+              car.vx * 0.22 + car.lastImpactNx * (2 + Math.random() * 4.5) + (Math.random() - 0.5) * 3,
+              1.6 + Math.random() * 3.8,
+              car.vz * 0.22 + car.lastImpactNz * (2 + Math.random() * 4.5) + (Math.random() - 0.5) * 3,
+              "spark",
+              car.y + 0.04,
+              Math.random() > 0.3 ? "#ffa73b" : "#fff7d6",
+              0.08 + Math.random() * 0.05
+            );
+          }
+          if (car.isPlayer && car.speed > 14 && skidTickRef.current === 0) {
+            impactFlashRef.current = Math.max(impactFlashRef.current, 0.22);
+          }
+        }
+
+        const highSlip = Math.abs(car.lateralSlipSpeed) > 4.0 && car.speed > 16;
+        const hardBrakeLock = car.isBraking && car.speed > 20;
+        if (car.isDrifting || highSlip || hardBrakeLock) {
+          if (skidTickRef.current === 0) {
+            stampRearSkidmarks(car);
+          }
+          if (Math.random() < (car.isDrifting ? 0.72 : 0.42)) {
+            const fwd = forwardFromHeading(car.heading);
+            const rx = -fwd.z;
+            const rz = fwd.x;
+            for (const side of [-0.74, 0.74] as const) {
+              spawnParticle(
+                car.x - fwd.x * 1.48 + rx * side + (Math.random() - 0.5) * 0.25,
+                car.y + 0.15,
+                car.z - fwd.z * 1.48 + rz * side + (Math.random() - 0.5) * 0.25,
+                (Math.random() - 0.5) * 1.8,
+                0.75 + Math.random() * 1.1,
+                (Math.random() - 0.5) * 1.8,
+                "smoke",
+                car.y + 0.05,
+                isDark ? "#cbd5e1" : "#94a3b8",
+                car.isDrifting ? 0.24 : 0.17
+              );
+            }
+          }
         }
       }
     }
 
-    // Update instanced particle pool (freeze decay cleanly when paused)
+    // Decay transient visual impact flash & camera shake cleanly
+    if (curPhase !== "paused") {
+      impactFlashRef.current = Math.max(0, impactFlashRef.current - dt * 4.2);
+      camShakeRef.current = Math.max(0, camShakeRef.current - dt * 3.1);
+      camKnockRef.current.multiplyScalar(Math.exp(-dt * 9.5));
+    }
+
+    // Dynamic spark illumination flash point light on impact
+    if (impactLightRef.current) {
+      const flash = impactFlashRef.current;
+      impactLightRef.current.intensity = flash > 0.02 ? flash * 14 : 0;
+      impactLightRef.current.position.set(
+        player.lastImpactX,
+        player.y + 0.75,
+        player.lastImpactZ
+      );
+    }
+
+    // Render asphalt tire skidmarks pool
+    const skidMesh = skidmarksRef.current;
+    if (skidMesh) {
+      const dummy = dummyObj.current;
+      const skids = skidPool.current;
+      for (let i = 0; i < SKIDMARK_COUNT; i++) {
+        const sm = skids[i];
+        if (sm.y < -50) {
+          dummy.position.set(0, -120, 0);
+          dummy.scale.setScalar(0.001);
+          dummy.rotation.set(0, 0, 0);
+          dummy.updateMatrix();
+          skidMesh.setMatrixAt(i, dummy.matrix);
+          continue;
+        }
+        dummy.position.set(sm.x, sm.y, sm.z);
+        dummy.rotation.set(0, sm.yaw, 0);
+        dummy.scale.set(1, 1, sm.len);
+        dummy.updateMatrix();
+        skidMesh.setMatrixAt(i, dummy.matrix);
+      }
+      skidMesh.instanceMatrix.needsUpdate = true;
+    }
+
+    // Update instanced particle pool (sparks bounce off asphalt, debris tumbles, smoke swells)
     const instMesh = particlesRef.current;
     if (instMesh && curPhase !== "paused") {
       const dummy = dummyObj.current;
@@ -1089,6 +1341,7 @@ function RaceWorld({
         if (!p.active) {
           dummy.position.set(0, -100, 0);
           dummy.scale.setScalar(0.001);
+          dummy.rotation.set(0, 0, 0);
           dummy.updateMatrix();
           instMesh.setMatrixAt(i, dummy.matrix);
           continue;
@@ -1098,21 +1351,46 @@ function RaceWorld({
           p.active = false;
           dummy.position.set(0, -100, 0);
           dummy.scale.setScalar(0.001);
+          dummy.rotation.set(0, 0, 0);
           dummy.updateMatrix();
           instMesh.setMatrixAt(i, dummy.matrix);
           continue;
         }
-        if (p.spark) p.vy -= 18 * dt;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.z += p.vz * dt;
+        if (p.kind === "spark" || p.kind === "debris") {
+          p.vy -= (p.kind === "spark" ? 21 : 24) * dt;
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.z += p.vz * dt;
+          if (p.y < p.floorY && p.vy < 0) {
+            p.y = p.floorY;
+            p.vy = -p.vy * (p.kind === "spark" ? 0.45 : 0.25);
+            p.vx *= 0.78;
+            p.vz *= 0.78;
+          }
+        } else {
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.z += p.vz * dt;
+        }
+
         const progress = p.life / p.maxLife;
-        const scale = p.spark ? (1 - progress) * 0.16 : 0.18 + progress * 0.48;
         dummy.position.set(p.x, p.y, p.z);
-        dummy.scale.setScalar(scale);
+        if (p.kind === "spark") {
+          const fade = Math.max(0.15, 1 - progress);
+          dummy.scale.set(p.size * fade, p.size * fade, p.size * (2.6 + fade * 2.0));
+          dummy.lookAt(p.x + p.vx, p.y + p.vy, p.z + p.vz);
+        } else if (p.kind === "debris") {
+          const fade = Math.max(0.15, 1 - progress * 0.7);
+          dummy.scale.set(p.size * 1.4 * fade, p.size * 0.45 * fade, p.size * 1.1 * fade);
+          dummy.rotation.set(p.life * 16, p.life * 11, p.life * 8);
+        } else {
+          const sc = p.size * (0.8 + progress * 2.1);
+          dummy.scale.setScalar(sc);
+          dummy.rotation.set(p.life * 2, p.life * 1.4, 0);
+        }
         dummy.updateMatrix();
         instMesh.setMatrixAt(i, dummy.matrix);
-        tmpColor.current.set(p.spark ? "#ff7e4f" : isDark ? "#cbd5e1" : "#94a3b8");
+        tmpColor.current.set(p.color);
         instMesh.setColorAt(i, tmpColor.current);
       }
       instMesh.instanceMatrix.needsUpdate = true;
@@ -1130,7 +1408,7 @@ function RaceWorld({
       if (meshRefs.chassisTilt) {
         const driftYawOffset = car.isDrifting
           ? -car.driftDirection * Math.min(0.24, car.driftCharge * 0.2)
-          : 0;
+          : Math.max(-0.14, Math.min(0.14, car.lateralSlipSpeed * 0.015));
         meshRefs.chassisTilt.rotation.set(car.visualPitch, driftYawOffset, car.visualRoll);
       }
       if (meshRefs.frontLeftSteer) meshRefs.frontLeftSteer.rotation.y = -car.steerAngle;
@@ -1153,49 +1431,67 @@ function RaceWorld({
       }
     }
 
-    // Update Web Audio F1 Engine & Tires (silenced automatically when paused or on Start screen)
+    // Update Web Audio F1 Engine, Tires, Curbs & Wall Scrape (supports Grid Revving during countdown!)
     audioCtrlRef.current?.update({
       speed: player.speed,
       throttle: playerThrottle,
       isBoosting: player.isBoosting,
       isDrifting: player.isDrifting,
       driftCharge: player.driftCharge,
+      lateralSlip: player.lateralSlipSpeed,
       onCurb: player.onCurb,
+      isScrapingWall: player.isScrapingWall,
+      wallScrapeIntensity: player.impactIntensity,
+      gridRevving: curPhase === "countdown",
       active: curPhase === "racing",
       muted,
     });
 
-    // Multi-angle configurable camera system (Chase, Wide Chase, Overhead T-Cam, Cockpit 1st-Person)
+    // Multi-angle configurable camera system with impact shake, G-force lean & visor shock
     const camCfg = cameraSettingsRef.current;
     const presetChanged = prevPresetRef.current !== camCfg.preset;
     prevPresetRef.current = camCfg.preset;
 
-    const speedRatio = Math.min(1, player.speed / 42);
+    const speedRatio = Math.min(1, player.speed / 45);
     const cam = camRef.current;
+    const shakeMag = Math.max(camShakeRef.current, player.impactShake);
+    const tNow = performance.now() * 0.055;
+    const impactJitterX = shakeMag > 0.01 ? Math.sin(tNow * 2.1) * shakeMag * 0.24 : 0;
+    const impactJitterY = shakeMag > 0.01 ? Math.cos(tNow * 2.9) * shakeMag * 0.18 : 0;
 
     if (camCfg.preset === "cockpit" || camCfg.preset === "tcam") {
       const isCockpit = camCfg.preset === "cockpit";
-      const localY = isCockpit ? 0.90 + camCfg.heightOffset * 0.45 : 1.24 + camCfg.heightOffset * 0.55;
-      const localZ = isCockpit ? -0.28 - camCfg.distanceOffset * 0.16 : 0.22 - camCfg.distanceOffset * 0.22;
-      const apexGlanceX = player.steerAngle * (isCockpit ? 3.8 : 2.2);
+      const gPullZ = Math.max(-0.04, Math.min(0.06, -player.visualPitch * 0.85));
+      const localY =
+        (isCockpit ? 0.90 + camCfg.heightOffset * 0.45 : 1.24 + camCfg.heightOffset * 0.55) +
+        impactJitterY * 0.35;
+      const localZ =
+        (isCockpit ? -0.28 - camCfg.distanceOffset * 0.16 : 0.22 - camCfg.distanceOffset * 0.22) +
+        gPullZ;
+      const apexGlanceX = player.steerAngle * (isCockpit ? 3.8 : 2.2) + impactJitterX * 1.4;
 
-      // Partial horizon lock so pitch/roll weight is tactile without tilting horizon excessively
-      camEulerTmp.current.set(player.visualPitch * 0.42, player.heading, 0, "YXZ");
+      camEulerTmp.current.set(player.visualPitch * 0.46, player.heading, 0, "YXZ");
       camQuatTmp.current.setFromEuler(camEulerTmp.current);
 
-      const shakeY = player.onCurb && player.speed > 14 ? (Math.random() - 0.5) * 0.018 : 0;
+      const shakeY = player.onCurb && player.speed > 12 ? (Math.random() - 0.5) * 0.022 : 0;
       const highSpeedBuzz =
-        player.speed > 34 ? (Math.random() - 0.5) * Math.min(0.012, (player.speed - 34) * 0.0008) : 0;
+        player.speed > 35 ? (Math.random() - 0.5) * Math.min(0.014, (player.speed - 35) * 0.0008) : 0;
 
-      camLocalPosTmp.current.set(0, localY + shakeY, localZ).applyQuaternion(camQuatTmp.current);
+      camLocalPosTmp.current
+        .set(impactJitterX * 0.22, localY + shakeY, localZ)
+        .applyQuaternion(camQuatTmp.current);
       camLocalTargetTmp.current
-        .set(apexGlanceX + highSpeedBuzz, isCockpit ? 0.56 + camCfg.heightOffset * 0.2 : 0.52 + camCfg.heightOffset * 0.2, -20)
+        .set(
+          apexGlanceX + highSpeedBuzz,
+          isCockpit ? 0.56 + camCfg.heightOffset * 0.2 : 0.52 + camCfg.heightOffset * 0.2,
+          -20
+        )
         .applyQuaternion(camQuatTmp.current);
 
       desiredCamPos.current.set(
-        player.x + camLocalPosTmp.current.x,
-        player.y + camLocalPosTmp.current.y,
-        player.z + camLocalPosTmp.current.z
+        player.x + camLocalPosTmp.current.x + camKnockRef.current.x * 0.32,
+        player.y + camLocalPosTmp.current.y + camKnockRef.current.y * 0.3,
+        player.z + camLocalPosTmp.current.z + camKnockRef.current.z * 0.32
       );
       desiredCamTarget.current.set(
         player.x + camLocalTargetTmp.current.x,
@@ -1209,12 +1505,18 @@ function RaceWorld({
 
       if (cam) {
         const fwd = forwardFromHeading(player.heading);
-        const rollTilt = Math.max(-0.075, Math.min(0.075, player.visualRoll * 0.45));
-        cam.up.set(-fwd.z * Math.sin(rollTilt), Math.cos(rollTilt), fwd.x * Math.sin(rollTilt)).normalize();
+        const rollTilt = Math.max(
+          -0.095,
+          Math.min(0.095, player.visualRoll * 0.48 + impactJitterX * 0.14)
+        );
+        cam.up
+          .set(-fwd.z * Math.sin(rollTilt), Math.cos(rollTilt), fwd.x * Math.sin(rollTilt))
+          .normalize();
         cam.position.copy(camPosRef.current);
         cam.lookAt(camTargetRef.current);
 
-        const targetFov = (isCockpit ? 68 : 62) + camCfg.fovOffset + (player.isBoosting ? 5.5 : 0);
+        const targetFov =
+          (isCockpit ? 68 : 62) + camCfg.fovOffset + speedRatio * 4.5 + (player.isBoosting ? 6.0 : 0);
         if (Math.abs(cam.fov - targetFov) > 0.05) {
           cam.fov += (targetFov - cam.fov) * Math.min(1, dt * 8.0);
           cam.updateProjectionMatrix();
@@ -1235,23 +1537,23 @@ function RaceWorld({
       const chaseDist =
         baseDist +
         camCfg.distanceOffset * (isWide ? 1.15 : 1.0) +
-        speedRatio * (isWide ? 0.9 : 0.72) +
-        (player.isBoosting ? 0.75 : 0) +
-        Math.max(0, playerThrottle) * 0.22 -
-        (player.isBraking ? 0.25 : 0);
+        speedRatio * (isWide ? 0.95 : 0.78) +
+        (player.isBoosting ? 0.8 : 0) +
+        Math.max(0, playerThrottle) * 0.28 -
+        (player.isBraking ? 0.34 : 0);
       const chaseHeight =
         baseHeight + camCfg.heightOffset + speedRatio * 0.14 + (player.isBoosting ? 0.12 : 0);
       const cornerSwing = -player.steerAngle * speedRatio * (isWide ? 1.0 : 1.35);
-      const curbShake = player.onCurb && player.speed > 14 ? (Math.random() - 0.5) * 0.04 : 0;
+      const curbShake = player.onCurb && player.speed > 12 ? (Math.random() - 0.5) * 0.048 : 0;
 
       desiredCamPos.current.set(
-        player.x - camFwd.x * chaseDist + camRightX * cornerSwing + curbShake,
-        player.y + chaseHeight + curbShake,
-        player.z - camFwd.z * chaseDist + camRightZ * cornerSwing
+        player.x - camFwd.x * chaseDist + camRightX * cornerSwing + curbShake + impactJitterX + camKnockRef.current.x,
+        player.y + chaseHeight + curbShake + impactJitterY + camKnockRef.current.y,
+        player.z - camFwd.z * chaseDist + camRightZ * cornerSwing + camKnockRef.current.z
       );
       desiredCamTarget.current.set(
-        player.x + camFwd.x * (isWide ? 9.5 : 6.8) + camRightX * (player.steerAngle * speedRatio * 1.1),
-        player.y + 0.88,
+        player.x + camFwd.x * (isWide ? 9.5 : 6.8) + camRightX * (player.steerAngle * speedRatio * 1.1) + impactJitterX * 0.55,
+        player.y + 0.88 + impactJitterY * 0.45,
         player.z + camFwd.z * (isWide ? 9.5 : 6.8) + camRightZ * (player.steerAngle * speedRatio * 1.1)
       );
 
@@ -1270,7 +1572,8 @@ function RaceWorld({
         cam.position.copy(camPosRef.current);
         cam.lookAt(camTargetRef.current);
 
-        const targetFov = (isWide ? 55 : 52) + camCfg.fovOffset + speedRatio * 7.5 + (player.isBoosting ? 6.5 : 0);
+        const targetFov =
+          (isWide ? 55 : 52) + camCfg.fovOffset + speedRatio * 8.0 + (player.isBoosting ? 6.5 : 0);
         if (Math.abs(cam.fov - targetFov) > 0.05) {
           cam.fov += (targetFov - cam.fov) * Math.min(1, dt * 6.5);
           cam.updateProjectionMatrix();
@@ -1287,7 +1590,7 @@ function RaceWorld({
       const { gear, rpm } = computeGearAndRpm(player.speed, player.isBoosting);
 
       onTelemetry({
-        speedKmh: Math.round(player.speed * 6.0),
+        speedKmh: Math.round(player.speed * 6.2),
         gear,
         rpm,
         rank,
@@ -1298,6 +1601,7 @@ function RaceWorld({
         isBoosting: player.isBoosting,
         isDrifting: player.isDrifting,
         driftCharge: player.driftCharge,
+        impactIntensity: Math.max(impactFlashRef.current, player.impactIntensity),
         countdownLabel,
         racers: standings.map((c, idx) => ({
           id: c.id,
@@ -1382,10 +1686,25 @@ function RaceWorld({
 
       <StreetCircuitEnvironment isDark={isDark} countdownStage={countdownStage} />
 
-      {/* Drift Tire Smoke & Wall Sparks Instanced Pool */}
+      {/* Dynamic Spark Impact Illumination Light */}
+      <pointLight
+        ref={impactLightRef}
+        color="#ff8a34"
+        intensity={0}
+        distance={14}
+        decay={2}
+      />
+
+      {/* Asphalt Rubber Skidmarks Pool */}
+      <instancedMesh ref={skidmarksRef} args={[undefined, undefined, SKIDMARK_COUNT]} frustumCulled={false}>
+        <boxGeometry args={[0.3, 0.014, 1.0]} />
+        <meshBasicMaterial color="#09090b" transparent opacity={0.48} depthWrite={false} />
+      </instancedMesh>
+
+      {/* Drift Smoke, Collision Sparks & Carbon Debris Pool */}
       <instancedMesh ref={particlesRef} args={[undefined, undefined, PARTICLE_COUNT]} frustumCulled={false}>
         <dodecahedronGeometry args={[1, 0]} />
-        <meshBasicMaterial toneMapped={false} transparent opacity={0.75} />
+        <meshBasicMaterial toneMapped={false} transparent opacity={0.85} />
       </instancedMesh>
 
       {initialCars.map((car) => (

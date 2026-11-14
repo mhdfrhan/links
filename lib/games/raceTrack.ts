@@ -79,7 +79,8 @@ export interface TrackArchSpec {
 
 export const TRACK_SAMPLES = 720;
 export const ROAD_HALF_WIDTH = 10.5;
-export const BARRIER_MARGIN = 1.05;
+// F1 track half-width ~0.92m -> car centerline touches visual rail (11.24m) near 10.28m
+export const BARRIER_MARGIN = 0.22;
 export const SAFE_HALF_WIDTH = ROAD_HALF_WIDTH - BARRIER_MARGIN;
 export const TOTAL_LAPS = 2;
 

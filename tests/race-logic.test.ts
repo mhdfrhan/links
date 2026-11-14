@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  ROAD_HALF_WIDTH,
   SAFE_HALF_WIDTH,
   TRACK_DATA,
   TRACK_SAMPLES,
@@ -178,4 +179,68 @@ test("Forza-style progressive torque, speed-sensitive steering rack & weight tra
   assert.ok(highSpeedSteer.steerAngle < 0.28);
   assert.ok(highSpeedSteer.steerAngle < lowSpeedSteer.steerAngle);
   assert.ok(Math.abs(highSpeedSteer.visualRoll) > 0.01);
+});
+
+test("glancing wall scrape preserves speed, curb riding stays barrier-free, and hard crashes rebound dramatically", () => {
+  // 1. Riding painted curb (within ROAD_HALF_WIDTH - 0.35 = 10.15m < SAFE_HALF_WIDTH 10.28m) must NOT hit invisible barrier
+  const curbCar = createInitialRacers().find((r) => r.isPlayer)!;
+  const sCurb = getTrackSampleAt(curbCar.u);
+  curbCar.x = sCurb.point.x + sCurb.right.x * (ROAD_HALF_WIDTH - 0.35);
+  curbCar.z = sCurb.point.z + sCurb.right.z * (ROAD_HALF_WIDTH - 0.35);
+  const fCurb = forwardFromHeading(curbCar.heading);
+  curbCar.vx = fCurb.x * 32;
+  curbCar.vz = fCurb.z * 32;
+  curbCar.speed = 32;
+  const curbEvt = stepCarPhysics(curbCar, { throttle: 1, steer: 0, drift: false, useBoost: false }, 1 / 60, 100);
+  assert.equal(curbCar.onCurb, true);
+  assert.equal(curbEvt.hitWall, false);
+  assert.equal(curbCar.wallHits, 0);
+
+  // 2. Shallow wall brush ("mepet pembatas") must glide continuously rather than dead-stopping
+  const grazeCar = createInitialRacers().find((r) => r.isPlayer)!;
+  const sGraze = getTrackSampleAt(0.05);
+  grazeCar.u = 0.05;
+  grazeCar.trackIndex = sGraze.index;
+  grazeCar.x = sGraze.point.x + sGraze.right.x * (SAFE_HALF_WIDTH + 0.05);
+  grazeCar.z = sGraze.point.z + sGraze.right.z * (SAFE_HALF_WIDTH + 0.05);
+  const roadYaw = headingFromTangent(sGraze.tangent.x, sGraze.tangent.z);
+  grazeCar.heading = roadYaw - 0.06; // slightly angled into right barrier
+  grazeCar.vx = sGraze.tangent.x * 36 + sGraze.right.x * 2.2;
+  grazeCar.vz = sGraze.tangent.z * 36 + sGraze.right.z * 2.2;
+  grazeCar.speed = Math.hypot(grazeCar.vx, grazeCar.vz);
+
+  let sawScrape = false;
+  for (let i = 0; i < 20; i++) {
+    stepCarPhysics(grazeCar, { throttle: 1, steer: 0, drift: false, useBoost: false }, 1 / 60, 200 + i * 16.6);
+    if (grazeCar.isScrapingWall) sawScrape = true;
+  }
+  assert.equal(sawScrape, true);
+  assert.ok(grazeCar.speed > 28, `Expected smooth glide speed > 28, got ${grazeCar.speed}`);
+  assert.ok(grazeCar.wallHits <= 1); // debounced cleanly, never +20 wallHits in 0.3s
+
+  // 3. Hard angled crash emits strong severity, camera shake impulse, and physical rebound off barrier
+  const crashCar = createInitialRacers().find((r) => r.isPlayer)!;
+  const sCrash = getTrackSampleAt(0.05);
+  crashCar.u = 0.05;
+  crashCar.trackIndex = sCrash.index;
+  crashCar.x = sCrash.point.x + sCrash.right.x * (SAFE_HALF_WIDTH + 0.2);
+  crashCar.z = sCrash.point.z + sCrash.right.z * (SAFE_HALF_WIDTH + 0.2);
+  crashCar.heading = headingFromTangent(sCrash.tangent.x, sCrash.tangent.z) - 0.65;
+  crashCar.vx = sCrash.tangent.x * 28 + sCrash.right.x * 16;
+  crashCar.vz = sCrash.tangent.z * 28 + sCrash.right.z * 16;
+  crashCar.speed = Math.hypot(crashCar.vx, crashCar.vz);
+
+  const crashEvt = stepCarPhysics(crashCar, { throttle: 1, steer: 0, drift: false, useBoost: false }, 1 / 60, 500);
+  assert.equal(crashEvt.hitWall, true);
+  assert.ok(crashEvt.impactSeverity > 0.35);
+  assert.ok(crashCar.impactShake > 0.35);
+  // Outward normal velocity away from right wall must be strictly negative (rebounding back onto track)
+  const outVel = crashCar.vx * sCrash.right.x + crashCar.vz * sCrash.right.z;
+  assert.ok(outVel < -2, `Expected physical rebound off barrier, got outVel=${outVel}`);
+
+  // Next 10 frames must carry ricochet momentum cleanly (> 16 m/s) instead of sideways brake-stall
+  for (let i = 0; i < 10; i++) {
+    stepCarPhysics(crashCar, { throttle: 1, steer: 0, drift: false, useBoost: false }, 1 / 60, 520 + i * 16.6);
+  }
+  assert.ok(crashCar.speed > 16, `Expected clean ricochet momentum > 16 m/s, got ${crashCar.speed}`);
 });

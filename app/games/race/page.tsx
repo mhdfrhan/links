@@ -120,6 +120,7 @@ const INITIAL_TELEMETRY: RaceTelemetrySnapshot = {
   isBoosting: false,
   isDrifting: false,
   driftCharge: 0,
+  impactIntensity: 0,
   countdownLabel: "3",
   racers: [],
 };
@@ -264,7 +265,7 @@ export default function RaceArenaPage() {
       onCountdownStep: (isGo) => playCountdownBeep(isGo, mutedRef.current),
       onBoost: () => playBoostSound(mutedRef.current),
       onLap: (isFinalLap) => playLapSound(isFinalLap, mutedRef.current),
-      onBump: () => playBumpSound(mutedRef.current),
+      onBump: (intensity, kind) => playBumpSound(mutedRef.current, intensity, kind),
       onFinishRace: (
         rank,
         totalTimeMs,
@@ -328,6 +329,36 @@ export default function RaceArenaPage() {
             onRequestRestart={handleRestart}
           />
         </div>
+
+        {/* Dynamic Collision Vignette Flash & High-Speed / Nitro Edge Tunneling */}
+        {phase === "racing" && (
+          <>
+            {telemetry.impactIntensity > 0.14 && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-75"
+                style={{
+                  opacity: Math.min(0.75, telemetry.impactIntensity * 0.85),
+                  boxShadow:
+                    "inset 0 0 85px rgba(239, 68, 68, 0.72), inset 0 0 28px rgba(251, 146, 60, 0.55)",
+                }}
+              />
+            )}
+            {(telemetry.isBoosting || telemetry.speedKmh >= 245) && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-200"
+                style={{
+                  opacity: telemetry.isBoosting
+                    ? 0.45
+                    : Math.min(0.26, (telemetry.speedKmh - 245) / 140),
+                  background:
+                    "radial-gradient(ellipse at center, transparent 58%, rgba(56, 189, 248, 0.22) 100%)",
+                }}
+              />
+            )}
+          </>
+        )}
 
         {/* Top Telemetry Bar */}
         <div className="pointer-events-none absolute inset-x-0 top-3 z-20 flex items-start justify-between gap-2 px-3 sm:px-6">

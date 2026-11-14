@@ -111,10 +111,58 @@ export function playLapSound(isFinalLap: boolean, muted: boolean) {
   }
 }
 
-export function playBumpSound(muted: boolean) {
+export function playBumpSound(
+  muted: boolean,
+  intensity = 0.55,
+  kind: "wall" | "car" = "car"
+) {
   if (muted) return;
-  playTone(96, 0.11, "triangle", 0.11, 38);
-  playTone(145, 0.06, "sine", 0.06, 52);
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const sev = Math.max(0.18, Math.min(1, intensity));
+  const start = ctx.currentTime;
+
+  // 1. Sub-bass chassis & suspension impact thump
+  playTone(76 + sev * 18, 0.16 + sev * 0.16, "triangle", 0.14 + sev * 0.18, 24);
+  playTone(54, 0.14 + sev * 0.14, "sine", 0.12 + sev * 0.15, 20);
+
+  // 2. Carbon / metallic debris crunch burst
+  const len = Math.floor(ctx.sampleRate * (0.14 + sev * 0.22));
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  let lp = 0;
+  for (let i = 0; i < len; i++) {
+    const raw = Math.random() * 2 - 1;
+    lp = lp * 0.62 + raw * 0.38;
+    const decay = Math.pow(1 - i / len, 1.35);
+    data[i] = (raw * 0.55 + lp * 0.75) * decay;
+  }
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buf;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = "bandpass";
+  filter.frequency.setValueAtTime(kind === "wall" ? 760 + sev * 540 : 480 + sev * 420, start);
+  filter.frequency.exponentialRampToValueAtTime(140, start + 0.14 + sev * 0.2);
+  filter.Q.value = kind === "wall" ? 1.45 : 1.05;
+
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0.16 + sev * 0.26, start);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, start + 0.14 + sev * 0.21);
+
+  noise.connect(filter);
+  filter.connect(noiseGain);
+  noiseGain.connect(ctx.destination);
+  noise.start(start);
+  noise.stop(start + 0.16 + sev * 0.22);
+
+  // 3. Guardrail steel ring transient when slamming barriers
+  if (kind === "wall" && sev > 0.28) {
+    playTone(265, 0.14 + sev * 0.1, "sawtooth", 0.045 + sev * 0.055, 118);
+    playTone(435, 0.11 + sev * 0.08, "triangle", 0.03 + sev * 0.04, 185);
+  }
 }
 
 export function playVictorySound(muted: boolean) {

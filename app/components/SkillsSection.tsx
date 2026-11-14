@@ -2,13 +2,9 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useRevealOnView } from "@/lib/utils/useRevealOnView";
 
 interface Skill {
   name: string;
@@ -46,30 +42,7 @@ export function SkillsSection({ categories }: SkillsSectionProps) {
       ? categories
       : categories.filter((c) => c.title === activeTab);
 
-  useGSAP(
-    () => {
-      if (!sectionRef.current) return;
-      const cards = sectionRef.current.querySelectorAll(".skill-bento-card");
-      if (cards.length === 0) return;
-
-      gsap.fromTo(
-        cards,
-        { opacity: 0, y: 36 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.1,
-          duration: 0.85,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-          },
-        },
-      );
-    },
-    { scope: sectionRef, dependencies: [activeTab, categories.length] },
-  );
+  useRevealOnView(sectionRef, ".skill-bento-card", [categories.length]);
 
   return (
     <section ref={sectionRef} className="w-full py-10 md:py-16">
@@ -202,7 +175,7 @@ function FilterTab({
   );
 }
 
-/* ─── 21st.dev Spotlight Category Card ─── */
+/* ─── 21st.dev Spotlight Category Card (Zero Layout-Thrash Rect Caching) ─── */
 function SkillCategoryCard({
   category,
   index,
@@ -211,11 +184,18 @@ function SkillCategoryCard({
   index: number;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+
+  const handleMouseEnter = () => {
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect();
+    }
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = cardRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
+    const rect = rectRef.current;
+    if (!el || !rect) return;
     el.style.setProperty("--spot-x", `${e.clientX - rect.left}px`);
     el.style.setProperty("--spot-y", `${e.clientY - rect.top}px`);
   };
@@ -223,6 +203,7 @@ function SkillCategoryCard({
   return (
     <div
       ref={cardRef}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       className="skill-bento-card group relative overflow-hidden p-6 sm:p-8 flex flex-col justify-between gap-8 transition-colors duration-300"
       style={{
@@ -240,9 +221,9 @@ function SkillCategoryCard({
         }}
       />
 
-      {/* Top Architectural Accent Line */}
+      {/* Top Architectural Accent Line (GPU scaleX only) */}
       <div
-        className="absolute top-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-500 ease-out"
+        className="gpu-sweep-bar absolute top-0 left-0 right-0 h-[2px]"
         style={{ background: "var(--accent)" }}
       />
 
@@ -277,34 +258,16 @@ function SkillCategoryCard({
         </span>
       </div>
 
-      {/* Interactive Tech Nodes */}
+      {/* Interactive Tech Nodes (CSS GPU transform + color transitions) */}
       <div className="relative z-10 flex flex-wrap gap-2.5">
         {category.skills.map((skill, skillIndex) => (
-          <motion.span
+          <span
             key={skill.name + skillIndex}
-            whileHover={{ y: -3, scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 480, damping: 24 }}
-            className="group/chip relative inline-flex items-center gap-2.5 px-3.5 py-2 select-none cursor-default transition-colors duration-200"
+            className="group/chip relative inline-flex items-center gap-2.5 px-3.5 py-2 select-none cursor-default transition-[transform,border-color,color,background-color] duration-200 hover:-translate-y-0.5 active:scale-95 bg-[var(--bg-primary)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--text-primary)]"
             style={{
               fontFamily: "var(--font-plus-jakarta), sans-serif",
               fontSize: "0.8125rem",
               fontWeight: 500,
-              color: "var(--text-secondary)",
-              border: "1px solid var(--border)",
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget;
-              el.style.borderColor = "var(--accent)";
-              el.style.color = "var(--text-primary)";
-              el.style.background =
-                "color-mix(in srgb, var(--accent) 8%, var(--bg-primary))";
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget;
-              el.style.borderColor = "var(--border)";
-              el.style.color = "var(--text-secondary)";
-              el.style.background = "var(--bg-primary)";
             }}
           >
             <span
@@ -312,7 +275,7 @@ function SkillCategoryCard({
               style={{ background: "var(--accent)" }}
             />
             <span>{skill.name}</span>
-          </motion.span>
+          </span>
         ))}
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 import { smoothScrollTo } from "@/lib/utils/smoothScroll";
@@ -14,8 +15,8 @@ interface FooterProps {
 }
 
 /**
- * Footer — Bold Call to Action
- * Vibrant block for contact to match the new aesthetic
+ * Footer — Modern Editorial Sign-off & Telemetry Bar
+ * Zero blur-heavy overhead (pure radial gradient), crisp 1px hairlines, and one-click email copy.
  */
 export function Footer({
   name = "Muhammad Farhan",
@@ -27,38 +28,56 @@ export function Footer({
   const { language } = useLanguage();
   const dict = dictionaries[language].footer;
   const currentYear = new Date().getFullYear();
+  const [copied, setCopied] = useState(false);
 
   const emailItem = socialLinks?.find(
     (s) => s.platform.toLowerCase() === "email"
   );
   const contactEmail = emailItem?.url || email || "hi.mhdfarhan@gmail.com";
+  const cleanEmail = contactEmail.replace(/^mailto:/i, "");
   const mailtoHref = contactEmail.startsWith("mailto:")
     ? contactEmail
     : `mailto:${contactEmail}`;
 
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(cleanEmail);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.location.href = mailtoHref;
+    }
+  };
+
   return (
     <footer className="w-full mt-24">
-      {/* Contact block */}
-      <div 
-        className="w-full relative overflow-hidden flex flex-col items-center justify-center py-20 px-6 text-center border-t border-border"
+      {/* Editorial Contact Block */}
+      <div
+        className="w-full relative overflow-hidden flex flex-col items-center justify-center py-20 sm:py-24 px-6 text-center border-t border-[var(--border)]"
         style={{
-          background: "transparent",
+          background:
+            "radial-gradient(ellipse 70% 60% at 50% 0%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 72%)",
         }}
       >
-        {/* Decorative glow */}
-        <div 
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-full blur-[100px] pointer-events-none opacity-[0.07]"
-          style={{ background: "radial-gradient(ellipse at top, var(--accent) 0%, transparent 70%)" }}
-        />
+        <span
+          className="relative z-10 text-[11px] font-semibold uppercase tracking-[0.14em] mb-4 inline-flex items-center gap-2"
+          style={{
+            color: "var(--accent)",
+            fontFamily: "var(--font-plus-jakarta), sans-serif",
+          }}
+        >
+          <span className="w-1.5 h-1.5 inline-block" style={{ background: "var(--accent)" }} />
+          // {language === "id" ? "TERBUKA UNTUK KOLABORASI" : "OPEN FOR COLLABORATION"}
+        </span>
 
         <h2
           style={{
             fontWeight: 700,
-            fontSize: "clamp(1.65rem, 3.2vw, 2.35rem)",
-            letterSpacing: "-0.02em",
+            fontSize: "clamp(1.85rem, 3.8vw, 2.75rem)",
+            letterSpacing: "-0.025em",
             color: "var(--text-primary)",
             fontFamily: "var(--font-plus-jakarta), sans-serif",
-            lineHeight: 1.1,
+            lineHeight: 1.08,
             marginBottom: "1rem",
             position: "relative",
             zIndex: 1,
@@ -66,14 +85,14 @@ export function Footer({
         >
           {dict.title}
         </h2>
-        
+
         <p
           style={{
-            fontSize: "1.125rem",
+            fontSize: "1.0625rem",
             color: "var(--text-secondary)",
-            maxWidth: "500px",
-            lineHeight: 1.6,
-            marginBottom: "2.5rem",
+            maxWidth: "520px",
+            lineHeight: 1.65,
+            marginBottom: "2.25rem",
             position: "relative",
             zIndex: 1,
           }}
@@ -81,30 +100,32 @@ export function Footer({
           {dict.subtitle}
         </p>
 
-        {/* Action Button */}
-        <a
-          href={mailtoHref}
-          className="group relative inline-flex items-center justify-center overflow-hidden  p-4 px-8 font-medium"
-          style={{
-            background: "var(--accent)",
-            color: "#fff",
-            textDecoration: "none",
-            transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            zIndex: 1,
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-            (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 25px -5px var(--accent)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-            (e.currentTarget as HTMLElement).style.boxShadow = "none";
-          }}
-        >
-          <span className="relative z-10" style={{ fontFamily: "var(--font-sans)", fontSize: "1rem" }}>
-            Get in touch
-          </span>
-        </a>
+        {/* Action Buttons: Direct Email CTA + Copy Address Micro-interaction */}
+        <div className="relative z-10 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={mailtoHref}
+            className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-sm font-semibold uppercase tracking-wider border border-[var(--accent)] bg-[var(--accent)] text-white hover:bg-transparent hover:text-[var(--accent)] transition-colors duration-200 no-underline"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
+            <span>{language === "id" ? "Hubungi Saya" : "Get in touch"}</span>
+            <span className="text-xs transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+              ↗
+            </span>
+          </a>
+
+          <button
+            type="button"
+            onClick={handleCopyEmail}
+            className="inline-flex items-center gap-2 px-5 py-4 text-xs font-semibold tracking-wider border border-[var(--border)] hover:border-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-200 cursor-pointer"
+            style={{
+              background: "var(--bg-secondary)",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+            }}
+            title={language === "id" ? "Salin alamat email" : "Copy email address"}
+          >
+            <span>{copied ? (language === "id" ? "Email Disalin ✓" : "Copied ✓") : cleanEmail}</span>
+          </button>
+        </div>
 
         {/* Social Links */}
         <div className="flex flex-wrap items-center justify-center gap-6 mt-12 relative z-1">

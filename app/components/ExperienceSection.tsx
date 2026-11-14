@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { useRevealOnView } from "@/lib/utils/useRevealOnView";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,45 +38,31 @@ export function ExperienceSection({
   const sectionRef = useRef<HTMLElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
 
+  useRevealOnView(sectionRef, ".exp-ledger-row", [items.length]);
+
   useGSAP(
     () => {
-      if (!sectionRef.current) return;
+      if (!sectionRef.current || !lineRef.current) return;
+      const prefersReduced =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReduced) return;
 
-      const rows = sectionRef.current.querySelectorAll(".exp-ledger-row");
-      if (rows.length > 0) {
-        gsap.fromTo(
-          rows,
-          { opacity: 0, y: 32 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.1,
-            duration: 0.8,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 78%",
-            },
+      gsap.fromTo(
+        lineRef.current,
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          ease: "none",
+          force3D: true,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 92%",
+            end: "bottom 65%",
+            scrub: true,
           },
-        );
-      }
-
-      if (lineRef.current) {
-        gsap.fromTo(
-          lineRef.current,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 70%",
-              end: "bottom 60%",
-              scrub: true,
-            },
-          },
-        );
-      }
+        },
+      );
     },
     { scope: sectionRef, dependencies: [items.length] },
   );
@@ -85,8 +72,19 @@ export function ExperienceSection({
       <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-stretch">
         {/* Left Column: Stretches to full height of section */}
         <div className="w-full lg:w-4/12 self-stretch relative">
-          {/* Sticky Inner Header */}
-          <div className="lg:sticky lg:top-28 z-10">
+          {/* Sticky Inner Header with Editorial Watermark */}
+          <div className="lg:sticky lg:top-28 z-10 overflow-hidden">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none select-none block font-sans font-extrabold leading-none -mb-6 opacity-[0.045]"
+              style={{
+                fontSize: "clamp(3.75rem, 6.5vw, 5.25rem)",
+                color: "var(--text-primary)",
+                letterSpacing: "-0.04em",
+              }}
+            >
+              {sectionNumber.replace(".", "")}
+            </span>
           <span
             style={{
               fontFamily: "var(--font-plus-jakarta), sans-serif",
@@ -169,10 +167,10 @@ export function ExperienceSection({
                     }`,
                   }}
                 >
-                  {/* Timeline Node Dot on the Rail */}
+                  {/* Timeline Node Dot on the Rail (GPU transform & colors only) */}
                   <span
                     aria-hidden="true"
-                    className="absolute -left-[25px] sm:-left-[37px] top-7 w-2.5 h-2.5 transition-all duration-300"
+                    className="absolute -left-[25px] sm:-left-[37px] top-7 w-2.5 h-2.5 transition-[transform,background-color,border-color] duration-300"
                     style={{
                       background: isExpanded
                         ? "var(--accent)"
@@ -184,11 +182,11 @@ export function ExperienceSection({
                     }}
                   />
 
-                  {/* Top Hover Sweep Line */}
+                  {/* Top Hover Sweep Line (GPU scaleX only) */}
                   <div
-                    className="absolute top-0 left-0 h-[2px] transition-all duration-500 ease-out"
+                    className="absolute top-0 left-0 right-0 h-[2px] origin-left transition-transform duration-500 ease-out will-change-transform"
                     style={{
-                      width: isExpanded ? "100%" : "0%",
+                      transform: isExpanded ? "scaleX(1)" : "scaleX(0)",
                       background: "var(--accent)",
                     }}
                   />
@@ -314,7 +312,7 @@ function ExperienceRowHeader({
 
         {hasPoints && (
           <div
-            className="w-8 h-8 flex items-center justify-center transition-all duration-300 flex-shrink-0"
+            className="w-8 h-8 flex items-center justify-center transition-colors duration-200 flex-shrink-0"
             style={{
               border: `1px solid ${
                 isExpanded ? "var(--accent)" : "var(--border)"

@@ -366,3 +366,34 @@ html.lenis, html.lenis body {
 .lenis.lenis-smooth iframe {
   pointer-events: none;
 }
+
+
+/* Editorial architectural surface & GPU motion utilities */
+.editorial-dot-grid {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--text-muted) 22%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 14px 14px;
+}
+
+.gpu-sweep-bar {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.group:hover .gpu-sweep-bar {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-marquee,
+  .terminal-cursor {
+    animation: none !important;
+  }
+}

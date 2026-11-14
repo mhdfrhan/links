@@ -51,6 +51,7 @@ export default function Home() {
   }, []);
 
   const navRef = useRef<HTMLElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const [navScrolled, setNavScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -130,13 +131,36 @@ export default function Home() {
     { dependencies: [isMenuOpen] },
   );
 
-  // Nav scroll effect: transparent → solid
+  // Nav scroll effect + zero-rerender GPU progress line
   useEffect(() => {
-    const handleScroll = () => {
-      setNavScrolled(window.scrollY > 60);
+    let rafId = 0;
+    const updateScrollMetrics = () => {
+      rafId = 0;
+      const y = window.scrollY;
+      setNavScrolled((prev) => {
+        const next = y > 60;
+        return prev === next ? prev : next;
+      });
+      if (progressBarRef.current) {
+        const docHeight =
+          document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? Math.min(1, Math.max(0, y / docHeight)) : 0;
+        progressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
     };
+
+    const handleScroll = () => {
+      if (!rafId) {
+        rafId = window.requestAnimationFrame(updateScrollMetrics);
+      }
+    };
+
+    updateScrollMetrics();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Loading state
@@ -205,12 +229,12 @@ export default function Home() {
         </div>
         <style>{`
           @keyframes revealText {
-            0% { width: 0%; }
-            100% { width: 100%; }
+            0% { clip-path: inset(0 100% 0 0); }
+            100% { clip-path: inset(0 0% 0 0); }
           }
           @keyframes slideLine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% { transform: translate3d(-100%, 0, 0); }
+            100% { transform: translate3d(100%, 0, 0); }
           }
         `}</style>
       </div>
@@ -234,20 +258,19 @@ export default function Home() {
       {/* ==================== NAVBAR ==================== */}
       <nav
         ref={navRef}
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pointer-events-auto"
+        className="fixed top-0 left-0 right-0 z-50 transition-colors duration-200 pointer-events-auto"
         style={{
           background:
             navScrolled || isMenuOpen
-              ? "color-mix(in srgb, var(--bg-primary) 80%, transparent)"
+              ? "color-mix(in srgb, var(--bg-primary) 90%, transparent)"
               : "transparent",
-          backdropFilter: navScrolled || isMenuOpen ? "blur(16px)" : "none",
+          backdropFilter: navScrolled || isMenuOpen ? "blur(8px)" : "none",
           WebkitBackdropFilter:
-            navScrolled || isMenuOpen ? "blur(16px)" : "none",
+            navScrolled || isMenuOpen ? "blur(8px)" : "none",
           borderBottom:
             navScrolled || isMenuOpen
               ? "1px solid var(--border)"
               : "1px solid transparent",
-          boxShadow: navScrolled ? "0 4px 24px -8px rgba(0,0,0,0.05)" : "none",
         }}
       >
         <div
@@ -307,16 +330,10 @@ export default function Home() {
                 className="flex items-center gap-2 px-3 py-1.5  border border-border/50 bg-background/30"
                 title="Available for work"
               >
-                <span className="relative flex h-2 w-2">
-                  <span
-                    className="animate-ping absolute inline-flex h-full w-full  opacity-75"
-                    style={{ backgroundColor: "var(--green)" }}
-                  ></span>
-                  <span
-                    className="relative inline-flex  h-2 w-2"
-                    style={{ backgroundColor: "var(--green)" }}
-                  ></span>
-                </span>
+                <span
+                  className="inline-flex h-2 w-2"
+                  style={{ backgroundColor: "var(--green)" }}
+                />
                 <span
                   style={{
                     fontFamily: "var(--font-plus-jakarta), sans-serif",
@@ -353,10 +370,10 @@ export default function Home() {
           {/* MOBILE DROPDOWN MENU */}
           <div
             ref={mobileMenuRef}
-            className="absolute top-[calc(100%+12px)] right-6 w-[240px] bg-card border border-border  shadow-2xl p-2 z-50 hidden md:hidden"
+            className="absolute top-[calc(100%+12px)] right-6 w-[240px] bg-card border border-border shadow-2xl p-2 z-50 hidden md:hidden"
             style={{
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
             }}
           >
             <div className="flex flex-col gap-1">
@@ -407,6 +424,21 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* GPU Scroll Progress Hairline */}
+        <div
+          aria-hidden="true"
+          className="absolute bottom-0 left-0 right-0 h-[1px] pointer-events-none overflow-hidden"
+        >
+          <div
+            ref={progressBarRef}
+            className="h-full w-full origin-left will-change-transform"
+            style={{
+              background: "var(--accent)",
+              transform: "scaleX(0)",
+            }}
+          />
         </div>
       </nav>
 
@@ -595,7 +627,7 @@ export default function Home() {
   );
 }
 
-/* ---- Navbar Link ---- */
+/* ---- Navbar Link (GPU underline micro-interaction) ---- */
 function NavLink({
   href,
   children,
@@ -610,31 +642,33 @@ function NavLink({
         e.preventDefault();
         smoothScrollTo(href);
       }}
-      className="px-4 py-2 transition-all duration-300 cursor-pointer"
+      className="group relative px-4 py-2 transition-colors duration-200 cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]"
       style={{
         fontFamily: "var(--font-plus-jakarta), system-ui, sans-serif",
         fontSize: "0.8125rem",
         fontWeight: 500,
-        color: "var(--text-muted)",
         textDecoration: "none",
         fontStyle: "normal",
       }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
-        (e.currentTarget as HTMLElement).style.backgroundColor =
-          "color-mix(in srgb, var(--text-primary) 5%, transparent)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-        (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-      }}
     >
-      {children}
+      <span>{children}</span>
+      <span
+        aria-hidden="true"
+        className="gpu-sweep-bar absolute left-4 right-4 bottom-1.5 h-[1px]"
+        style={{ background: "var(--accent)" }}
+      />
     </a>
   );
 }
 
 /* ---- Section Divider ---- */
 function SectionDivider() {
-  return <div style={{ height: "4rem" }} />;
+  return (
+    <div
+      className="my-12 w-full h-[1px]"
+      style={{
+        background: "color-mix(in srgb, var(--border) 55%, transparent)",
+      }}
+    />
+  );
 }

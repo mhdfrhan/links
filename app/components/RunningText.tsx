@@ -1,28 +1,44 @@
 "use client";
 
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import { useEffect, useRef, useState } from "react";
 
 const BASE_WORDS = [
   "FULLSTACK DEVELOPER",
   "CREATIVE CODER",
   "UI/UX ENTHUSIAST",
   "PROBLEM SOLVER",
-  "TECH EXPLORER"
+  "TECH EXPLORER",
 ];
 
-// Multiply the words array to ensure the total width is much larger than any screen,
-// preventing the "empty gap" issue when the CSS marquee loops.
+// Repeat to exceed ultra-wide viewports seamlessly without gaps
 const WORDS = [...BASE_WORDS, ...BASE_WORDS, ...BASE_WORDS, ...BASE_WORDS];
 
 export function RunningText() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(true);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+      },
+      { rootMargin: "120px 0px" },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section 
-      className="w-[100vw] relative left-1/2 -translate-x-1/2 overflow-hidden flex items-center"
+    <section
+      ref={sectionRef}
+      className="group w-[100vw] relative left-1/2 -translate-x-1/2 overflow-hidden flex items-center select-none"
       style={{
         background: "var(--accent)",
-        height: "60px",
+        height: "56px",
         marginTop: "3rem",
         marginBottom: "1rem",
         borderTop: "1px solid var(--border)",
@@ -36,32 +52,36 @@ export function RunningText() {
         }
         .animate-marquee {
           display: flex;
-          animation: marquee 70s linear infinite;
+          animation: marquee 68s linear infinite;
           will-change: transform;
         }
+        .marquee-paused .animate-marquee,
+        .group:hover .animate-marquee {
+          animation-play-state: paused;
+        }
       `}</style>
-      <div className="flex whitespace-nowrap">
+      <div className={`flex whitespace-nowrap ${inView ? "" : "marquee-paused"}`}>
         <div className="animate-marquee">
           {WORDS.map((word, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className="flex items-center"
               style={{
                 fontFamily: "var(--font-plus-jakarta), sans-serif",
-                fontSize: "1rem",
+                fontSize: "0.9375rem",
                 fontWeight: 700,
                 color: "#fff",
-                letterSpacing: "0.1em",
+                letterSpacing: "0.11em",
                 paddingRight: "2rem",
               }}
             >
               {word}
               <svg
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                strokeWidth="4"
+                strokeWidth="3.5"
                 strokeLinecap="butt"
                 style={{ marginLeft: "2rem", color: "#fff", flexShrink: 0 }}
               >
@@ -75,25 +95,25 @@ export function RunningText() {
         </div>
         <div className="animate-marquee" aria-hidden="true">
           {WORDS.map((word, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className="flex items-center"
               style={{
                 fontFamily: "var(--font-plus-jakarta), sans-serif",
-                fontSize: "1rem",
+                fontSize: "0.9375rem",
                 fontWeight: 700,
                 color: "#fff",
-                letterSpacing: "0.1em",
+                letterSpacing: "0.11em",
                 paddingRight: "2rem",
               }}
             >
               {word}
               <svg
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                strokeWidth="4"
+                strokeWidth="3.5"
                 strokeLinecap="butt"
                 style={{ marginLeft: "2rem", color: "#fff", flexShrink: 0 }}
               >

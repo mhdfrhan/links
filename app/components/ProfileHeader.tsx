@@ -99,41 +99,58 @@ export function ProfileHeader({
     if (taglineWords.length <= 1) return;
     const interval = setInterval(() => {
       setTaglineIndex((prev) => (prev + 1) % taglineWords.length);
-    }, 3000);
+    }, 3200);
     return () => clearInterval(interval);
   }, [taglineWords.length]);
 
-  // GSAP Entrance + Smooth Hero Banner Parallax on Scroll
+  // GSAP Entrance + Smooth Hero Banner Parallax on Scroll (100% GPU transforms)
   useGSAP(
     () => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1 } });
+      const prefersReduced =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (prefersReduced) {
+        gsap.set(".hero-text, .hero-image, .hero-meta", {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          clipPath: "inset(0% 0 0% 0)",
+        });
+        return;
+      }
+
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out", duration: 0.9, force3D: true },
+      });
 
       tl.fromTo(
         ".hero-text",
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, stagger: 0.1 },
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, stagger: 0.08 },
       )
         .fromTo(
           ".hero-image",
-          { opacity: 0, scale: 0.96 },
-          { opacity: 1, scale: 1, duration: 1.2 },
-          "-=0.6",
+          { opacity: 0, clipPath: "inset(6% 0 6% 0)" },
+          { opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1.05, ease: "power4.out" },
+          "-=0.55",
         )
         .fromTo(
           ".hero-meta",
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, stagger: 0.1 },
-          "-=0.8",
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, stagger: 0.08 },
+          "-=0.7",
         );
 
-      // Smooth Parallax Window Effect on Scroll
+      // Smooth Parallax Window Effect on Scroll (GPU translate3d only)
       gsap.fromTo(
         ".hero-parallax-layer",
-        { yPercent: -12, scale: 1.1 },
+        { yPercent: -10, scale: 1.08 },
         {
-          yPercent: 12,
+          yPercent: 10,
           scale: 1,
           ease: "none",
+          force3D: true,
           scrollTrigger: {
             trigger: ".hero-image",
             start: "top bottom",
@@ -142,13 +159,40 @@ export function ProfileHeader({
           },
         },
       );
-
     },
     { scope: containerRef },
   );
 
+  const currentYear = new Date().getFullYear();
+
   return (
-    <section ref={containerRef} className="w-full relative pt-8 md:pt-16 z-10">
+    <section ref={containerRef} className="w-full relative pt-6 md:pt-12 z-10">
+      {/* Architectural Telemetry Top Strip (Sam Goddard / Brandon Yasin inspired) */}
+      <div
+        className="hero-text flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 md:mb-8"
+        style={{ borderBottom: "1px solid color-mix(in srgb, var(--border) 65%, transparent)" }}
+      >
+        <div className="flex items-center gap-2.5">
+          <span
+            className="w-1.5 h-1.5 inline-block"
+            style={{ background: "var(--accent)" }}
+          />
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.12em] tabular-nums"
+            style={{
+              color: "var(--text-muted)",
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+            }}
+          >
+            PORTFOLIO // EDITION {currentYear}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <LiveClock />
+        </div>
+      </div>
+
       {/* Massive Typography Hero */}
       <h1
         className="hero-text"
@@ -156,16 +200,16 @@ export function ProfileHeader({
           fontFamily: "var(--font-plus-jakarta), sans-serif",
           fontWeight: 700,
           fontSize: "clamp(2.25rem, 8vw, 4.75rem)",
-          lineHeight: 1.08,
+          lineHeight: 1.06,
           color: "var(--text-primary)",
-          letterSpacing: "-0.02em",
+          letterSpacing: "-0.025em",
           maxWidth: "100%",
-          marginBottom: "1.5rem",
+          marginBottom: "1.75rem",
         }}
       >
         <span className="block">{name}</span>
         <span
-          className="block mt-1 min-h-[2.3em] sm:min-h-[1.2em]"
+          className="block mt-1.5 min-h-[2.3em] sm:min-h-[1.2em] overflow-hidden"
           style={{
             color: "var(--accent)",
             fontSize: "clamp(1.6rem, 5vw, 3.75rem)",
@@ -179,11 +223,11 @@ export function ProfileHeader({
           <AnimatePresence initial={false}>
             <motion.span
               key={taglineIndex % taglineWords.length}
-              initial={{ y: 18, opacity: 0, filter: "blur(5px)" }}
-              animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-              exit={{ y: -18, opacity: 0, filter: "blur(5px)" }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="sm:whitespace-nowrap"
+              initial={{ y: "105%", opacity: 0 }}
+              animate={{ y: "0%", opacity: 1 }}
+              exit={{ y: "-105%", opacity: 0 }}
+              transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+              className="sm:whitespace-nowrap will-change-transform"
               style={{
                 gridArea: "1/1/2/2",
                 wordBreak: "keep-all",
@@ -195,8 +239,14 @@ export function ProfileHeader({
         </span>
       </h1>
 
-      {/* Full Width Image Banner with Smooth Scroll Parallax */}
-      <div className="w-screen relative left-1/2 -translate-x-1/2 mb-12 overflow-hidden hero-image">
+      {/* Full Width Image Banner with 1px Hairline Frame & Smooth Scroll Parallax */}
+      <div
+        className="w-screen relative left-1/2 -translate-x-1/2 mb-10 overflow-hidden hero-image"
+        style={{
+          borderTop: "1px solid var(--border)",
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
         <div
           className="relative w-full overflow-hidden"
           style={{
@@ -214,6 +264,19 @@ export function ProfileHeader({
               priority
             />
           </div>
+          {/* Subtle architectural corner index */}
+          <div
+            aria-hidden="true"
+            className="hidden sm:flex items-center gap-2 absolute bottom-4 right-6 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] pointer-events-none"
+            style={{
+              background: "color-mix(in srgb, var(--bg-primary) 78%, transparent)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <span className="w-1.5 h-1.5 inline-block" style={{ background: "var(--accent)" }} />
+            21:9 // VISUAL FRAME
+          </div>
         </div>
       </div>
 
@@ -222,22 +285,16 @@ export function ProfileHeader({
         {/* Top Row: Availability badge on left, Social Links on right */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[var(--border)]/60">
           <div className="flex items-center gap-2.5">
-            <span className="relative flex h-2 w-2">
-              <span
-                className="animate-ping absolute inline-flex h-full w-full opacity-75"
-                style={{ backgroundColor: "var(--green)" }}
-              />
-              <span
-                className="relative inline-flex h-2 w-2"
-                style={{ backgroundColor: "var(--green)" }}
-              />
-            </span>
+            <span
+              className="inline-flex h-2 w-2"
+              style={{ backgroundColor: "var(--green)" }}
+            />
             <span
               style={{
                 fontFamily: "var(--font-plus-jakarta), sans-serif",
                 fontSize: "0.75rem",
                 textTransform: "uppercase",
-                letterSpacing: "0.06em",
+                letterSpacing: "0.08em",
                 color: "var(--text-secondary)",
                 fontWeight: 600,
               }}
@@ -280,36 +337,85 @@ export function ProfileHeader({
                 e.preventDefault();
                 smoothScrollTo("#projects");
               }}
-              className="px-5 py-2.5 flex items-center gap-2 text-sm font-semibold transition-all duration-300 border no-underline group cursor-pointer"
+              className="px-5 py-2.5 flex items-center gap-2.5 text-sm font-semibold transition-colors duration-200 border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] text-[var(--text-primary)] no-underline group cursor-pointer relative overflow-hidden"
               style={{
                 background: "transparent",
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
                 fontFamily: "var(--font-sans), system-ui, sans-serif",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "var(--accent)";
-                e.currentTarget.style.color = "var(--accent)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "var(--border)";
-                e.currentTarget.style.color = "var(--text-primary)";
-              }}
             >
-              <span>{language === "id" ? "Lihat Projek" : "Explore Projects"}</span>
-              <span className="text-xs transition-transform duration-300 group-hover:translate-y-0.5 font-semibold" style={{ color: "var(--accent)" }}>↓</span>
+              <span className="relative z-10">{language === "id" ? "Lihat Projek" : "Explore Projects"}</span>
+              <span className="relative z-10 text-xs transition-transform duration-300 group-hover:translate-y-0.5 font-semibold" style={{ color: "var(--accent)" }}>↓</span>
             </a>
           </div>
 
           <span
-            className="text-xs text-[var(--text-muted)] tracking-wider font-medium"
+            className="text-xs text-[var(--text-muted)] tracking-wider font-medium uppercase"
             style={{ fontFamily: "var(--font-plus-jakarta), sans-serif" }}
           >
-            // PEKANBARU, ID
+            // {language === "id" ? "SCROLL KE BAWAH" : "SCROLL DOWN"}
           </span>
         </div>
       </div>
     </section>
+  );
+}
+
+/* ---- Live WIB Clock (Isolated component so hero doesn't re-render every second) ---- */
+function LiveClock() {
+  const [localTime, setLocalTime] = useState<string>("");
+
+  useEffect(() => {
+    const formatter = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Jakarta",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    });
+
+    const updateClock = () => {
+      try {
+        setLocalTime(`${formatter.format(new Date())} WIB`);
+      } catch {
+        setLocalTime("UTC+7");
+      }
+    };
+
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    const scheduleNextTick = () => {
+      updateClock();
+      const delay = 1000 - (Date.now() % 1000) + 10;
+      timeoutId = setTimeout(scheduleNextTick, delay);
+    };
+
+    const handleVisibility = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      if (!document.hidden) {
+        scheduleNextTick();
+      }
+    };
+
+    scheduleNextTick();
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
+  return (
+    <span
+      className="text-[11px] font-semibold uppercase tracking-[0.1em] tabular-nums"
+      style={{
+        color: "var(--text-secondary)",
+        fontFamily: "var(--font-plus-jakarta), sans-serif",
+      }}
+    >
+      PEKANBARU, ID {localTime ? `— ${localTime}` : ""}
+    </span>
   );
 }
 
@@ -359,7 +465,7 @@ function CvDownloadButton({ cvData }: { cvData: { id?: CvEntry; en?: CvEntry } }
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-5 py-2.5  flex items-center justify-center gap-2 transition-all duration-300 relative group overflow-hidden border"
+        className="px-5 py-2.5 flex items-center justify-center gap-2 transition-colors duration-200 relative group overflow-hidden border"
         style={{
           background: "color-mix(in srgb, var(--accent) 10%, transparent)",
           borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
@@ -382,15 +488,15 @@ function CvDownloadButton({ cvData }: { cvData: { id?: CvEntry; en?: CvEntry } }
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            initial={{ opacity: 0, y: 8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute top-[calc(100%+12px)] left-0 z-[100] min-w-[180px]  overflow-hidden shadow-2xl border border-border"
+            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute top-[calc(100%+12px)] left-0 z-[100] min-w-[180px] overflow-hidden shadow-2xl border border-border"
             style={{
-              background: "var(--bg-secondary)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
+              background: "color-mix(in srgb, var(--bg-secondary) 96%, transparent)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
             }}
           >
             {cvData.id && (

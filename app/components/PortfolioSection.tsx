@@ -10,6 +10,7 @@ import { dictionaries } from "@/lib/i18n/dictionaries";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRevealOnView } from "@/lib/utils/useRevealOnView";
 
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
@@ -71,66 +72,64 @@ export function PortfolioSection({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Instant viewport-entry reveal for non-horizontal grids (mobile-first)
+  useRevealOnView(
+    sectionRef,
+    horizontalScroll ? ".__none__" : ".project-card",
+    [horizontalScroll, projects.length],
+  );
+
   useGSAP(
     () => {
-      if (horizontalScroll) {
-        const section = sectionRef.current;
-        const container = containerRef.current;
-        if (!section || !container) return;
+      if (!horizontalScroll) return;
+      const prefersReduced =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-        // Horizontal scroll animation for the container
-        const wrapper = container.parentElement;
-        const scrollTween = gsap.to(container, {
-          x: () => -(container.scrollWidth - window.innerWidth),
-          ease: "none",
-          scrollTrigger: {
-            trigger: wrapper,
-            start: "center 55%", // Pin slightly below the true center to give breathing room for the header
-            end: () => `+=${container.scrollWidth - window.innerWidth}`,
-            pin: section,
-            scrub: true, // Change from 1 to true to prevent double-smoothing conflict with Lenis
-            invalidateOnRefresh: true,
-          },
-        });
+      const section = sectionRef.current;
+      const container = containerRef.current;
+      if (!section || !container) return;
 
-        // Coverflow scale effect for each card
+      // Horizontal scroll animation for the container (linear easing inside Lenis scrub)
+      const wrapper = container.parentElement;
+      const scrollTween = gsap.to(container, {
+        x: () => -(container.scrollWidth - window.innerWidth),
+        ease: "none",
+        force3D: true,
+        scrollTrigger: {
+          trigger: wrapper,
+          start: "center 55%",
+          end: () => `+=${container.scrollWidth - window.innerWidth}`,
+          pin: section,
+          scrub: true,
+          anticipatePin: 1,
+          fastScrollEnd: true,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      // Smooth Coverflow scale/opacity per card (GPU composited, stays crisp even off-center)
+      if (!prefersReduced) {
         const cards = gsap.utils.toArray<HTMLElement>(".horizontal-project-card");
         cards.forEach((card) => {
-          gsap.set(card, { scale: 0.85, opacity: 0.4 });
+          gsap.set(card, { scale: 0.94, opacity: 0.72, force3D: true });
 
           const tl = gsap.timeline({
             scrollTrigger: {
               trigger: card,
               containerAnimation: scrollTween,
-              start: "left right", // Left edge enters screen from right
-              end: "right left",   // Right edge leaves screen to left
+              start: "left right",
+              end: "right left",
               scrub: true,
-            }
+            },
           });
 
-          // Animate to 1 in the first half (center), back to 0.85 in second half
-          tl.to(card, { scale: 1, opacity: 1, ease: "power1.inOut", duration: 1, force3D: true })
-            .to(card, { scale: 0.85, opacity: 0.4, ease: "power1.inOut", duration: 1, force3D: true });
+          tl.to(card, { scale: 1, opacity: 1, ease: "none", duration: 1, force3D: true })
+            .to(card, { scale: 0.94, opacity: 0.72, ease: "none", duration: 1, force3D: true });
         });
-      } else {
-        gsap.fromTo(
-          ".project-card",
-          { opacity: 0, y: 50 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.15,
-            duration: 1,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 75%",
-            },
-          }
-        );
       }
     },
-    { scope: sectionRef, dependencies: [horizontalScroll, projects.length] }
+    { scope: sectionRef, dependencies: [horizontalScroll, projects.length] },
   );
 
   return (
@@ -175,8 +174,8 @@ export function PortfolioSection({
             <span className="border-b border-transparent group-hover:border-[var(--accent)] transition-colors duration-300">
               {dict.viewAll}
             </span>
-            <div className="w-8 h-8 border border-[var(--border)] flex items-center justify-center group-hover:bg-[var(--accent)] group-hover:border-[var(--accent)] transition-all duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 group-hover:text-white">
+            <div className="w-8 h-8 border border-[var(--border)] flex items-center justify-center group-hover:bg-[var(--accent)] group-hover:border-[var(--accent)] transition-colors duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 group-hover:text-white transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
               </svg>
             </div>
@@ -227,11 +226,13 @@ export function PortfolioSection({
         </div>
       )}
 
-      {/* Modern Sleek Modal */}
+      {/* Modern Sleek Modal with Project-to-Project Navigation */}
       <AnimatePresence>
         {selectedProject && (
           <ProjectModal
             project={selectedProject}
+            projects={projects}
+            onSelectProject={setSelectedProject}
             onClose={() => setSelectedProject(null)}
             categories={categories}
           />
@@ -256,10 +257,10 @@ function ProjectCard({
   return (
     <div
       onClick={onClick}
-      className="group relative w-full overflow-hidden cursor-pointer flex flex-col transition-all duration-300"
+      className="group relative w-full overflow-hidden cursor-pointer flex flex-col"
       style={{ background: "transparent" }}
     >
-      {/* Image Container with Sharp Border */}
+      {/* Image Container with Sharp 1px Hairline Border & Corner Frame */}
       <div 
         className="relative w-full overflow-hidden border border-[var(--border)] transition-colors duration-300 group-hover:border-[var(--accent)]"
         style={{ aspectRatio: "16/10", background: "var(--bg-tertiary)" }}
@@ -268,11 +269,39 @@ function ProjectCard({
           src={project.imageUrl}
           alt={project.title}
           fill
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] will-change-transform"
           sizes="(max-width: 768px) 100vw, 50vw"
         />
-        {/* Accent hover glow */}
-        <div className="absolute inset-0 bg-[var(--accent)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        {/* GPU Accent Top Sweep Bar */}
+        <div
+          aria-hidden="true"
+          className="gpu-sweep-bar absolute top-0 left-0 right-0 h-[2px] z-10"
+          style={{ background: "var(--accent)" }}
+        />
+        {/* Subtle Index & Live Badge Overlay */}
+        <div
+          className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] tabular-nums"
+          style={{
+            background: "color-mix(in srgb, var(--bg-primary) 86%, transparent)",
+            color: "var(--text-primary)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          /{String(index + 1).padStart(2, "0")}
+        </div>
+        {project.link && (
+          <div
+            className="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{
+              background: "color-mix(in srgb, var(--bg-primary) 90%, transparent)",
+              color: "var(--accent)",
+              border: "1px solid var(--accent)",
+            }}
+          >
+            <span className="w-1.5 h-1.5 inline-block" style={{ background: "var(--accent)" }} />
+            LIVE
+          </div>
+        )}
       </div>
       
       {/* Content Area Below Image */}
@@ -281,7 +310,7 @@ function ProjectCard({
           <span className="text-[0.75rem] uppercase tracking-wider text-[var(--accent)] font-semibold">
             {project.categoryId ? categories.find(c => c.id === project.categoryId)?.name || "Project" : "Project"}
           </span>
-          <span className="text-[0.75rem] text-[var(--text-muted)] font-medium">
+          <span className="text-[0.75rem] text-[var(--text-muted)] font-medium tabular-nums">
             /{String(index + 1).padStart(2, "0")}
           </span>
         </div>
@@ -304,7 +333,7 @@ function ProjectCard({
             ))}
           </div>
           <span className="text-[0.75rem] font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors flex items-center gap-1">
-            details ↗
+            details <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>
           </span>
         </div>
       </div>
@@ -487,13 +516,17 @@ function FormattedProjectDescription({ text }: { text: string }) {
   );
 }
 
-/* ---- Sleek Editorial Modal (Top Image + Bottom Content & Scroll Lock) ---- */
+/* ---- Sleek Editorial Modal (Top Image + Bottom Content & Project-to-Project Navigation) ---- */
 function ProjectModal({
   project,
+  projects = [],
+  onSelectProject,
   onClose,
   categories = [],
 }: {
   project: Project;
+  projects?: Project[];
+  onSelectProject?: (p: Project) => void;
   onClose: () => void;
   categories?: Array<{ id: string; name: string }>;
 }) {
@@ -501,14 +534,27 @@ function ProjectModal({
   const { language } = useLanguage();
   const dict = dictionaries[language].projects;
 
+  const currentIdx = projects.findIndex((p) => p.id === project.id);
+  const hasPrevNext = projects.length > 1 && currentIdx !== -1 && Boolean(onSelectProject);
+  const prevProject = hasPrevNext
+    ? projects[(currentIdx - 1 + projects.length) % projects.length]
+    : null;
+  const nextProject = hasPrevNext
+    ? projects[(currentIdx + 1) % projects.length]
+    : null;
+
   useEffect(() => {
     setMounted(true);
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (hasPrevNext && onSelectProject) {
+        if (e.key === "ArrowLeft" && prevProject) onSelectProject(prevProject);
+        if (e.key === "ArrowRight" && nextProject) onSelectProject(nextProject);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  }, [onClose, hasPrevNext, onSelectProject, prevProject, nextProject]);
 
   if (!mounted) return null;
 
@@ -522,22 +568,22 @@ function ProjectModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.22 }}
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10"
       style={{
-        background: "rgba(9, 9, 11, 0.82)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
+        background: "rgba(9, 9, 11, 0.86)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
       }}
       onClick={onClose}
       onWheel={(e) => e.stopPropagation()}
     >
       <motion.div
         data-lenis-prevent
-        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        initial={{ opacity: 0, y: 20, scale: 0.985 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16, scale: 0.98 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        exit={{ opacity: 0, y: 14, scale: 0.985 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         className="relative w-full max-w-3xl max-h-[88dvh] flex flex-col overflow-hidden"
         style={{
           background: "var(--bg-secondary)",
@@ -551,7 +597,7 @@ function ProjectModal({
           type="button"
           onClick={onClose}
           aria-label="Close modal"
-          className="absolute top-4 right-4 z-30 flex items-center justify-center border border-[var(--border)] bg-[var(--bg-primary)]/85 backdrop-blur-md text-[var(--text-primary)] hover:text-white hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all duration-300 w-10 h-10 cursor-pointer"
+          className="absolute top-4 right-4 z-30 flex items-center justify-center border border-[var(--border)] bg-[var(--bg-primary)]/90 text-[var(--text-primary)] hover:text-white hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-colors duration-200 w-10 h-10 cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -657,19 +703,7 @@ function ProjectModal({
                   href={project.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center justify-center gap-3 w-full py-4 text-[0.8125rem] font-semibold uppercase tracking-wider transition-all duration-300 border border-[var(--accent)] no-underline"
-                  style={{
-                    background: "var(--accent)",
-                    color: "#fff",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = "var(--accent)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "var(--accent)";
-                    e.currentTarget.style.color = "#fff";
-                  }}
+                  className="group flex items-center justify-center gap-3 w-full py-4 text-[0.8125rem] font-semibold uppercase tracking-wider transition-colors duration-200 border border-[var(--accent)] no-underline bg-[var(--accent)] text-white hover:bg-transparent hover:text-[var(--accent)]"
                 >
                   <span>{dict.viewProject}</span>
                   <svg
@@ -678,7 +712,7 @@ function ProjectModal({
                     viewBox="0 0 24 24"
                     strokeWidth={2}
                     stroke="currentColor"
-                    className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                    className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"
                   >
                     <path
                       strokeLinecap="round"
@@ -687,6 +721,41 @@ function ProjectModal({
                     />
                   </svg>
                 </a>
+              )}
+
+              {/* Project-to-Project Editorial Switcher (Jesper Landberg inspired) */}
+              {hasPrevNext && prevProject && nextProject && onSelectProject && (
+                <div
+                  className="grid grid-cols-2 gap-3 pt-4"
+                  style={{ borderTop: "1px solid color-mix(in srgb, var(--border) 60%, transparent)" }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onSelectProject(prevProject)}
+                    className="group/nav text-left p-3 border border-[var(--border)] hover:border-[var(--accent)] transition-colors duration-200 cursor-pointer"
+                    style={{ background: "var(--bg-primary)" }}
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-widest block mb-1" style={{ color: "var(--text-muted)" }}>
+                      ← {language === "id" ? "Sebelumnya" : "Prev Project"}
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold line-clamp-1 group-hover/nav:text-[var(--accent)] transition-colors" style={{ color: "var(--text-primary)" }}>
+                      {prevProject.title}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onSelectProject(nextProject)}
+                    className="group/nav text-right p-3 border border-[var(--border)] hover:border-[var(--accent)] transition-colors duration-200 cursor-pointer"
+                    style={{ background: "var(--bg-primary)" }}
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-widest block mb-1" style={{ color: "var(--text-muted)" }}>
+                      {language === "id" ? "Berikutnya" : "Next Project"} →
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold line-clamp-1 group-hover/nav:text-[var(--accent)] transition-colors" style={{ color: "var(--text-primary)" }}>
+                      {nextProject.title}
+                    </span>
+                  </button>
+                </div>
               )}
             </div>
           </div>

@@ -1,13 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useRevealOnView } from "@/lib/utils/useRevealOnView";
 
 interface Award {
   title: string;
@@ -32,30 +28,7 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
   const dict = dictionaries[language].awards;
   const sectionRef = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      if (!sectionRef.current) return;
-      const rows = sectionRef.current.querySelectorAll(".award-ledger-row");
-      if (rows.length === 0) return;
-
-      gsap.fromTo(
-        rows,
-        { opacity: 0, y: 28 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.08,
-          duration: 0.75,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-          },
-        },
-      );
-    },
-    { scope: sectionRef, dependencies: [awards.length] },
-  );
+  useRevealOnView(sectionRef, ".award-ledger-row", [awards.length]);
 
   return (
     <section ref={sectionRef} className="w-full py-10 md:py-16">
@@ -145,7 +118,7 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
                 </span>
 
                 <h3
-                  className="transition-all duration-300 group-hover:translate-x-2 group-hover:text-[var(--accent)]"
+                  className="transition-[transform,color] duration-300 group-hover:translate-x-2 group-hover:text-[var(--accent)]"
                   style={{
                     fontFamily: "var(--font-plus-jakarta), sans-serif",
                     fontWeight: 700,
@@ -173,20 +146,23 @@ export function AwardsSection({ awards }: AwardsSectionProps) {
                   </span>
                 )}
 
-                <span
-                  className="text-xs font-semibold tabular-nums px-2.5 py-1"
-                  style={{
-                    color: "var(--accent)",
-                    background:
-                      "color-mix(in srgb, var(--accent) 10%, transparent)",
-                    border:
-                      "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
-                    fontFamily: "var(--font-plus-jakarta), sans-serif",
-                  }}
-                >
-                </span>
+                {(award.year || award.date) && (
+                  <span
+                    className="text-xs font-semibold tabular-nums px-2.5 py-1"
+                    style={{
+                      color: "var(--accent)",
+                      background:
+                        "color-mix(in srgb, var(--accent) 10%, transparent)",
+                      border:
+                        "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
+                      fontFamily: "var(--font-plus-jakarta), sans-serif",
+                    }}
+                  >
+                    {award.year || award.date}
+                  </span>
+                )}
 
-                <div className="hidden sm:flex w-9 h-9 items-center justify-center border border-[var(--border)] text-[var(--text-muted)] transition-all duration-300 group-hover:bg-[var(--accent)] group-hover:border-[var(--accent)] group-hover:text-white">
+                <div className="hidden sm:flex w-9 h-9 items-center justify-center border border-[var(--border)] text-[var(--text-muted)] transition-colors duration-200 group-hover:bg-[var(--accent)] group-hover:border-[var(--accent)] group-hover:text-white">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"

@@ -1,13 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useRevealOnView } from "@/lib/utils/useRevealOnView";
 
 interface Certification {
   title: string;
@@ -34,30 +30,7 @@ export function CertificationsSection({
   const dict = dictionaries[language].certifications;
   const sectionRef = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      if (!sectionRef.current) return;
-      const cards = sectionRef.current.querySelectorAll(".cert-bento-card");
-      if (cards.length === 0) return;
-
-      gsap.fromTo(
-        cards,
-        { opacity: 0, y: 36 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.1,
-          duration: 0.8,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-          },
-        },
-      );
-    },
-    { scope: sectionRef, dependencies: [certifications.length] },
-  );
+  useRevealOnView(sectionRef, ".cert-bento-card", [certifications.length]);
 
   return (
     <section ref={sectionRef} className="w-full py-10 md:py-16">
@@ -130,11 +103,18 @@ function CredentialCard({
   verifyLabel: string;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+
+  const handleMouseEnter = () => {
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect();
+    }
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = cardRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
+    const rect = rectRef.current;
+    if (!el || !rect) return;
     el.style.setProperty("--spot-x", `${e.clientX - rect.left}px`);
     el.style.setProperty("--spot-y", `${e.clientY - rect.top}px`);
   };
@@ -142,6 +122,7 @@ function CredentialCard({
   return (
     <div
       ref={cardRef}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       className="cert-bento-card group relative overflow-hidden p-6 sm:p-8 flex flex-col justify-between gap-6 transition-colors duration-300"
       style={{
@@ -159,9 +140,9 @@ function CredentialCard({
         }}
       />
 
-      {/* Top Animated Accent Line */}
+      {/* Top Animated Accent Line (GPU scaleX) */}
       <div
-        className="absolute top-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-500 ease-out"
+        className="gpu-sweep-bar absolute top-0 left-0 right-0 h-[2px]"
         style={{ background: "var(--accent)" }}
       />
 
@@ -242,14 +223,14 @@ function CredentialCard({
             <span className="group-hover/btn:text-[var(--accent)] transition-colors">
               {verifyLabel}
             </span>
-            <span className="w-8 h-8 flex items-center justify-center border border-[var(--border)] text-[var(--text-primary)] transition-all duration-300 group-hover/btn:bg-[var(--accent)] group-hover/btn:border-[var(--accent)] group-hover/btn:text-white">
+            <span className="w-8 h-8 flex items-center justify-center border border-[var(--border)] text-[var(--text-primary)] transition-colors duration-200 group-hover/btn:bg-[var(--accent)] group-hover/btn:border-[var(--accent)] group-hover/btn:text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={2}
                 stroke="currentColor"
-                className="w-3.5 h-3.5"
+                className="w-3.5 h-3.5 transition-transform duration-200 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5"
               >
                 <path
                   strokeLinecap="round"

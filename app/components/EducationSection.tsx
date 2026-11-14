@@ -1,13 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { dictionaries } from "@/lib/i18n/dictionaries";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useRevealOnView } from "@/lib/utils/useRevealOnView";
 
 interface Education {
   institution: string;
@@ -31,30 +27,7 @@ export function EducationSection({ items }: EducationSectionProps) {
   const dict = dictionaries[language].education;
   const sectionRef = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      if (!sectionRef.current) return;
-      const cards = sectionRef.current.querySelectorAll(".edu-editorial-card");
-      if (cards.length === 0) return;
-
-      gsap.fromTo(
-        cards,
-        { opacity: 0, y: 36 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.12,
-          duration: 0.85,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-          },
-        },
-      );
-    },
-    { scope: sectionRef, dependencies: [items.length] },
-  );
+  useRevealOnView(sectionRef, ".edu-editorial-card", [items.length]);
 
   return (
     <section ref={sectionRef} className="w-full py-10 md:py-16">
@@ -99,9 +72,9 @@ export function EducationSection({ items }: EducationSectionProps) {
               border: "1px solid var(--border)",
             }}
           >
-            {/* Top Animated Accent Sweep */}
+            {/* Top Animated Accent Sweep (GPU scaleX only) */}
             <div
-              className="absolute top-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-500 ease-out"
+              className="gpu-sweep-bar absolute top-0 left-0 right-0 h-[2px]"
               style={{ background: "var(--accent)" }}
             />
 

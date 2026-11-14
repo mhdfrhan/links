@@ -1,12 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useRevealOnView } from "@/lib/utils/useRevealOnView";
 
 /**
  * SoftwareAgencyCta — 2026 Awwwards / 21st.dev Architectural Promo Card
@@ -17,32 +13,20 @@ export function SoftwareAgencyCta() {
   const { language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLAnchorElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
 
-  useGSAP(
-    () => {
-      if (!sectionRef.current || !cardRef.current) return;
-      gsap.fromTo(
-        cardRef.current,
-        { opacity: 0, y: 36 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.85,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 82%",
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
+  useRevealOnView(sectionRef, ".agency-cta-card", []);
+
+  const handleMouseEnter = () => {
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect();
+    }
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const el = cardRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
+    const rect = rectRef.current;
+    if (!el || !rect) return;
     el.style.setProperty("--spot-x", `${e.clientX - rect.left}px`);
     el.style.setProperty("--spot-y", `${e.clientY - rect.top}px`);
   };
@@ -69,8 +53,9 @@ export function SoftwareAgencyCta() {
         href="https://handigital.biz.id"
         target="_blank"
         rel="noopener noreferrer"
+        onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
-        className="group relative block w-full overflow-hidden p-7 sm:p-10 md:p-12 no-underline transition-colors duration-300 border border-[var(--border)] hover:border-[var(--accent)]"
+        className="agency-cta-card group relative block w-full overflow-hidden p-7 sm:p-10 md:p-12 no-underline transition-colors duration-300 border border-[var(--border)] hover:border-[var(--accent)]"
         style={{
           background: "var(--bg-secondary)",
           borderRadius: 0,
@@ -86,21 +71,20 @@ export function SoftwareAgencyCta() {
           }}
         />
 
-        {/* Ambient Corner Accent Glow */}
+        {/* Ambient Corner Accent Glow (Pure radial gradient, zero filter:blur overhead) */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-24 -right-24 w-80 h-80 opacity-20 group-hover:opacity-35 transition-opacity duration-500"
+          className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 opacity-25 group-hover:opacity-40 transition-opacity duration-500"
           style={{
             background:
-              "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(60px)",
+              "radial-gradient(circle, color-mix(in srgb, var(--accent) 32%, transparent) 0%, transparent 70%)",
           }}
         />
 
-        {/* Top Animated Accent Sweep Bar */}
+        {/* Top Animated Accent Sweep Bar (GPU scaleX only) */}
         <div
           aria-hidden="true"
-          className="absolute top-0 left-0 h-[2px] w-20 group-hover:w-full transition-all duration-500 ease-out"
+          className="absolute top-0 left-0 right-0 h-[2px] origin-left scale-x-[0.18] group-hover:scale-x-100 transition-transform duration-500 ease-out will-change-transform"
           style={{ background: "var(--accent)" }}
         />
 
@@ -208,7 +192,7 @@ export function SoftwareAgencyCta() {
           {/* Right Column: Action CTA Block (4 cols) */}
           <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end justify-end gap-4">
             <div
-              className="w-full lg:w-auto px-6 py-4 flex items-center justify-between lg:justify-center gap-4 text-xs uppercase tracking-wider font-semibold transition-all duration-300"
+              className="w-full lg:w-auto px-6 py-4 flex items-center justify-between lg:justify-center gap-4 text-xs uppercase tracking-wider font-semibold transition-colors duration-200"
               style={{
                 background: "var(--accent)",
                 color: "#ffffff",

@@ -30,7 +30,6 @@ import {
 import {
   type ControlInput,
   type RacerState,
-  computeGearAndRpm,
   createInitialRacers,
   resolveCarCollisions,
   sortRaceStandings,
@@ -1434,6 +1433,8 @@ function RaceWorld({
     // Update Web Audio F1 Engine, Tires, Curbs & Wall Scrape (supports Grid Revving during countdown!)
     audioCtrlRef.current?.update({
       speed: player.speed,
+      gear: player.gear,
+      rpm: player.rpm,
       throttle: playerThrottle,
       isBoosting: player.isBoosting,
       isDrifting: player.isDrifting,
@@ -1587,12 +1588,11 @@ function RaceWorld({
       lastHudSyncAtRef.current = now;
       const standings = sortRaceStandings(cars);
       const rank = standings.findIndex((c) => c.isPlayer) + 1;
-      const { gear, rpm } = computeGearAndRpm(player.speed, player.isBoosting);
 
       onTelemetry({
         speedKmh: Math.round(player.speed * 6.2),
-        gear,
-        rpm,
+        gear: player.gear,
+        rpm: player.rpm,
         rank,
         lap: player.lap,
         elapsedMs: raceElapsedMsRef.current,

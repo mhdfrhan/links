@@ -244,3 +244,37 @@ test("glancing wall scrape preserves speed, curb riding stays barrier-free, and 
   }
   assert.ok(crashCar.speed > 16, `Expected clean ricochet momentum > 16 m/s, got ${crashCar.speed}`);
 });
+
+test("gearbox hysteresis and empty-nitro lockout prevent 6<->7 flapping and boost chatter at limit", () => {
+  const car = createInitialRacers().find((r) => r.isPlayer)!;
+  const fwd = forwardFromHeading(car.heading);
+  // Cruise at normal top speed (45 m/s -> cleanly in Gear 7)
+  car.vx = fwd.x * 45;
+  car.vz = fwd.z * 45;
+  car.speed = 45;
+  car.gear = 7;
+
+  // Mild speed dips to 41.2 m/s (above hysteresis floor 42 - 2.0 = 40.0) stay locked in Gear 7
+  for (let i = 0; i < 15; i++) {
+    car.gearHoldTimer = 0;
+    const f = forwardFromHeading(car.heading);
+    car.vx = f.x * (i % 2 === 0 ? 41.2 : 44.8);
+    car.vz = f.z * (i % 2 === 0 ? 41.2 : 44.8);
+    car.speed = Math.hypot(car.vx, car.vz);
+    const evt = stepCarPhysics(car, { throttle: 1, steer: 0, drift: false, useBoost: false }, 1 / 60, 1000 + i * 16.6);
+    assert.equal(car.gear, 7);
+    assert.equal(evt.downshifted, false);
+  }
+
+  // Holding boost past empty tank triggers lockout cleanly without re-engaging until reserve builds
+  car.boostMeter = 1.2;
+  stepCarPhysics(car, { throttle: 1, steer: 0, drift: false, useBoost: true }, 1 / 60, 1400);
+  // Drain to <= 0.5 -> boostExhausted locks cleanly across subsequent holds
+  for (let i = 0; i < 10; i++) {
+    stepCarPhysics(car, { throttle: 1, steer: 0, drift: false, useBoost: true }, 1 / 60, 1420 + i * 16.6);
+    if (car.boostExhausted) {
+      assert.equal(car.isBoosting, false);
+    }
+  }
+  assert.equal(car.boostExhausted, true);
+});

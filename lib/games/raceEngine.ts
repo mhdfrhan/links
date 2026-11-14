@@ -51,6 +51,7 @@ export interface RacerState {
   bestLapMs: number | null;
   lapStartMs: number;
   boostMeter: number;
+  boostExhausted: boolean;
   isBoosting: boolean;
   padBoostTimer: number;
   isDrifting: boolean;
@@ -60,6 +61,8 @@ export interface RacerState {
   wallHits: number;
   wallContactTimer: number;
   gear: number;
+  rpm: number;
+  gearHoldTimer: number;
   shiftDipTimer: number;
   isBraking: boolean;
   onCurb: boolean;
@@ -109,7 +112,7 @@ export const CAR_COLLISION_RADIUS = 1.15;
 export const BASE_MAX_SPEED = 45;
 export const BOOST_MAX_SPEED = 57;
 
-const GEAR_SPEED_THRESHOLDS = [0, 7.5, 14, 21, 28.5, 36.5, 45, 57] as const;
+const GEAR_SPEED_THRESHOLDS = [0, 7.5, 14, 21, 28, 35, 42, 57] as const;
 const GEAR_TORQUE_MULTIPLIERS = [1.32, 1.24, 1.14, 1.04, 0.94, 0.84, 0.74] as const;
 
 const RANK_BONUS_BY_POSITION: Record<number, number> = {
@@ -199,6 +202,7 @@ export function createInitialRacers(): RacerState[] {
       bestLapMs: null,
       lapStartMs: 0,
       boostMeter: 45,
+      boostExhausted: false,
       isBoosting: false,
       padBoostTimer: 0,
       isDrifting: false,
@@ -208,6 +212,8 @@ export function createInitialRacers(): RacerState[] {
       wallHits: 0,
       wallContactTimer: 0,
       gear: 1,
+      rpm: 0.22,
+      gearHoldTimer: 0,
       shiftDipTimer: 0,
       isBraking: false,
       onCurb: false,
@@ -253,6 +259,7 @@ export function stepCarPhysics(
   // Decay per-frame impact & cooldown timers cleanly
   car.wallContactTimer = Math.max(0, car.wallContactTimer - dt);
   car.shiftDipTimer = Math.max(0, car.shiftDipTimer - dt);
+  car.gearHoldTimer = Math.max(0, car.gearHoldTimer - dt);
   car.impactIntensity = Math.max(0, car.impactIntensity - dt * 3.8);
   car.impactShake = Math.max(0, car.impactShake - dt * 3.2);
   car.isScrapingWall = false;
@@ -263,15 +270,23 @@ export function stepCarPhysics(
     car.padBoostTimer = Math.max(0, car.padBoostTimer - dt);
   }
 
-  // Nitro consumption & passive trickle regeneration
-  const manualBoostActive = rawInput.useBoost && car.boostMeter > 2 && throttle > -0.2;
+  // Nitro consumption with hysteresis lockout so holding boost on an empty tank never sputters on/off
+  if (!rawInput.useBoost) {
+    if (car.boostMeter >= 10) car.boostExhausted = false;
+  } else if (car.boostMeter >= 20) {
+    car.boostExhausted = false;
+  }
+
+  const manualBoostActive =
+    rawInput.useBoost && !car.boostExhausted && car.boostMeter > 0.5 && throttle > -0.2;
   if (manualBoostActive) {
     car.boostMeter = Math.max(0, car.boostMeter - 35 * dt);
+    if (car.boostMeter <= 0.5) car.boostExhausted = true;
   } else {
     car.boostMeter = Math.min(100, car.boostMeter + 5.8 * dt);
   }
 
-  const boosting = manualBoostActive || car.padBoostTimer > 0;
+  const boosting = (manualBoostActive && !car.boostExhausted) || car.padBoostTimer > 0;
   car.isBoosting = boosting;
 
   const paceFactor = car.isPlayer ? 1.0 : car.aiBasePace;
@@ -296,22 +311,34 @@ export function stepCarPhysics(
     car.driftDirection = 0;
   }
 
-  // Sequential gearbox tracking + powerband calculation
+  // Sequential gearbox tracking with speed & time hysteresis (prevents 6 <-> 7 hunting near top speed)
   const fwd = forwardFromHeading(car.heading);
   const currentForwardSpeed = car.vx * fwd.x + car.vz * fwd.z;
   car.isBraking = throttle < -0.1 && currentForwardSpeed > 2;
 
   const forwardMag = Math.max(0, currentForwardSpeed);
-  const { gear: computedGear, rpm: computedRpm } = computeGearAndRpm(forwardMag, boosting);
-  if (computedGear > car.gear && forwardMag > 6 && throttle > 0.1) {
+  while (car.gear < 7 && forwardMag > GEAR_SPEED_THRESHOLDS[car.gear] + 0.35 && throttle > 0.05) {
+    car.gear += 1;
+    car.gearHoldTimer = 0.36;
     events.upshifted = true;
     car.shiftDipTimer = 0.052;
-  } else if (computedGear < car.gear && forwardMag > 10) {
+  }
+  while (car.gear > 1 && car.gearHoldTimer <= 0 && forwardMag < GEAR_SPEED_THRESHOLDS[car.gear - 1] - 2.0) {
+    car.gear -= 1;
+    car.gearHoldTimer = 0.32;
     events.downshifted = true;
   }
-  car.gear = computedGear;
 
-  const gearTorqueMult = GEAR_TORQUE_MULTIPLIERS[Math.max(0, Math.min(6, computedGear - 1))];
+  const gearLow = GEAR_SPEED_THRESHOLDS[car.gear - 1];
+  const gearHigh = GEAR_SPEED_THRESHOLDS[car.gear];
+  const gearFrac = gearHigh > gearLow ? Math.min(1, Math.max(0, (forwardMag - gearLow) / (gearHigh - gearLow))) : 1;
+  const computedRpm = Math.min(
+    1,
+    (car.gear === 1 ? 0.22 + gearFrac * 0.78 : 0.44 + gearFrac * 0.56) + (boosting ? 0.06 : 0)
+  );
+  car.rpm = computedRpm;
+
+  const gearTorqueMult = GEAR_TORQUE_MULTIPLIERS[Math.max(0, Math.min(6, car.gear - 1))];
   // Peak mid-band torque swell between 45%-92% RPM; brief torque cut during upshift gear change
   const powerBand = 0.88 + Math.sin(Math.min(1, computedRpm) * Math.PI * 0.86) * 0.24;
   const shiftClutchCut = car.shiftDipTimer > 0 && !boosting ? 0.36 : 1.0;
@@ -933,10 +960,10 @@ export function computeGearAndRpm(
     const high = GEAR_SPEED_THRESHOLDS[g];
     if (safeSpeed <= high || g === 7) {
       const frac = high > low ? Math.min(1, Math.max(0, (safeSpeed - low) / (high - low))) : 1;
-      const rpmBase = g === 1 ? 0.22 + frac * 0.78 : 0.42 + frac * 0.58;
+      const rpmBase = g === 1 ? 0.22 + frac * 0.78 : 0.44 + frac * 0.56;
       return {
         gear: g,
-        rpm: Math.min(1, isBoosting ? Math.max(rpmBase, 0.78) : rpmBase),
+        rpm: Math.min(1, isBoosting ? rpmBase + 0.07 : rpmBase),
       };
     }
   }

@@ -11,6 +11,8 @@ import { computeGearAndRpm } from "./raceEngine";
 
 export interface EngineAudioFrameInput {
   speed: number;
+  gear?: number;
+  rpm?: number;
   throttle?: number;
   isBoosting: boolean;
   isDrifting: boolean;
@@ -93,17 +95,16 @@ export class F1AudioController {
   private scrapeFilter: BiquadFilterNode | null = null;
   private scrapeGain: GainNode | null = null;
 
-  private turboOsc: OscillatorNode | null = null;
-  private turboHarmonicOsc: OscillatorNode | null = null;
-  private turboFilter: BiquadFilterNode | null = null;
-  private turboGain: GainNode | null = null;
+  private inductionSource: AudioBufferSourceNode | null = null;
+  private inductionFilter: BiquadFilterNode | null = null;
+  private inductionGain: GainNode | null = null;
 
   private noiseBuffer: AudioBuffer | null = null;
   private lastGear = 1;
+  private lastShiftAtMs = 0;
   private gridRevLevel = 0.2;
   private boostSpool = 0;
   private wasBoosting = false;
-  private lastLimiterCutPhase = 0;
   private shiftDipUntil = 0;
   private revBlipUntil = 0;
   private disposed = false;
@@ -324,45 +325,27 @@ export class F1AudioController {
     this.scrapeFilter = scrapeFilter;
     this.scrapeGain = scrapeGain;
 
-    // 6. Turbo / ERS MGU-H Turbine Whine Stack (eliminates flat Nitro drone at overdrive speeds)
-    const turboMix = ctx.createGain();
-    turboMix.gain.value = 1;
+    // 6. Pressurized Air Intake / Boost Induction Whoosh (warm filtered airflow, zero shrill whistle)
+    const inductionSrc = ctx.createBufferSource();
+    inductionSrc.buffer = pinkNoise;
+    inductionSrc.loop = true;
 
-    const turboOsc = ctx.createOscillator();
-    turboOsc.type = "triangle";
-    turboOsc.frequency.value = 1450;
-    const tPrimaryGain = ctx.createGain();
-    tPrimaryGain.gain.value = 0.65;
-    turboOsc.connect(tPrimaryGain);
-    tPrimaryGain.connect(turboMix);
+    const inductionFilter = ctx.createBiquadFilter();
+    inductionFilter.type = "bandpass";
+    inductionFilter.frequency.value = 620;
+    inductionFilter.Q.value = 1.15;
 
-    const turboHarmonicOsc = ctx.createOscillator();
-    turboHarmonicOsc.type = "sine";
-    turboHarmonicOsc.frequency.value = 2900;
-    const tHarmGain = ctx.createGain();
-    tHarmGain.gain.value = 0.35;
-    turboHarmonicOsc.connect(tHarmGain);
-    tHarmGain.connect(turboMix);
+    const inductionGain = ctx.createGain();
+    inductionGain.gain.value = 0;
 
-    const turboFilter = ctx.createBiquadFilter();
-    turboFilter.type = "bandpass";
-    turboFilter.frequency.value = 2100;
-    turboFilter.Q.value = 2.1;
+    inductionSrc.connect(inductionFilter);
+    inductionFilter.connect(inductionGain);
+    inductionGain.connect(bus);
+    inductionSrc.start();
 
-    const turboGain = ctx.createGain();
-    turboGain.gain.value = 0;
-
-    turboMix.connect(turboFilter);
-    turboFilter.connect(turboGain);
-    turboGain.connect(bus);
-
-    turboOsc.start();
-    turboHarmonicOsc.start();
-
-    this.turboOsc = turboOsc;
-    this.turboHarmonicOsc = turboHarmonicOsc;
-    this.turboFilter = turboFilter;
-    this.turboGain = turboGain;
+    this.inductionSource = inductionSrc;
+    this.inductionFilter = inductionFilter;
+    this.inductionGain = inductionGain;
   }
 
   public unlock() {
@@ -389,8 +372,9 @@ export class F1AudioController {
       this.driftGain?.gain.setTargetAtTime(0, now, 0.05);
       this.curbOutGain?.gain.setTargetAtTime(0, now, 0.04);
       this.scrapeGain?.gain.setTargetAtTime(0, now, 0.04);
-      this.turboGain?.gain.setTargetAtTime(0, now, 0.06);
+      this.inductionGain?.gain.setTargetAtTime(0, now, 0.06);
       this.lastGear = 1;
+      this.lastShiftAtMs = 0;
       this.gridRevLevel = 0.2;
       this.boostSpool = 0;
       this.wasBoosting = false;
@@ -401,72 +385,52 @@ export class F1AudioController {
     const throttleLoad = Math.max(0, Math.min(1, throttle));
     const speedRatio = Math.min(1, Math.max(0, frame.speed / 57));
 
-    const { gear, rpm } = computeGearAndRpm(frame.speed, frame.isBoosting);
+    const computed =
+      frame.gear !== undefined && frame.rpm !== undefined
+        ? { gear: frame.gear, rpm: frame.rpm }
+        : computeGearAndRpm(frame.speed, frame.isBoosting);
+    const { gear, rpm } = computed;
     const nowPerf = performance.now();
 
     if (frame.gridRevving && !frame.active) {
-      const targetGridRev = throttleLoad > 0.1 ? 0.28 + throttleLoad * 0.69 : 0.2;
+      const targetGridRev = throttleLoad > 0.1 ? 0.28 + throttleLoad * 0.68 : 0.2;
       this.gridRevLevel += (targetGridRev - this.gridRevLevel) * 0.18;
     } else {
-      if (gear > this.lastGear && frame.speed > 7) {
-        this.shiftDipUntil = nowPerf + 62;
-        this.playShiftThump(ctx, this.masterGain);
-      } else if (gear < this.lastGear && frame.speed > 12) {
-        this.revBlipUntil = nowPerf + 120;
-        this.playShiftThump(ctx, this.masterGain);
+      if (gear !== this.lastGear && nowPerf - this.lastShiftAtMs >= 320) {
+        if (gear > this.lastGear && frame.speed > 7) {
+          this.shiftDipUntil = nowPerf + 58;
+          this.lastShiftAtMs = nowPerf;
+          this.playShiftThump(ctx, this.masterGain);
+        } else if (gear < this.lastGear && frame.speed > 12) {
+          this.revBlipUntil = nowPerf + 115;
+          this.lastShiftAtMs = nowPerf;
+          this.playShiftThump(ctx, this.masterGain);
+        }
       }
       this.lastGear = gear;
     }
 
-    // Turbo / ERS boost spool ramps smoothly + wastegate flutter when releasing boost
+    // Smooth induction spool under Nitro boost (gentle pressure release when lifting boost)
     const targetSpool = frame.isBoosting && throttleLoad > 0.05 ? 1 : 0;
-    this.boostSpool += (targetSpool - this.boostSpool) * (targetSpool > this.boostSpool ? 0.14 : 0.09);
-    if (this.wasBoosting && !frame.isBoosting && frame.active && frame.speed > 18) {
-      this.playWastegateFlutter(ctx, this.masterGain);
+    this.boostSpool += (targetSpool - this.boostSpool) * (targetSpool > this.boostSpool ? 0.12 : 0.08);
+    if (this.wasBoosting && !frame.isBoosting && frame.active && frame.speed > 18 && throttleLoad > 0.1) {
+      this.playWastegateRelease(ctx, this.masterGain);
     }
     this.wasBoosting = frame.isBoosting;
 
     const isIgnitionCut = frame.active && nowPerf < this.shiftDipUntil;
-    const revMatchFlare = frame.active && nowPerf < this.revBlipUntil ? 0.15 : 0;
+    const revMatchFlare = frame.active && nowPerf < this.revBlipUntil ? 0.12 : 0;
 
     const rawRpm = frame.gridRevving && !frame.active ? this.gridRevLevel : rpm;
 
-    // Rev-limiter ignition-cut bounce near redline (15.5 Hz F1 limiter pulse eliminates flat organ drone!)
-    const onLimiter =
-      (rawRpm > 0.945 && throttleLoad > 0.35) ||
-      (frame.gridRevving && !frame.active && this.gridRevLevel > 0.9);
-    let limiterBounceRpm = 0;
-    let limiterVolDip = 1.0;
-    let limiterBarkHz = 0;
-
-    if (onLimiter) {
-      const limCycle = (nowPerf * 0.0155) % 1;
-      const inCut = limCycle > 0.56;
-      limiterBounceRpm = (limCycle - 0.5) * -0.14 - (inCut ? 0.04 : 0);
-      limiterVolDip = inCut ? 0.62 : 1.08;
-      limiterBarkHz = inCut ? -220 : 260;
-
-      // Occasional subtle exhaust crackle tick on rev-limiter edge transitions
-      if (this.lastLimiterCutPhase <= 0.56 && limCycle > 0.56 && frame.isBoosting && Math.random() < 0.45) {
-        this.playLimiterPop(ctx, this.masterGain);
-      }
-      this.lastLimiterCutPhase = limCycle;
-    } else {
-      this.lastLimiterCutPhase = 0;
-    }
-
-    // Organic cylinder firing roughness & speed wind ripple so steady high-speed cruising stays textured
-    const microFlutter =
-      Math.sin(nowPerf * 0.047) * 0.014 + Math.cos(nowPerf * 0.083) * 0.009;
-
+    // Gentle analog combustion texture at top end (smooth & rich, zero harsh 15Hz chiptune buzz)
+    const analogWarmth =
+      Math.sin(nowPerf * 0.022) * 0.005 + Math.cos(nowPerf * 0.039) * 0.003;
     const effectiveRpm = Math.min(
-      1.09,
-      Math.max(
-        0.18,
-        rawRpm + revMatchFlare + this.boostSpool * 0.075 + limiterBounceRpm + microFlutter
-      )
+      1.06,
+      Math.max(0.18, rawRpm + revMatchFlare + this.boostSpool * 0.045 + analogWarmth)
     );
-    const baseHz = 40 + effectiveRpm * 70 + speedRatio * 18;
+    const baseHz = 40 + effectiveRpm * 69 + speedRatio * 15;
 
     if (
       this.subOsc &&
@@ -477,43 +441,34 @@ export class F1AudioController {
       this.engineFilter &&
       this.engineGain
     ) {
-      this.subOsc.frequency.setTargetAtTime(baseHz, now, 0.022);
-      this.mainOsc.frequency.setTargetAtTime(baseHz * 2, now, 0.022);
-      // Dynamic harmonic detune breathes with throttle load + turbo spool for fierce exhaust growl
-      const detuneRatio = 1.007 + throttleLoad * 0.004 + this.boostSpool * 0.006;
-      this.twinOsc.frequency.setTargetAtTime(baseHz * 2 * detuneRatio, now, 0.025);
-      this.intakeOsc.frequency.setTargetAtTime(baseHz * 3, now, 0.022);
+      this.subOsc.frequency.setTargetAtTime(baseHz, now, 0.03);
+      this.mainOsc.frequency.setTargetAtTime(baseHz * 2, now, 0.03);
+      const detuneRatio = 1.0075 + throttleLoad * 0.003 + this.boostSpool * 0.004;
+      this.twinOsc.frequency.setTargetAtTime(baseHz * 2 * detuneRatio, now, 0.035);
+      this.intakeOsc.frequency.setTargetAtTime(baseHz * 3, now, 0.03);
 
-      // Intake harmonic bites harder under open throttle or DRS/Nitro
-      const intakeLevel = 0.08 + throttleLoad * 0.16 + this.boostSpool * 0.11;
-      this.intakeGain.gain.setTargetAtTime(intakeLevel, now, 0.035);
+      const intakeLevel = 0.08 + throttleLoad * 0.15 + this.boostSpool * 0.09;
+      this.intakeGain.gain.setTargetAtTime(intakeLevel, now, 0.045);
 
       const cutoff =
         290 +
-        effectiveRpm * 520 +
-        throttleLoad * 580 +
-        this.boostSpool * 480 +
-        limiterBarkHz;
-      this.engineFilter.frequency.setTargetAtTime(Math.max(220, cutoff), now, 0.03);
+        effectiveRpm * 510 +
+        throttleLoad * 540 +
+        this.boostSpool * 420;
+      this.engineFilter.frequency.setTargetAtTime(Math.max(240, cutoff), now, 0.045);
 
-      const loadVol =
-        (0.13 + throttleLoad * 0.095 + speedRatio * 0.07 + this.boostSpool * 0.055) *
-        limiterVolDip;
-      this.engineGain.gain.setTargetAtTime(isIgnitionCut ? loadVol * 0.35 : loadVol, now, 0.02);
+      const loadVol = 0.13 + throttleLoad * 0.09 + speedRatio * 0.07 + this.boostSpool * 0.045;
+      this.engineGain.gain.setTargetAtTime(isIgnitionCut ? loadVol * 0.38 : loadVol, now, 0.025);
     }
 
-    // MGU-H / Turbo spool whine climbing with boost + overdrive speed
-    if (this.turboOsc && this.turboHarmonicOsc && this.turboFilter && this.turboGain) {
-      const turbineBaseHz =
-        1250 + speedRatio * 1750 + this.boostSpool * 950 + (onLimiter ? limiterBounceRpm * 1400 : 0);
-      this.turboOsc.frequency.setTargetAtTime(turbineBaseHz, now, 0.04);
-      this.turboHarmonicOsc.frequency.setTargetAtTime(turbineBaseHz * 1.5, now, 0.04);
-      this.turboFilter.frequency.setTargetAtTime(turbineBaseHz * 1.15, now, 0.05);
-      const whineVol =
-        this.boostSpool > 0.03 || speedRatio > 0.72
-          ? Math.min(0.085, this.boostSpool * 0.062 + Math.max(0, speedRatio - 0.72) * 0.075)
+    // Warm pressurized airflow layer when surging with Nitro / extreme speed
+    if (this.inductionGain && this.inductionFilter) {
+      const airVol =
+        this.boostSpool > 0.03
+          ? Math.min(0.14, this.boostSpool * 0.11 + speedRatio * 0.03)
           : 0;
-      this.turboGain.gain.setTargetAtTime(whineVol, now, 0.04);
+      this.inductionGain.gain.setTargetAtTime(airVol, now, 0.06);
+      this.inductionFilter.frequency.setTargetAtTime(520 + speedRatio * 580 + this.boostSpool * 260, now, 0.06);
     }
 
     if (!frame.active) {
@@ -525,18 +480,12 @@ export class F1AudioController {
     }
 
     if (this.roadGain && this.roadFilter) {
-      const windBuffet =
-        speedRatio > 0.65 ? Math.sin(nowPerf * 0.053) * (speedRatio - 0.65) * 180 : 0;
       this.roadGain.gain.setTargetAtTime(
-        frame.speed > 3 ? Math.min(0.24, speedRatio * 0.18 + this.boostSpool * 0.045) : 0,
+        frame.speed > 3 ? Math.min(0.22, speedRatio * 0.17 + this.boostSpool * 0.035) : 0,
         now,
         0.07
       );
-      this.roadFilter.frequency.setTargetAtTime(
-        Math.max(150, 175 + speedRatio * 820 + windBuffet),
-        now,
-        0.06
-      );
+      this.roadFilter.frequency.setTargetAtTime(175 + speedRatio * 780, now, 0.07);
     }
 
     if (this.driftGain && this.driftFilter) {
@@ -565,38 +514,24 @@ export class F1AudioController {
     }
   }
 
-  private playLimiterPop(ctx: AudioContext, dest: AudioNode) {
+  private playWastegateRelease(ctx: AudioContext, dest: AudioNode) {
     if (!this.noiseBuffer) return;
     const start = ctx.currentTime;
     const burst = ctx.createBufferSource();
     burst.buffer = this.noiseBuffer;
     const bp = ctx.createBiquadFilter();
     bp.type = "bandpass";
-    bp.frequency.value = 240 + Math.random() * 140;
+    bp.frequency.setValueAtTime(1100, start);
+    bp.frequency.exponentialRampToValueAtTime(420, start + 0.16);
     bp.Q.value = 1.6;
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.09, start);
-    g.gain.exponentialRampToValueAtTime(0.001, start + 0.048);
+    g.gain.setValueAtTime(0.065, start);
+    g.gain.exponentialRampToValueAtTime(0.001, start + 0.17);
     burst.connect(bp);
     bp.connect(g);
     g.connect(dest);
     burst.start(start);
-    burst.stop(start + 0.055);
-  }
-
-  private playWastegateFlutter(ctx: AudioContext, dest: AudioNode) {
-    const start = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(2600, start);
-    osc.frequency.exponentialRampToValueAtTime(1150, start + 0.18);
-    g.gain.setValueAtTime(0.045, start);
-    g.gain.exponentialRampToValueAtTime(0.001, start + 0.19);
-    osc.connect(g);
-    g.connect(dest);
-    osc.start(start);
-    osc.stop(start + 0.2);
+    burst.stop(start + 0.18);
   }
 
   private playShiftThump(ctx: AudioContext, dest: AudioNode) {
@@ -646,8 +581,7 @@ export class F1AudioController {
       this.curbSource?.stop();
       this.curbLfo?.stop();
       this.scrapeSource?.stop();
-      this.turboOsc?.stop();
-      this.turboHarmonicOsc?.stop();
+      this.inductionSource?.stop();
       if (this.ctx && this.ctx.state !== "closed") {
         this.ctx.close().catch(() => {});
       }

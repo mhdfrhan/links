@@ -305,6 +305,15 @@ export default function RaceArenaPage() {
     color: "var(--text-primary)",
   };
 
+  const rpmPct = Math.round(telemetry.rpm * 100);
+  const rpmColor =
+    telemetry.rpm > 0.88
+      ? "#ef4444"
+      : telemetry.rpm > 0.65
+      ? "var(--accent)"
+      : "var(--green)";
+  const boostPct = Math.max(0, Math.min(100, telemetry.boostMeter));
+
   return (
     <GameShell
       code="01"
@@ -582,69 +591,126 @@ export default function RaceArenaPage() {
           </div>
         )}
 
-        {/* Speedometer + F1 Gear/RPM + Nitro Gauge */}
+        {/* Speedometer + F1 Gear/RPM + Nitro Gauge (Compact single bar on mobile; full twin cards on desktop) */}
         {(phase === "countdown" || phase === "racing") && (
-          <div className="pointer-events-none absolute right-3 bottom-32 z-20 flex flex-col items-end gap-1.5 sm:right-6 md:bottom-5">
-            <div className="flex w-40 flex-col gap-1.5 border px-3.5 py-2 backdrop-blur-md sm:w-44" style={surfaceStyle}>
-              <div className="flex items-baseline justify-between gap-2">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[10px] font-bold" style={{ color: "var(--accent)" }}>
+          <>
+            {/* Mobile Compact Single Strip tucked inside touch-pedal footprint so it never covers the car */}
+            <div
+              className="pointer-events-none absolute right-3 bottom-[118px] z-20 flex w-[118px] flex-col gap-1 border px-2 py-1.5 backdrop-blur-sm md:hidden"
+              style={{
+                borderColor: "var(--border)",
+                background: "color-mix(in srgb, var(--bg-primary) 58%, transparent)",
+                color: "var(--text-primary)",
+              }}
+            >
+              <div className="flex items-baseline justify-between leading-none">
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-[9px] font-bold" style={{ color: "var(--accent)" }}>
                     G
                   </span>
-                  <span className="text-xl font-black tabular-nums">{telemetry.gear}</span>
+                  <span className="text-sm font-black tabular-nums">{telemetry.gear}</span>
                 </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-black tracking-tight tabular-nums sm:text-3xl">
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-base font-black tracking-tight tabular-nums">
                     {telemetry.speedKmh}
                   </span>
-                  <span className="text-[10px] font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  <span className="text-[8px] font-semibold" style={{ color: "var(--text-secondary)" }}>
                     KM/H
                   </span>
                 </div>
               </div>
-              <div className="h-1.5 w-full overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
+
+              <div className="h-1 w-full overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
                 <div
                   className="h-full transition-[width] duration-75"
                   style={{
-                    width: `${Math.round(telemetry.rpm * 100)}%`,
-                    background:
-                      telemetry.rpm > 0.88
-                        ? "#ef4444"
-                        : telemetry.rpm > 0.65
-                        ? "var(--accent)"
-                        : "var(--green)",
+                    width: `${rpmPct}%`,
+                    background: rpmColor,
                   }}
                 />
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <BoltIcon
+                  className="h-2.5 w-2.5 shrink-0"
+                  style={{ color: telemetry.isDrifting ? "#38bdf8" : "var(--accent)" }}
+                />
+                <div className="h-1 flex-1 overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
+                  <div
+                    className="h-full transition-[width] duration-75"
+                    style={{
+                      width: `${boostPct}%`,
+                      background: telemetry.isBoosting || telemetry.isDrifting ? "#38bdf8" : "var(--accent)",
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[9px] font-bold leading-none tabular-nums"
+                  style={{ color: telemetry.isBoosting ? "#38bdf8" : "var(--text-secondary)" }}
+                >
+                  {Math.round(boostPct)}%
+                </span>
               </div>
             </div>
 
-            <div className="flex w-40 flex-col gap-1 border p-2 backdrop-blur-md sm:w-44" style={surfaceStyle}>
-              <div className="flex items-center justify-between text-[10px] font-bold tracking-wider uppercase">
-                <span className="flex items-center gap-1">
-                  <BoltIcon className="h-3 w-3" style={{ color: "var(--accent)" }} />
-                  NITRO
-                </span>
-                <span className="tabular-nums" style={{ color: telemetry.isBoosting ? "var(--accent)" : "var(--text-secondary)" }}>
-                  {Math.round(telemetry.boostMeter)}%
-                </span>
-              </div>
-              <div className="h-2 w-full overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
-                <div
-                  className="h-full transition-[width] duration-75"
-                  style={{
-                    width: `${Math.max(0, Math.min(100, telemetry.boostMeter))}%`,
-                    background: telemetry.isBoosting ? "#38bdf8" : "var(--accent)",
-                  }}
-                />
-              </div>
-              {telemetry.isDrifting && (
-                <div className="flex justify-between text-[10px] font-bold" style={{ color: "#38bdf8" }}>
-                  <span>DRIFT CHARGE</span>
-                  <span>{Math.min(100, Math.round((telemetry.driftCharge / 0.45) * 100))}%</span>
+            {/* Desktop Full Telemetry Cards */}
+            <div className="pointer-events-none absolute right-6 bottom-5 z-20 hidden flex-col items-end gap-1.5 md:flex">
+              <div className="flex w-44 flex-col gap-1.5 border px-3.5 py-2 backdrop-blur-md" style={surfaceStyle}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[10px] font-bold" style={{ color: "var(--accent)" }}>
+                      G
+                    </span>
+                    <span className="text-xl font-black tabular-nums">{telemetry.gear}</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-black tracking-tight tabular-nums">
+                      {telemetry.speedKmh}
+                    </span>
+                    <span className="text-[10px] font-semibold" style={{ color: "var(--text-secondary)" }}>
+                      KM/H
+                    </span>
+                  </div>
                 </div>
-              )}
+                <div className="h-1.5 w-full overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
+                  <div
+                    className="h-full transition-[width] duration-75"
+                    style={{
+                      width: `${rpmPct}%`,
+                      background: rpmColor,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex w-44 flex-col gap-1 border p-2 backdrop-blur-md" style={surfaceStyle}>
+                <div className="flex items-center justify-between text-[10px] font-bold tracking-wider uppercase">
+                  <span className="flex items-center gap-1">
+                    <BoltIcon className="h-3 w-3" style={{ color: "var(--accent)" }} />
+                    NITRO
+                  </span>
+                  <span className="tabular-nums" style={{ color: telemetry.isBoosting ? "var(--accent)" : "var(--text-secondary)" }}>
+                    {Math.round(boostPct)}%
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
+                  <div
+                    className="h-full transition-[width] duration-75"
+                    style={{
+                      width: `${boostPct}%`,
+                      background: telemetry.isBoosting ? "#38bdf8" : "var(--accent)",
+                    }}
+                  />
+                </div>
+                {telemetry.isDrifting && (
+                  <div className="flex justify-between text-[10px] font-bold" style={{ color: "#38bdf8" }}>
+                    <span>DRIFT CHARGE</span>
+                    <span>{Math.min(100, Math.round((telemetry.driftCharge / 0.45) * 100))}%</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* Desktop Controls Legend & Open Asset Credit */}

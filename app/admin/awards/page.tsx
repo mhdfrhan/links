@@ -1,30 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { db } from "@/lib/firebase/config";
-import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, writeBatch } from "firebase/firestore";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { AdminCard } from "../components/AdminCard";
 import { AdminFormField } from "../components/AdminFormField";
 import { AdminModal } from "../components/AdminModal";
 import { showToast } from "../components/AdminToast";
 import { AITranslateButton } from "../components/AITranslateButton";
 import { SortableItem } from "../components/SortableItem";
+import { useSortableCollection } from "../hooks/useSortableCollection";
 import { PlusIcon, PencilIcon, TrashIcon, StarIcon, SparklesIcon } from "@heroicons/react/24/outline";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 
 interface Award {
@@ -37,8 +25,8 @@ interface Award {
 }
 
 export default function AwardsPage() {
-  const [items, setItems] = useState<Award[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { items, loading, fetchData, sensors, handleDragEnd } =
+    useSortableCollection<Award>("awards");
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -47,49 +35,6 @@ export default function AwardsPage() {
   const [year, setYear] = useState("");
   const [highlight, setHighlight] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Award | null>(null);
-
-  useEffect(() => { fetchData(); }, []);
-
-  const fetchData = async () => {
-    try {
-      const snap = await getDocs(query(collection(db, "awards"), orderBy("order", "asc")));
-      setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Award)));
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
-  };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
-
-  const saveOrderToFirebase = async (newItems: Award[]) => {
-    try {
-      const batch = writeBatch(db);
-      newItems.forEach((item, index) => {
-        const docRef = doc(db, "awards", item.id);
-        batch.update(docRef, { order: index });
-      });
-      await batch.commit();
-      showToast("success", "Urutan berhasil disimpan!");
-    } catch (error) {
-      console.error(error);
-      showToast("error", "Gagal menyimpan urutan.");
-      fetchData();
-    }
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = items.findIndex((i) => i.id === active.id);
-      const newIndex = items.findIndex((i) => i.id === over.id);
-      const newItems = arrayMove(items, oldIndex, newIndex);
-      
-      setItems(newItems);
-      saveOrderToFirebase(newItems);
-    }
-  };
 
   const resetForm = () => { setIsEditing(false); setEditId(null); setTitle(""); setTitleEn(""); setYear(""); setHighlight(false); };
 
@@ -197,7 +142,7 @@ export default function AwardsPage() {
       {items.length === 0 && !isEditing ? (
         <AdminCard>
           <div className="text-center py-10">
-            <p className="text-xs text-muted-foreground">Belum ada data. Klik "Tambah Data" untuk memulai.</p>
+            <p className="text-xs text-muted-foreground">Belum ada data. Klik &ldquo;Tambah Data&rdquo; untuk memulai.</p>
           </div>
         </AdminCard>
       ) : (

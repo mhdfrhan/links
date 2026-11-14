@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SparklesIcon } from "@heroicons/react/24/outline";
+import { auth } from "@/lib/firebase/config";
 import { showToast } from "./AdminToast";
 
 interface AITranslateButtonProps {
@@ -22,9 +23,17 @@ export function AITranslateButton({ text, onTranslated, className = "", label = 
 
     setLoading(true);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error("Sesi login admin berakhir. Silakan login ulang.");
+      }
+
       const response = await fetch("/api/translate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ text }),
       });
 
@@ -38,9 +47,10 @@ export function AITranslateButton({ text, onTranslated, className = "", label = 
         onTranslated(data.translatedText);
         showToast("success", "Teks berhasil ditranslasi!");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("AI Translate Error:", error);
-      showToast("error", error.message || "Terjadi kesalahan pada AI Translate");
+      const msg = error instanceof Error ? error.message : "Terjadi kesalahan pada AI Translate";
+      showToast("error", msg);
     } finally {
       setLoading(false);
     }

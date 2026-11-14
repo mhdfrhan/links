@@ -49,13 +49,6 @@ export async function uploadToCloudinary(
   });
 }
 
-export function getCloudinaryUrl(publicId: string, transforms?: string): string {
-  if (transforms) {
-    return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transforms}/${publicId}`;
-  }
-  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${publicId}`;
-}
-
 interface CloudinaryRawResponse {
   secure_url: string;
   public_id: string;

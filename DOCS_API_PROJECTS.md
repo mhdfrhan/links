@@ -57,7 +57,6 @@ Endpoint ini telah dilengkapi dengan beberapa lapisan keamanan:
       "fullDescription": "Deskripsi lengkap...",
       "fullDescription_en": "Full description...",
       "imageUrl": "https://res.cloudinary.com/...",
-      "cloudinaryPublicId": "portfolio/projects/...",
       "techStack": ["React", "Laravel", "MySQL"],
       "link": "https://github.com/mhdfrhan",
       "order": 0,

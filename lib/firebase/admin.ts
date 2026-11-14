@@ -1,15 +1,20 @@
 import * as admin from 'firebase-admin';
 
-let isConfigured = false;
+const globalForAdmin = globalThis as typeof globalThis & {
+  __firebaseAdminConfigured?: boolean;
+};
+
+let isConfigured = globalForAdmin.__firebaseAdminConfigured === true;
 
 if (!admin.apps.length) {
   try {
     const serviceAccountStr = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     const serviceAccount = serviceAccountStr ? JSON.parse(serviceAccountStr) : {};
-    
+
     if (Object.keys(serviceAccount).length === 0) {
       console.warn("FIREBASE_SERVICE_ACCOUNT_KEY is missing or empty. Server-side admin features will not work.");
       admin.initializeApp(); // Initialize empty to prevent build crash
+      isConfigured = false;
     } else {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
@@ -21,9 +26,13 @@ if (!admin.apps.length) {
     if (!admin.apps.length) {
       admin.initializeApp();
     }
+    isConfigured = false;
   }
-} else {
-  isConfigured = true; // Already initialized correctly if apps.length > 0
+  globalForAdmin.__firebaseAdminConfigured = isConfigured;
+} else if (globalForAdmin.__firebaseAdminConfigured === undefined) {
+  // Apps were initialized outside this module (e.g. test or external init with cert)
+  isConfigured = Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+  globalForAdmin.__firebaseAdminConfigured = isConfigured;
 }
 
 export const isAdminConfigured = isConfigured;

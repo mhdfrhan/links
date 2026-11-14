@@ -43,9 +43,8 @@ export default function RegisterPage() {
         }
       } catch (err) {
         console.error("Error checking registration status", err);
-        // If we can't check, allow registration attempt — the create user will fail 
-        // server-side if not allowed. This prevents false "closed" messages.
-        setIsAllowed(true);
+        // Fail closed: if Firestore config cannot be verified, do not expose registration UI
+        setIsAllowed(false);
       }
     };
 
@@ -80,13 +79,18 @@ export default function RegisterPage() {
       });
 
       router.push("/admin/dashboard");
-    } catch (err: any) {
-      if (err.code === "auth/email-already-in-use") {
+    } catch (err: unknown) {
+      const code =
+        typeof err === "object" && err !== null && "code" in err
+          ? (err as { code?: string }).code
+          : undefined;
+      const msg = err instanceof Error ? err.message : undefined;
+      if (code === "auth/email-already-in-use") {
         setError("Email ini sudah digunakan. Silakan login.");
-      } else if (err.code === "auth/weak-password") {
+      } else if (code === "auth/weak-password") {
         setError("Password terlalu lemah. Minimal 6 karakter.");
       } else {
-        setError(err.message || "Gagal melakukan registrasi.");
+        setError(msg || "Gagal melakukan registrasi.");
       }
       setLoading(false);
     }

@@ -7,22 +7,12 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
+import { formatExperienceText } from "@/lib/utils/formatExperience";
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface AboutSectionProps {
   text: string;
-}
-
-function formatExperienceText(text: string): string {
-  if (!text) return "";
-  const years = new Date().getFullYear() - 2022;
-
-  let formatted = text.replace(/(pengalaman\s+(?:[^]*?))\b\d+\b(\s+tahun)/gi, `$1${years}$2`);
-  formatted = formatted.replace(/(experience\s+(?:[^]*?))\b\d+\b(\s+years)/gi, `$1${years}$2`);
-  formatted = formatted.replace(/\b4\s*tahun/gi, `${years} tahun`);
-  formatted = formatted.replace(/\b4\s*years/gi, `${years} years`);
-  return formatted;
 }
 
 /**

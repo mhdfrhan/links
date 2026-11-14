@@ -31,17 +31,6 @@ interface ProfileHeaderProps {
   socialLinks?: ISocialLink[];
 }
 
-function formatExperienceText(text: string): string {
-  if (!text) return "";
-  const years = new Date().getFullYear() - 2022;
-  
-  let formatted = text.replace(/(pengalaman\s+(?:[^]*?))\b\d+\b(\s+tahun)/gi, `$1${years}$2`);
-  formatted = formatted.replace(/(experience\s+(?:[^]*?))\b\d+\b(\s+years)/gi, `$1${years}$2`);
-  formatted = formatted.replace(/\b4\s*tahun/gi, `${years} tahun`);
-  formatted = formatted.replace(/\b4\s*years/gi, `${years} years`);
-  return formatted;
-}
-
 /**
  * ProfileHeader — Vibrant Editorial Hero
  * Full landscape image, rich typography, and GSAP animations.
@@ -352,7 +341,7 @@ export function ProfileHeader({
             className="text-xs text-[var(--text-muted)] tracking-wider font-medium uppercase"
             style={{ fontFamily: "var(--font-plus-jakarta), sans-serif" }}
           >
-            // {language === "id" ? "SCROLL KE BAWAH" : "SCROLL DOWN"}
+            {"// "}{language === "id" ? "SCROLL KE BAWAH" : "SCROLL DOWN"}
           </span>
         </div>
       </div>

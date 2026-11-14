@@ -36,9 +36,9 @@ export default function SettingsPage() {
         ]);
 
         if (securityDoc.exists()) {
-          setPin(securityDoc.data().pin || "04032005");
+          setPin(securityDoc.data().pin || "");
         } else {
-          setPin("04032005");
+          setPin("");
         }
 
         if (adminDoc.exists()) {
@@ -65,7 +65,10 @@ export default function SettingsPage() {
   const handleSaveSecurity = async () => {
     setSavingSecurity(true);
     try {
-      await setDoc(doc(db, "config", "security"), { pin });
+      const trimmedPin = pin.trim();
+      if (trimmedPin) {
+        await setDoc(doc(db, "config", "security"), { pin: trimmedPin });
+      }
 
       const adminRef = doc(db, "config", "admin");
       const adminSnap = await getDoc(adminRef);
@@ -137,8 +140,8 @@ export default function SettingsPage() {
             type="password"
             value={pin}
             onChange={setPin}
-            placeholder="Masukkan PIN"
-            hint="PIN digunakan untuk reset password. Default: 04032005"
+            placeholder="Masukkan PIN baru"
+            hint="PIN digunakan untuk reset password (simpan PIN yang kuat; kosongkan jika tidak ingin mengubah)."
           />
 
           <div className="space-y-2">

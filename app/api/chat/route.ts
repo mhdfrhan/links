@@ -1,55 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import * as adminModule from "firebase-admin";
-
-function formatExperienceText(text: string): string {
-  if (!text) return "";
-  const years = new Date().getFullYear() - 2022;
-
-  let formatted = text.replace(
-    /(pengalaman\s+(?:[^]*?))\b\d+\b(\s+tahun)/gi,
-    `$1${years}$2`,
-  );
-  formatted = formatted.replace(
-    /(experience\s+(?:[^]*?))\b\d+\b(\s+years)/gi,
-    `$1${years}$2`,
-  );
-  formatted = formatted.replace(/\b4\s*tahun/gi, `${years} tahun`);
-  formatted = formatted.replace(/\b4\s*years/gi, `${years} years`);
-  return formatted;
-}
+import { adminDb, isAdminConfigured } from "@/lib/firebase/admin";
+import { createRateLimiter, getClientIp } from "@/lib/utils/rateLimit";
+import { formatExperienceText } from "@/lib/utils/formatExperience";
 
 // ============================================================
-// RATE LIMITER — In-memory, per IP, max 15 req/menit
+// RATE LIMITER — In-memory, bounded per IP, max 15 req/menit
 // ============================================================
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip);
-
-  if (!record || now > record.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + 60_000 });
-    return true;
-  }
-
-  if (record.count >= 15) return false;
-
-  record.count++;
-  return true;
-}
-
-// ============================================================
-// OPENAI CLIENT — via NVIDIA API
-// ============================================================
-const apiKey =
-  process.env.NVIDIA_API_KEY?.trim() ||
-  "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";
-
-const openai = new OpenAI({
-  apiKey,
-  baseURL: "https://integrate.api.nvidia.com/v1",
+const checkRateLimit = createRateLimiter({
+  maxRequests: 15,
+  windowMs: 60_000,
 });
+
+function getOpenAIClient(): OpenAI | null {
+  const apiKey = process.env.NVIDIA_API_KEY?.trim();
+  if (!apiKey) return null;
+  return new OpenAI({
+    apiKey,
+    baseURL: "https://integrate.api.nvidia.com/v1",
+  });
+}
 
 // ============================================================
 // INJECTION PATTERN DETECTOR
@@ -129,20 +99,11 @@ async function buildPortfolioContext(): Promise<string> {
   }
 
   try {
-    // Pastikan Firebase Admin sudah terinisialisasi
-    if (!adminModule.apps.length) {
-      const serviceAccountStr = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-      if (serviceAccountStr) {
-        const serviceAccount = JSON.parse(serviceAccountStr);
-        adminModule.initializeApp({
-          credential: adminModule.credential.cert(serviceAccount),
-        });
-      } else {
-        return buildStaticContext();
-      }
+    if (!isAdminConfigured) {
+      return buildStaticContext();
     }
 
-    const db = adminModule.firestore();
+    const db = adminDb;
 
     const [
       aboutDoc,
@@ -224,14 +185,18 @@ async function buildPortfolioContext(): Promise<string> {
     const skills = skillsSnap.docs
       .map((d) => {
         const s = d.data();
-        const skillNames = (s.skills || [])
-          .map((sk: any) => sk.name)
+        const skillNames = ((s.skills || []) as Array<{ name: string }>)
+          .map((sk) => sk.name)
           .join(", ");
         return `- ${s.title}: ${skillNames}`;
       })
       .join("\n");
 
-    const socialLinks = (profile?.socialLinks || []) as any[];
+    const socialLinks = (profile?.socialLinks || []) as Array<{
+      platform: string;
+      label?: string;
+      url: string;
+    }>;
     const emailFromSocial = socialLinks.find((s) => s.platform?.toLowerCase() === "email")?.url;
     const githubFromSocial = socialLinks.find((s) => s.platform?.toLowerCase() === "github")?.url;
     const linkedinFromSocial = socialLinks.find((s) => s.platform?.toLowerCase() === "linkedin")?.url;
@@ -443,11 +408,7 @@ function isOffTopicResponse(text: string): boolean {
 // ============================================================
 export async function POST(req: NextRequest) {
   try {
-    // Get IP for rate limiting
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
+    const ip = getClientIp(req.headers);
 
     // Rate limit check
     if (!checkRateLimit(ip)) {
@@ -457,6 +418,14 @@ export async function POST(req: NextRequest) {
             "Terlalu banyak pesan. Tunggu sebentar dan coba lagi. / Too many messages. Please wait a moment.",
         },
         { status: 429 },
+      );
+    }
+
+    const openai = getOpenAIClient();
+    if (!openai) {
+      return NextResponse.json(
+        { error: "AI chat service is not configured." },
+        { status: 503 },
       );
     }
 
@@ -520,7 +489,15 @@ export async function POST(req: NextRequest) {
     ];
 
     // Call NVIDIA API dengan model nvidia/nemotron-3.5-super-vl-120b-a12b
-    const completion = await (openai.chat.completions.create as any)({
+    type StreamChunk = {
+      choices?: Array<{
+        delta?: { content?: string };
+        finish_reason?: string | null;
+      }>;
+    };
+    const completion = await (openai.chat.completions.create as unknown as (
+      params: Record<string, unknown>
+    ) => Promise<AsyncIterable<StreamChunk>>)({
       model: "nvidia/nemotron-3.5-super-vl-120b-a12b",
       messages,
       temperature: 1,
@@ -552,7 +529,7 @@ export async function POST(req: NextRequest) {
         try {
           for await (const chunk of completion) {
             if (!chunk.choices || chunk.choices.length === 0) continue;
-            const delta = chunk.choices[0]?.delta as any;
+            const delta = chunk.choices[0]?.delta;
             // Skip reasoning_content (internal AI thinking) — only send final answer
             const text = delta?.content || "";
 
@@ -602,10 +579,10 @@ export async function POST(req: NextRequest) {
         Connection: "keep-alive",
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Chat API] Error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 },
     );
   }

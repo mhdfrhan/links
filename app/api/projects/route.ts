@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as adminModule from "firebase-admin";
+import { adminDb, isAdminConfigured } from "@/lib/firebase/admin";
 import { db as clientDb } from "@/lib/firebase/config";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { createRateLimiter, getClientIp } from "@/lib/utils/rateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -12,24 +13,12 @@ const corsHeaders = {
 };
 
 // ============================================================
-// RATE LIMITER — In-memory, per IP, max 60 req/menit
+// RATE LIMITER — Bounded in-memory, per IP, max 60 req/menit
 // ============================================================
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip);
-
-  if (!record || now > record.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + 60_000 });
-    return true;
-  }
-
-  if (record.count >= 60) return false;
-
-  record.count++;
-  return true;
-}
+const checkRateLimit = createRateLimiter({
+  maxRequests: 60,
+  windowMs: 60_000,
+});
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -38,27 +27,8 @@ export async function OPTIONS() {
   });
 }
 
-function getAdminFirestore() {
-  if (!adminModule.apps.length) {
-    const serviceAccountStr = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    if (serviceAccountStr) {
-      try {
-        const serviceAccount = JSON.parse(serviceAccountStr);
-        adminModule.initializeApp({
-          credential: adminModule.credential.cert(serviceAccount),
-        });
-      } catch (err) {
-        console.error("[Projects API] Error initializing Firebase Admin:", err);
-      }
-    }
-  }
-  return adminModule.apps.length ? adminModule.firestore() : null;
-}
-
 async function getCategoriesAndProjects() {
-  const adminDb = getAdminFirestore();
-
-  if (adminDb) {
+  if (isAdminConfigured) {
     // 1. Gunakan Firebase Admin SDK (Standar untuk Node.js / Vercel Serverless)
     const [categoriesSnap, projectsSnap] = await Promise.all([
       adminDb.collection("categories").orderBy("order", "asc").get(),
@@ -100,7 +70,7 @@ async function getCategoriesAndProjects() {
 export async function GET(req: NextRequest) {
   try {
     // 1. IP Rate Limiting Security Check
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous";
+    const ip = getClientIp(req.headers);
     if (!checkRateLimit(ip)) {
       return NextResponse.json(
         {
@@ -149,11 +119,12 @@ export async function GET(req: NextRequest) {
     const { categories, projects } = await getCategoriesAndProjects();
 
     // Buat mapping kategori untuk mempermudah pencarian nama kategori & subkategori
+    type CategoryDoc = { id: string; name?: string; subCategories?: { id: string; name: string }[] };
     const categoryMap = new Map<
       string,
       { name: string; subCategories?: { id: string; name: string }[] }
     >();
-    categories.forEach((cat: any) => {
+    (categories as CategoryDoc[]).forEach((cat) => {
       categoryMap.set(cat.id, {
         name: cat.name || "",
         subCategories: cat.subCategories || [],
@@ -161,39 +132,40 @@ export async function GET(req: NextRequest) {
     });
 
     // Ambil dan filter hanya projek yang memiliki shareToApi === true
-    let sharedProjects = projects
-      .map((data: any) => {
-        const catInfo = data.categoryId ? categoryMap.get(data.categoryId) : undefined;
+    let sharedProjects = (projects as Array<Record<string, unknown>>)
+      .map((data) => {
+        const categoryId = typeof data.categoryId === "string" ? data.categoryId : null;
+        const subCategoryId = typeof data.subCategoryId === "string" ? data.subCategoryId : null;
+        const catInfo = categoryId ? categoryMap.get(categoryId) : undefined;
         const subCatName = catInfo?.subCategories?.find(
-          (s: any) => s.id === data.subCategoryId
+          (s) => s.id === subCategoryId
         )?.name;
 
         return {
-          id: data.id,
-          title: data.title || "",
-          title_en: data.title_en || "",
-          description: data.description || "",
-          description_en: data.description_en || "",
-          fullDescription: data.fullDescription || "",
-          fullDescription_en: data.fullDescription_en || "",
-          imageUrl: data.imageUrl || "",
-          cloudinaryPublicId: data.cloudinaryPublicId || "",
-          techStack: Array.isArray(data.techStack) ? data.techStack : [],
-          link: data.link || "",
+          id: String(data.id || ""),
+          title: typeof data.title === "string" ? data.title : "",
+          title_en: typeof data.title_en === "string" ? data.title_en : "",
+          description: typeof data.description === "string" ? data.description : "",
+          description_en: typeof data.description_en === "string" ? data.description_en : "",
+          fullDescription: typeof data.fullDescription === "string" ? data.fullDescription : "",
+          fullDescription_en: typeof data.fullDescription_en === "string" ? data.fullDescription_en : "",
+          imageUrl: typeof data.imageUrl === "string" ? data.imageUrl : "",
+          techStack: Array.isArray(data.techStack) ? (data.techStack as string[]) : [],
+          link: typeof data.link === "string" ? data.link : "",
           order: typeof data.order === "number" ? data.order : 0,
-          categoryId: data.categoryId || null,
+          categoryId,
           categoryName: catInfo?.name || null,
-          subCategoryId: data.subCategoryId || null,
+          subCategoryId,
           subCategoryName: subCatName || null,
           shareToApi: !!data.shareToApi,
         };
       })
-      .filter((p: any) => p.shareToApi);
+      .filter((p) => p.shareToApi);
 
     // Filter opsional berdasarkan category ID atau category Name
     if (categoryParam) {
       sharedProjects = sharedProjects.filter(
-        (p: any) =>
+        (p) =>
           p.categoryId === categoryParam ||
           p.categoryName?.toLowerCase() === categoryParam.toLowerCase()
       );
@@ -221,12 +193,12 @@ export async function GET(req: NextRequest) {
         },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Projects API Error]:", error);
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Gagal mengambil data projek",
+        error: "Gagal mengambil data projek",
       },
       {
         status: 500,

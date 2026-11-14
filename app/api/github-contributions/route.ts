@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createRateLimiter, getClientIp } from "@/lib/utils/rateLimit"
+import { isValidGitHubUsername } from "@/lib/utils/validators"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 60
+
+const checkRateLimit = createRateLimiter({
+  maxRequests: 30,
+  windowMs: 60_000,
+})
 
 interface ContributionDay {
   date: string
@@ -9,8 +16,25 @@ interface ContributionDay {
 }
 
 export async function GET(req: NextRequest) {
+  const ip = getClientIp(req.headers)
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests", data: null },
+      { status: 429 }
+    )
+  }
+
   const { searchParams } = new URL(req.url)
-  const username = searchParams.get("username") || "mhdfrhan"
+  const rawUsername = searchParams.get("username")?.trim()
+  const username = rawUsername || "mhdfrhan"
+
+  if (!isValidGitHubUsername(username)) {
+    return NextResponse.json(
+      { error: "Invalid GitHub username", data: null },
+      { status: 400 }
+    )
+  }
+
   const token = process.env.GITHUB_TOKEN?.trim()
 
   try {
@@ -70,7 +94,7 @@ export async function GET(req: NextRequest) {
 
     // 2. Alternatif: Public contributions API tanpa perlu token
     const publicApiRes = await fetch(
-      `https://github-contributions-api.jogruber.de/v4/${username}?y=last`,
+      `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(username)}?y=last`,
       {
         next: { revalidate: 3600 },
         headers: { "User-Agent": "portfolio-skyline" },
@@ -80,7 +104,9 @@ export async function GET(req: NextRequest) {
     if (publicApiRes.ok) {
       const publicData = await publicApiRes.json()
       if (Array.isArray(publicData.contributions)) {
-        const days: ContributionDay[] = publicData.contributions.map((item: any) => ({
+        const days: ContributionDay[] = (
+          publicData.contributions as Array<{ date: string; count: number }>
+        ).map((item) => ({
           date: item.date,
           count: item.count,
         }))
@@ -97,10 +123,10 @@ export async function GET(req: NextRequest) {
       { message: "No data available from GitHub, using generated dummy data", data: null },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[GitHub Contributions API Error]:", error)
     return NextResponse.json(
-      { error: error?.message || "Failed to fetch GitHub contributions", data: null },
+      { error: error instanceof Error ? error.message : "Failed to fetch GitHub contributions", data: null },
       { status: 500 }
     )
   }

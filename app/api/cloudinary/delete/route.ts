@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { verifyAdminRequest } from "@/lib/firebase/serverAuth";
 
-
+const ALLOWED_RESOURCE_TYPES = new Set(["image", "raw", "video"]);
 
 /**
  * POST /api/cloudinary/delete
- * Body: { publicId: string, resourceType?: "image" | "raw" }
+ * Body: { publicId: string, resourceType?: "image" | "raw" | "video" }
  *
  * Menghapus asset dari Cloudinary menggunakan signed request.
- * Endpoint ini hanya bisa diakses server-side (API Secret tidak pernah ke client).
+ * Wajib menyertakan Bearer ID Token admin Firebase yang valid.
  */
 export async function POST(req: NextRequest) {
   try {
+    const authResult = await verifyAdminRequest(req);
+    if (!authResult.ok) {
+      return authResult.response;
+    }
+
     const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.trim().replace(/^["']|["']$/g, "");
     const API_KEY = process.env.CLOUDINARY_API_KEY?.trim().replace(/^["']|["']$/g, "");
     const API_SECRET = process.env.CLOUDINARY_API_SECRET?.trim().replace(/^["']|["']$/g, "");
@@ -28,16 +34,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Diagnostic log: Check if keys are swapped (API Key is usually numeric, Secret is alphanumeric)
     if (API_KEY.length > 20 && /^[a-zA-Z0-9_-]+$/.test(API_KEY)) {
       console.warn("[Cloudinary Delete] WARNING: API_KEY looks like an API_SECRET. Please check your .env file.");
     }
 
     const { publicId, resourceType = "raw" } = await req.json();
 
-    if (!publicId) {
+    if (!publicId || typeof publicId !== "string") {
       return NextResponse.json(
         { error: "publicId diperlukan" },
+        { status: 400 }
+      );
+    }
+
+    if (!ALLOWED_RESOURCE_TYPES.has(resourceType)) {
+      return NextResponse.json(
+        { error: "resourceType tidak valid" },
         { status: 400 }
       );
     }
@@ -50,7 +62,6 @@ export async function POST(req: NextRequest) {
       .update(signatureString)
       .digest("hex");
 
-    // Kirim request ke Cloudinary Destroy API
     const formData = new FormData();
     formData.append("public_id", publicId);
     formData.append("timestamp", timestamp);
@@ -75,10 +86,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Cloudinary Delete] Error:", err);
     return NextResponse.json(
-      { error: "Internal server error", detail: err.message },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

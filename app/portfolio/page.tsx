@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useState, useMemo } from "react";
 import { PortfolioSection } from "../components/PortfolioSection";
 import { usePortfolioData } from "../../lib/hooks/usePortfolioData";
+import { useLanguage } from "../../lib/contexts/LanguageContext";
+import { dictionaries } from "../../lib/i18n/dictionaries";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { LanguageToggle } from "../components/LanguageToggle";
 
 /**
  * PortfolioPage — Halaman semua project
@@ -14,12 +17,41 @@ import { ThemeToggle } from "../components/ThemeToggle";
  */
 export default function PortfolioPage() {
   const { data, loading } = usePortfolioData();
+  const { language } = useLanguage();
+  const dict = dictionaries[language];
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
+  const l = (obj: object | null | undefined, field: string, fallback = ""): string => {
+    if (!obj) return fallback;
+    const record = obj as Record<string, unknown>;
+    const enVal = record[`${field}_en`];
+    if (language === "en" && typeof enVal === "string" && enVal) return enVal;
+    const val = record[field];
+    return typeof val === "string" && val ? val : fallback;
+  };
+
+  const localizedCategories = useMemo(
+    () =>
+      data.categories.map((c) => ({
+        ...c,
+        name: l(c, "name"),
+        subCategories: Array.isArray(c.subCategories)
+          ? c.subCategories.map((sub) => ({ ...sub, name: l(sub, "name") }))
+          : [],
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data.categories, language]
+  );
+
   const filteredAndSortedProjects = useMemo(() => {
-    let result = [...data.projects];
+    let result = data.projects.map((p) => ({
+      ...p,
+      title: l(p, "title"),
+      description: l(p, "description"),
+      fullDescription: l(p, "fullDescription"),
+    }));
 
     // Filter by category
     if (selectedCategory !== "all") {
@@ -41,7 +73,8 @@ export default function PortfolioPage() {
     });
 
     return result;
-  }, [data.projects, selectedCategory, selectedSubCategory, sortOrder]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.projects, language, selectedCategory, selectedSubCategory, sortOrder]);
 
   // ---- Loading state ----
   if (loading) {
@@ -70,7 +103,7 @@ export default function PortfolioPage() {
               letterSpacing: "0.03em",
             }}
           >
-            loading...
+            {dict.misc.loading}
           </span>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -78,11 +111,11 @@ export default function PortfolioPage() {
     );
   }
 
-  const activeCategory = data.categories.find(
-    (c: any) => c.id === selectedCategory,
+  const activeCategory = localizedCategories.find(
+    (c) => c.id === selectedCategory,
   );
   const hasSubCategories =
-    selectedCategory !== "all" && activeCategory?.subCategories?.length > 0;
+    selectedCategory !== "all" && Boolean(activeCategory?.subCategories?.length);
 
   return (
     <div
@@ -138,11 +171,12 @@ export default function PortfolioPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
               </svg>
             </div>
-            Back to Home
+            {language === "id" ? "Kembali ke Beranda" : "Back to Home"}
           </Link>
 
-          {/* Right side: theme toggle */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {/* Right side: language + theme toggle */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <LanguageToggle />
             <ThemeToggle />
           </div>
         </div>
@@ -169,7 +203,7 @@ export default function PortfolioPage() {
               marginBottom: "1.5rem",
             }}
           >
-            All Projects
+            {language === "id" ? "Semua Proyek" : "All Projects"}
           </h1>
           <p
             style={{
@@ -179,7 +213,9 @@ export default function PortfolioPage() {
               maxWidth: "600px",
             }}
           >
-            A comprehensive archive of my work, exploring digital experiences across web apps, systems, and creative profiles.
+            {language === "id"
+              ? "Arsip lengkap karya saya yang mencakup aplikasi web, sistem, dan profil digital kreatif."
+              : "A comprehensive archive of my work, exploring digital experiences across web apps, systems, and creative profiles."}
           </p>
         </div>
 
@@ -205,9 +241,9 @@ export default function PortfolioPage() {
                 setSelectedSubCategory("all");
               }}
             >
-              All Works
+              {language === "id" ? "Semua Karya" : "All Works"}
             </FilterPill>
-            {data.categories.map((cat: any) => (
+            {localizedCategories.map((cat) => (
               <FilterPill
                 key={cat.id}
                 active={selectedCategory === cat.id}
@@ -237,9 +273,9 @@ export default function PortfolioPage() {
                 onClick={() => setSelectedSubCategory("all")}
                 small
               >
-                All {activeCategory?.name}
+                {language === "id" ? `Semua ${activeCategory?.name}` : `All ${activeCategory?.name}`}
               </FilterPill>
-              {activeCategory?.subCategories?.map((sub: any) => (
+              {activeCategory?.subCategories?.map((sub) => (
                 <FilterPill
                   key={sub.id}
                   active={selectedSubCategory === sub.id}
@@ -284,8 +320,8 @@ export default function PortfolioPage() {
                     paddingRight: "1rem",
                   }}
                 >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
+                  <option value="newest">{language === "id" ? "Terbaru" : "Newest First"}</option>
+                  <option value="oldest">{language === "id" ? "Terlama" : "Oldest First"}</option>
                 </select>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 text-[var(--text-secondary)]">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -310,14 +346,16 @@ export default function PortfolioPage() {
                 color: "var(--text-muted)",
               }}
             >
-              No projects found in this category.
+              {language === "id"
+                ? "Tidak ada proyek di kategori ini."
+                : "No projects found in this category."}
             </p>
           </div>
         ) : (
           <PortfolioSection
             projects={filteredAndSortedProjects}
             showAllButton={false}
-            categories={data.categories}
+            categories={localizedCategories}
             columns={3}
           />
         )}

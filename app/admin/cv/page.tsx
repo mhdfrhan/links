@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { db } from "@/lib/firebase/config";
+import { db, auth } from "@/lib/firebase/config";
 import { doc, getDoc, setDoc, deleteField } from "firebase/firestore";
 import { uploadRawToCloudinary } from "@/lib/cloudinary/config";
 import { AdminCard } from "../components/AdminCard";
@@ -82,9 +82,16 @@ export default function CvPage() {
     try {
       // 1. Hapus file dari Cloudinary (jika ada publicId)
       if (entry?.cloudinaryPublicId) {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) {
+          throw new Error("Sesi login admin berakhir. Silakan login ulang.");
+        }
         const res = await fetch("/api/cloudinary/delete", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
           body: JSON.stringify({
             publicId: entry.cloudinaryPublicId,
             resourceType: "raw",
@@ -108,9 +115,10 @@ export default function CvPage() {
       showToast("success", `CV ${deleteTarget === "id" ? "Indonesia" : "English"} berhasil dihapus.`);
       setDeleteTarget(null);
       await fetchCvData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting CV:", err);
-      showToast("error", err.message || "Gagal menghapus CV.");
+      const msg = err instanceof Error ? err.message : "Gagal menghapus CV.";
+      showToast("error", msg);
     }
   };
 
@@ -236,9 +244,10 @@ function CvUploadCard({
 
       showToast("success", `${label} berhasil diupload!`);
       onUploadSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Upload error:", err);
-      setError(err.message || "Gagal mengupload file.");
+      const msg = err instanceof Error ? err.message : "Gagal mengupload file.";
+      setError(msg);
     } finally {
       setUploading(false);
       setUploadProgress(0);
